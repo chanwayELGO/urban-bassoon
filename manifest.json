@@ -1,0 +1,31 @@
+{
+  "name": "Travel Companion",
+  "short_name": "TravelPal",
+  "description": "Your all-in-one travel companion — plan, pack, budget, explore.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07101F",
+  "theme_color": "#FFA828",
+  "categories": ["travel", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%2307101F'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E✈️%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%2307101F'/%3E%3Ctext y='360' x='256' text-anchor='middle' font-size='300'%3E✈️%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    { "name": "Plan Trip", "url": "./index.html#plan", "description": "Open trip planner" },
+    { "name": "Packing List", "url": "./index.html#pack", "description": "Open packing checklist" },
+    { "name": "Budget", "url": "./index.html#budget", "description": "Track expenses" }
+  ]
+}
