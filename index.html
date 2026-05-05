@@ -343,6 +343,141 @@
     .emg-country { font-size: 12px; font-weight: 600; margin-bottom: 5px; }
     .emg-nums { font-size: 11px; color: var(--text-dim); }
 
+    /* ─── Share / Invite Modal ─────────────────────────────────────────────── */
+    .share-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(7,16,31,0.82); backdrop-filter: blur(12px);
+      display: flex; align-items: flex-end;
+      animation: fadeIn 0.2s ease;
+    }
+    .share-sheet {
+      background: linear-gradient(160deg,#0D1E3A 0%,#07101F 100%);
+      border: 1px solid rgba(255,168,40,0.2);
+      border-radius: 26px 26px 0 0;
+      width: 100%; max-width: 480px; margin: 0 auto;
+      max-height: 92vh; display: flex; flex-direction: column;
+      animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      padding-bottom: var(--safe-bottom);
+    }
+    .share-header {
+      padding: 18px 20px 14px; flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .share-header-top { display: flex; align-items: center; justify-content: space-between; }
+    .share-title { font-family:'Playfair Display',serif; font-size:18px; color:var(--amber); }
+    .share-body { flex:1; overflow-y:auto; padding:16px 20px; }
+    .share-body::-webkit-scrollbar { display:none; }
+    .share-tabs { display:flex; gap:6px; margin-top:14px; }
+    .share-tab-btn {
+      flex:1; padding:8px; font-size:12px; font-weight:600; border-radius:10px;
+      border:none; cursor:pointer; transition:all 0.15s;
+      background:rgba(255,255,255,0.05); color:rgba(230,217,194,0.5);
+    }
+    .share-tab-btn.active { background:var(--amber); color:#07101F; }
+
+    /* Trip Code display */
+    .trip-code-box {
+      background: rgba(255,168,40,0.07);
+      border: 2px solid rgba(255,168,40,0.25);
+      border-radius: 16px; padding: 18px;
+      text-align: center; margin: 14px 0;
+      animation: fadeUp 0.3s ease;
+    }
+    .trip-code {
+      font-family: 'DM Sans', monospace; font-size: 26px;
+      font-weight: 700; color: var(--amber);
+      letter-spacing: 4px; margin: 8px 0;
+      word-break: break-all;
+    }
+    .trip-code-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+
+    /* QR code */
+    .qr-wrap {
+      display: flex; justify-content: center; margin: 10px 0;
+    }
+    .qr-wrap img {
+      width: 160px; height: 160px; border-radius: 14px;
+      border: 2px solid rgba(255,168,40,0.2);
+    }
+
+    /* Share action buttons */
+    .share-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .share-action-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: 13px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text); font-size: 13px; font-weight: 500;
+      transition: all 0.18s; text-align: left;
+      font-family: 'DM Sans', sans-serif; width: 100%;
+    }
+    .share-action-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,168,40,0.2); }
+    .share-action-btn .sab-icon { font-size: 20px; flex-shrink: 0; }
+    .share-action-btn .sab-info { flex:1; }
+    .share-action-btn .sab-title { font-weight:600; }
+    .share-action-btn .sab-sub { font-size:11px; color:var(--text-dim); margin-top:2px; }
+
+    /* What-to-share checkboxes */
+    .include-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 10px;
+      background: rgba(255,255,255,0.03); margin-bottom: 6px;
+      cursor: pointer; user-select: none;
+    }
+    .include-check {
+      width: 18px; height: 18px; border-radius: 5px;
+      border: 2px solid rgba(255,168,40,0.3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .include-check.on { background: var(--amber); border-color: var(--amber); }
+    .include-check.on::after { content:'✓'; color:#07101F; font-size:11px; font-weight:900; }
+
+    /* Join preview */
+    .join-preview {
+      background: rgba(77,184,122,0.06);
+      border: 1px solid rgba(77,184,122,0.2);
+      border-radius: 14px; padding: 14px;
+      animation: fadeUp 0.25s ease;
+    }
+    .join-preview-title { font-family:'Playfair Display',serif; font-size:15px; color:#4DB87A; margin-bottom:8px; }
+    .join-preview-row { display:flex; align-items:center; gap:8px; font-size:12px; color:rgba(230,217,194,0.7); padding:3px 0; }
+
+    /* Invite sent badge */
+    .invite-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(77,184,122,0.1); border: 1px solid rgba(77,184,122,0.25);
+      border-radius: 99px; padding: 5px 12px; font-size:12px; color:#4DB87A; font-weight:600;
+    }
+
+    /* Share button in header */
+    .header-share-btn {
+      background: rgba(255,168,40,0.1); border: 1px solid rgba(255,168,40,0.2);
+      border-radius: 10px; padding: 5px 10px; font-size: 16px;
+      cursor: pointer; color: var(--amber); flex-shrink: 0;
+      transition: all 0.18s; line-height: 1;
+    }
+    .header-share-btn:hover { background: rgba(255,168,40,0.2); }
+
+    /* Copied flash */
+    .copied-flash {
+      position: fixed; bottom: calc(80px + var(--safe-bottom) + 12px); left: 50%; transform: translateX(-50%);
+      background: rgba(77,184,122,0.95); color: #fff; border-radius: 99px;
+      padding: 8px 20px; font-size: 13px; font-weight: 600;
+      z-index: 3000; animation: popIn 0.2s ease, fadeOut 0.3s ease 1.5s forwards;
+      white-space: nowrap;
+    }
+    @keyframes popIn { from{transform:translateX(-50%) scale(0.8);opacity:0} to{transform:translateX(-50%) scale(1);opacity:1} }
+    @keyframes fadeOut { to{opacity:0;transform:translateX(-50%) translateY(8px)} }
+
+    /* Collab pulse (live indicator) */
+    .collab-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4DB87A; display: inline-block;
+      animation: blink 2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
     /* ─── Multi-currency & Split ───────────────────────────────────────────── */
     .curr-badge {
       display: inline-flex; align-items: center;
@@ -416,6 +551,114 @@
       margin-top: 2px; width: fit-content;
     }
     .rate-note { font-size: 10px; color: var(--text-dim); margin-top: 4px; text-align: right; }
+
+    /* ─── Dashboard ────────────────────────────────────────────────────────── */
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .dash-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 14px; cursor: pointer;
+      transition: all 0.18s; -webkit-tap-highlight-color: transparent;
+    }
+    .dash-card:active { transform: scale(0.97); opacity: 0.9; }
+    .dash-card-icon { font-size: 26px; margin-bottom: 6px; line-height: 1; }
+    .dash-card-val { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--amber); line-height:1.1; }
+    .dash-card-label { font-size:11px; color:var(--text-dim); margin-top:3px; text-transform:uppercase; letter-spacing:0.6px; }
+    .dash-card-sub { font-size:11px; color:var(--text-dim); margin-top:4px; }
+    .dash-ring-wrap { display:flex; align-items:center; justify-content:center; position:relative; width:64px; height:64px; margin:0 auto 4px; }
+    .dash-ring-wrap svg { transform:rotate(-90deg); }
+    .dash-ring-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+
+    .today-card {
+      background: linear-gradient(135deg,rgba(255,168,40,0.08),rgba(7,16,31,0));
+      border: 1px solid rgba(255,168,40,0.18); border-radius:18px; padding:16px; margin-bottom:12px;
+    }
+    .today-activity {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .today-activity:last-child { border-bottom:none; }
+    .today-act-check {
+      width:22px; height:22px; border-radius:6px; flex-shrink:0;
+      border:2px solid rgba(255,168,40,0.3); display:flex; align-items:center;
+      justify-content:center; transition:all 0.15s; cursor:pointer;
+    }
+    .today-act-check.on { background:var(--amber); border-color:var(--amber); }
+    .today-act-check.on::after { content:'✓'; color:#07101F; font-size:11px; font-weight:900; }
+    .today-act-text { font-size:13px; flex:1; line-height:1.4; }
+    .today-act-text.done { text-decoration:line-through; color:var(--text-dim); }
+    .act-quick-btns { display:flex; gap:5px; flex-shrink:0; }
+    .act-q-btn {
+      background:rgba(255,255,255,0.06); border:none; border-radius:7px;
+      padding:4px 7px; font-size:11px; cursor:pointer; color:var(--text-dim);
+      transition:all 0.15s; line-height:1; min-width:28px; text-align:center;
+    }
+    .act-q-btn:active { background:rgba(255,168,40,0.15); color:var(--amber); }
+
+    .countdown-banner {
+      background:linear-gradient(135deg,#0C1B34,#0E0820);
+      border:1px solid rgba(255,168,40,0.15); border-radius:18px; padding:16px;
+      display:flex; align-items:center; gap:14px; margin-bottom:12px;
+    }
+    .countdown-num { font-family:'Playfair Display',serif; font-size:38px; font-weight:700; color:var(--amber); line-height:1; }
+    .countdown-info { flex:1; min-width:0; }
+    .countdown-label { font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.7px; }
+    .countdown-dest { font-size:14px; font-weight:600; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .mem-mini-strip { display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; -webkit-overflow-scrolling:touch; }
+    .mem-mini-strip::-webkit-scrollbar { display:none; }
+    .mem-mini-card {
+      flex-shrink:0; width:90px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:13px; padding:10px 8px; cursor:pointer;
+      text-align:center; transition:all 0.15s;
+    }
+    .mem-mini-card:active { transform:scale(0.95); }
+    .mem-mini-mood { font-size:22px; line-height:1; }
+    .mem-mini-title { font-size:10px; color:var(--text-dim); margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .quick-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+    .quick-action-btn {
+      display:flex; align-items:center; gap:8px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; padding:12px; cursor:pointer;
+      transition:all 0.18s; min-height:54px;
+    }
+    .quick-action-btn:active { transform:scale(0.97); border-color:rgba(255,168,40,0.3); }
+    .qa-icon { font-size:20px; line-height:1; flex-shrink:0; }
+    .qa-label { font-size:12px; font-weight:600; color:var(--text); }
+    .qa-sub { font-size:10px; color:var(--text-dim); margin-top:1px; }
+
+    .linked-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      background:rgba(91,164,255,0.1); border:1px solid rgba(91,164,255,0.2);
+      border-radius:6px; padding:2px 7px; font-size:10px; color:#5BA4FF;
+      margin-top:3px; cursor:pointer;
+    }
+    .linked-badge:active { background:rgba(91,164,255,0.2); }
+
+    /* ─── Mobile responsive tweaks ─────────────────────────────────────────── */
+    @media (max-width:360px) {
+      .dash-grid { grid-template-columns:1fr 1fr; gap:8px; }
+      .dash-card { padding:11px; }
+      .dash-card-val { font-size:17px; }
+      .quick-actions { grid-template-columns:1fr 1fr; gap:7px; }
+      .card { padding:13px; }
+      .grid-2 { grid-template-columns:1fr; }
+      .grid-3 { grid-template-columns:1fr 1fr 1fr; gap:6px; }
+      .stat-val { font-size:16px !important; }
+      .tab-label { font-size:9px; }
+      .tab-icon { font-size:18px; }
+    }
+    @media (max-width:320px) {
+      .quick-actions { grid-template-columns:1fr; }
+      .dash-grid { grid-template-columns:1fr; }
+    }
+    /* Ensure no horizontal overflow anywhere */
+    .content, .content-inner, .card, .day-card, .memory-card { max-width:100%; overflow-x:hidden; word-break:break-word; }
+    /* Minimum touch targets */
+    button, .check-item, .mood-btn, .occ-chip, .person-chip, .suggest-chip,
+    .tab-btn, .act-q-btn, .quick-action-btn, .dash-card { min-height:36px; }
+    .tab-btn { min-height:52px; }
 
     /* ─── Smart Pack ───────────────────────────────────────────────────────── */
     .smart-pack-card {
@@ -722,8 +965,206 @@ const LS = {
   set: (k, v)  => { try { localStorage.setItem(k, JSON.stringify(v)); } catch{} },
 };
 
+/* ── DASHBOARD ────────────────────────────────────────────────────────────── */
+function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories, weatherData, fetchWeather, navigateTo, toggleActivity, onQuickExpense, onQuickMemory }) {
+  const today = new Date();
+
+  // Countdown
+  const daysUntil = trip.startDate ? Math.ceil((new Date(trip.startDate) - today) / 86400000) : null;
+  const isOnTrip = daysUntil !== null && daysUntil <= 0 &&
+    (!trip.endDate || new Date(trip.endDate) >= today);
+  const tripOver = trip.endDate && new Date(trip.endDate) < today;
+
+  // Today's day in itinerary
+  const todayISO = today.toISOString().split("T")[0];
+  const currentDayIndex = trip.startDate
+    ? Math.floor((today - new Date(trip.startDate)) / 86400000)
+    : -1;
+  const todayDay = currentDayIndex >= 0 && currentDayIndex < itinerary.length
+    ? itinerary[currentDayIndex] : null;
+
+  // Stats
+  const packingTotal = Object.values(packing).flat().length;
+  const packingDone  = Object.values(packing).flat().filter(i=>i.checked).length;
+  const packingPct   = packingTotal ? Math.round(packingDone/packingTotal*100) : 0;
+  const spent        = expenses.reduce((s,e)=>s+(e.amtBase??Number(e.amount??0)),0);
+  const totalBudget  = LS.get("tc_budget",2000);
+  const budgetPct    = totalBudget > 0 ? Math.min(100, Math.round(spent/totalBudget*100)) : 0;
+  const allActs      = itinerary.flatMap(d=>d.activities);
+  const doneActs     = allActs.filter(a=>a.done).length;
+
+  // Auto-fetch weather for destination
+  useEffect(()=>{
+    if(trip.destination && !weatherData) fetchWeather(trip.destination);
+  },[trip.destination]);
+
+  // Ring SVG helper
+  const Ring = ({pct, color, size=64, stroke=6}) => {
+    const r = (size-stroke*2)/2;
+    const circ = 2*Math.PI*r;
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={stroke}/>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+          strokeDasharray={circ} strokeDashoffset={circ*(1-pct/100)} strokeLinecap="round"
+          style={{transition:"stroke-dashoffset 0.6s ease"}}/>
+      </svg>
+    );
+  };
+
+  return (
+    <div>
+      {/* ── Countdown / Status Banner ── */}
+      {trip.destination && (
+        <div className="countdown-banner">
+          <div>
+            {tripOver ? <div className="countdown-num">✈️</div>
+              : isOnTrip ? <div className="countdown-num" style={{fontSize:28}}>🌍</div>
+              : <div className="countdown-num">{daysUntil}</div>
+            }
+          </div>
+          <div className="countdown-info">
+            <div className="countdown-label">
+              {tripOver ? "Trip completed" : isOnTrip ? "You're on your trip!" : "days until departure"}
+            </div>
+            <div className="countdown-dest">📍 {trip.destination}</div>
+            {trip.startDate && <div style={{fontSize:11,color:"var(--text-dim)",marginTop:3}}>
+              {trip.startDate}{trip.endDate?" → "+trip.endDate:""}
+            </div>}
+          </div>
+          {weatherData && !weatherData.error && (
+            <div style={{textAlign:"center",flexShrink:0}}>
+              <div style={{fontSize:30,lineHeight:1}}>{weatherData.icon}</div>
+              <div style={{fontSize:16,fontWeight:700,color:"var(--amber)"}}>{weatherData.temp}{weatherData.unit}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Today's Activities ── */}
+      {todayDay && (
+        <div className="today-card">
+          <div className="flex items-center justify-between" style={{marginBottom:10}}>
+            <div className="card-title" style={{marginBottom:0,fontSize:14}}>
+              📅 {todayDay.label} — Today
+            </div>
+            <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>navigateTo(1)}>Full plan</button>
+          </div>
+          {todayDay.activities.length === 0
+            ? <div style={{fontSize:13,color:"var(--text-dim)"}}>No activities planned for today</div>
+            : todayDay.activities.map(act=>(
+              <div key={act.id} className="today-activity">
+                <div className={`today-act-check${act.done?" on":""}`} onClick={()=>toggleActivity(todayDay.id,act.id)}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div className={`today-act-text${act.done?" done":""}`}>{act.text}</div>
+                </div>
+                <div className="act-quick-btns">
+                  <div className="act-q-btn" title="Log expense" onClick={()=>onQuickExpense(act,todayDay)}>💰</div>
+                  <div className="act-q-btn" title="Add memory" onClick={()=>onQuickMemory(act,todayDay)}>📸</div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      )}
+
+      {/* ── Stats Grid ── */}
+      <div className="dash-grid">
+        <div className="dash-card" onClick={()=>navigateTo(2)}>
+          <div className="dash-ring-wrap">
+            <Ring pct={budgetPct} color={budgetPct>85?"#FF5C5C":"#FFA828"}/>
+            <div className="dash-ring-center">
+              <div style={{fontSize:12,fontWeight:700,color:"var(--amber)"}}>{budgetPct}%</div>
+            </div>
+          </div>
+          <div className="dash-card-label">Budget Used</div>
+          <div className="dash-card-sub">{baseCurrency} {spent.toFixed(0)} of {totalBudget}</div>
+        </div>
+        <div className="dash-card" onClick={()=>navigateTo(2)}>
+          <div className="dash-ring-wrap">
+            <Ring pct={packingPct} color="#4DB87A"/>
+            <div className="dash-ring-center">
+              <div style={{fontSize:12,fontWeight:700,color:"#4DB87A"}}>{packingPct}%</div>
+            </div>
+          </div>
+          <div className="dash-card-label">Packed</div>
+          <div className="dash-card-sub">{packingDone} of {packingTotal} items</div>
+        </div>
+        <div className="dash-card" onClick={()=>navigateTo(1)}>
+          <div className="dash-card-icon">📅</div>
+          <div className="dash-card-val">{doneActs}/{allActs.length}</div>
+          <div className="dash-card-label">Activities Done</div>
+        </div>
+        <div className="dash-card" onClick={()=>navigateTo(5)}>
+          <div className="dash-card-icon">📸</div>
+          <div className="dash-card-val">{memories.length}</div>
+          <div className="dash-card-label">Memories</div>
+          {memories.length > 0 && <div className="dash-card-sub">{memories[memories.length-1].title}</div>}
+        </div>
+      </div>
+
+      {/* ── Quick Actions ── */}
+      <div className="quick-actions">
+        {[
+          {icon:"✈️",label:"Trip Details",sub:"Dates & destination",tab:1},
+          {icon:"🧳",label:"Smart Pack",sub:"AI packing list",tab:2},
+          {icon:"💰",label:"Log Expense",sub:"Track spending",tab:3},
+          {icon:"🌍",label:"Explore",sub:"Weather & tips",tab:4},
+          {icon:"📸",label:"Add Memory",sub:"Drop a pin",tab:5},
+          {icon:"📤",label:"Share Trip",sub:"Invite travellers",action:"share"},
+        ].map((qa,i)=>(
+          <div key={i} className="quick-action-btn"
+            onClick={()=>qa.action==="share" ? navigateTo("share") : navigateTo(qa.tab)}>
+            <span className="qa-icon">{qa.icon}</span>
+            <div><div className="qa-label">{qa.label}</div><div className="qa-sub">{qa.sub}</div></div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Recent Memories Strip ── */}
+      {memories.length > 0 && (
+        <div className="card">
+          <div className="flex items-center justify-between" style={{marginBottom:10}}>
+            <div className="card-title" style={{marginBottom:0,fontSize:14}}>📸 Recent Memories</div>
+            <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>navigateTo(5)}>See all</button>
+          </div>
+          <div className="mem-mini-strip">
+            {[...memories].reverse().slice(0,8).map(mem=>(
+              <div key={mem.id} className="mem-mini-card" onClick={()=>navigateTo(5)}>
+                <div className="mem-mini-mood">{mem.mood}</div>
+                <div className="mem-mini-title">{mem.title}</div>
+                {mem.photo && <img src={mem.photo} style={{width:74,height:50,objectFit:"cover",borderRadius:8,marginTop:6}} alt=""/>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Recent Expenses ── */}
+      {expenses.length > 0 && (
+        <div className="card">
+          <div className="flex items-center justify-between" style={{marginBottom:10}}>
+            <div className="card-title" style={{marginBottom:0,fontSize:14}}>💳 Recent Expenses</div>
+            <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>navigateTo(3)}>See all</button>
+          </div>
+          {[...expenses].reverse().slice(0,4).map(exp=>(
+            <div key={exp.id} className="exp-row" style={{padding:"8px 0"}}>
+              <div className="exp-cat" style={{fontSize:18}}>{exp.cat.split(" ")[0]}</div>
+              <div className="exp-info">
+                <div className="exp-desc" style={{fontSize:12}}>{exp.desc}</div>
+                {exp.activityText && <div className="linked-badge">📅 {exp.activityText.slice(0,20)}</div>}
+              </div>
+              <div className="exp-amt" style={{fontSize:12}}>{baseCurrency} {Number(exp.amtBase??exp.amount).toFixed(2)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── PLAN Tab ─────────────────────────────────────────────────────────────── */
-function PlanTab({ trip, saveTrip, itinerary, addDay, addActivity, toggleActivity, removeDay, removeActivity }) {
+function PlanTab({ trip, saveTrip, itinerary, addDay, addActivity, toggleActivity, removeDay, removeActivity, expenses, baseCurrency, memories, navigateTo, onQuickExpense, onQuickMemory }) {
   const [newActs, setNewActs] = useState({});
   const tripDays = trip.startDate && trip.endDate
     ? Math.max(0, Math.round((new Date(trip.endDate)-new Date(trip.startDate))/86400000)+1)
@@ -735,6 +1176,11 @@ function PlanTab({ trip, saveTrip, itinerary, addDay, addActivity, toggleActivit
     addActivity(dayId, t);
     setNewActs(p=>({...p,[dayId]:""}));
   };
+
+  // Per-day derived stats
+  const daySpend = (day) =>
+    expenses.filter(e=>e.dayId===day.id).reduce((s,e)=>s+(e.amtBase??Number(e.amount??0)),0);
+  const dayMemories = (day) => memories.filter(m=>m.dayId===day.id).length;
 
   return (
     <div>
@@ -750,7 +1196,7 @@ function PlanTab({ trip, saveTrip, itinerary, addDay, addActivity, toggleActivit
               <input type="date" className="input" value={trip.endDate} onChange={e=>saveTrip({...trip,endDate:e.target.value})} /></div>
           </div>
           {tripDays && (
-            <div style={{fontSize:12,color:"rgba(230,217,194,0.45)",display:"flex",gap:12}}>
+            <div style={{fontSize:12,color:"rgba(230,217,194,0.45)",display:"flex",gap:12,flexWrap:"wrap"}}>
               <span>🗓️ {tripDays} {tripDays===1?"day":"days"}</span>
               {trip.destination&&<span>📍 {trip.destination}</span>}
             </div>
@@ -765,30 +1211,41 @@ function PlanTab({ trip, saveTrip, itinerary, addDay, addActivity, toggleActivit
         </div>
         {itinerary.length===0 ? (
           <div className="empty"><div className="empty-icon">🗓️</div><div className="empty-msg">Add days to build your itinerary</div></div>
-        ) : itinerary.map(day=>(
-          <div key={day.id} className="day-card">
-            <div className="day-hdr">
-              <div className="day-title">{day.label}</div>
-              <button className="btn-del" onClick={()=>removeDay(day.id)}>✕</button>
-            </div>
-            {day.activities.map(act=>(
-              <div key={act.id} className="act-row">
-                <div className="check-box" style={{cursor:"pointer",flexShrink:0}}
-                  onClick={()=>toggleActivity(day.id,act.id)}>
-                  {act.done&&<span style={{color:"#07101F",fontSize:11,fontWeight:900}}>✓</span>}
+        ) : itinerary.map(day=>{
+          const ds = daySpend(day); const dm = dayMemories(day);
+          return (
+            <div key={day.id} className="day-card">
+              <div className="day-hdr">
+                <div className="day-title">{day.label}</div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  {ds>0&&<span className="linked-badge" onClick={()=>navigateTo(3)}>💰 {baseCurrency} {ds.toFixed(0)}</span>}
+                  {dm>0&&<span className="linked-badge" style={{background:"rgba(255,168,40,0.08)",borderColor:"rgba(255,168,40,0.2)",color:"var(--amber)"}} onClick={()=>navigateTo(5)}>📸 {dm}</span>}
+                  <button className="btn-del" onClick={()=>removeDay(day.id)}>✕</button>
                 </div>
-                <span className={`act-text${act.done?" done":""}`} onClick={()=>toggleActivity(day.id,act.id)}>{act.text}</span>
-                <button className="btn-del" style={{fontSize:12}} onClick={()=>removeActivity(day.id,act.id)}>✕</button>
               </div>
-            ))}
-            <div className="flex gap-8 mt-8">
-              <input className="input flex-1" style={{padding:"7px 11px",fontSize:12}} placeholder="Add activity…"
-                value={newActs[day.id]||""} onChange={e=>setNewActs(p=>({...p,[day.id]:e.target.value}))}
-                onKeyDown={e=>e.key==="Enter"&&handleAdd(day.id)} />
-              <button className="btn-ghost" onClick={()=>handleAdd(day.id)}>Add</button>
+              {day.activities.map(act=>(
+                <div key={act.id} className="act-row">
+                  <div className="check-box" style={{cursor:"pointer",flexShrink:0}}
+                    onClick={()=>toggleActivity(day.id,act.id)}>
+                    {act.done&&<span style={{color:"#07101F",fontSize:11,fontWeight:900}}>✓</span>}
+                  </div>
+                  <span className={`act-text${act.done?" done":""}`} onClick={()=>toggleActivity(day.id,act.id)}>{act.text}</span>
+                  <div className="act-quick-btns">
+                    <div className="act-q-btn" title="Log expense for this activity" onClick={()=>onQuickExpense(act,day)}>💰</div>
+                    <div className="act-q-btn" title="Add memory for this activity" onClick={()=>onQuickMemory(act,day)}>📸</div>
+                    <button className="btn-del" style={{fontSize:12}} onClick={()=>removeActivity(day.id,act.id)}>✕</button>
+                  </div>
+                </div>
+              ))}
+              <div className="flex gap-8 mt-8">
+                <input className="input flex-1" style={{padding:"7px 11px",fontSize:12}} placeholder="Add activity…"
+                  value={newActs[day.id]||""} onChange={e=>setNewActs(p=>({...p,[day.id]:e.target.value}))}
+                  onKeyDown={e=>e.key==="Enter"&&handleAdd(day.id)} />
+                <button className="btn-ghost" onClick={()=>handleAdd(day.id)}>Add</button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -1086,6 +1543,349 @@ Rules:
         );
       })}
     </div>
+  );
+}
+
+/* ── SHARE MODAL ──────────────────────────────────────────────────────────── */
+const JSONBLOB = "https://jsonblob.com/api/jsonBlob";
+
+function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseCurrency, totalBudget, memories, saveTrip, saveItinerary, savePacking, saveExpenses, savePeople, saveBudget, saveBaseCurrency, initialCode="" }) {
+  const [activeTab, setActiveTab] = useState(initialCode ? "join" : "share");
+  const [includes, setIncludes]   = useState({ itinerary:true, packing:true, budget:true, memories:false });
+  const [shareState, setShareState] = useState({ step:"idle", code:"", error:"" }); // idle | creating | ready | updating | error
+  const [joinCode,   setJoinCode]   = useState(initialCode);
+  const [joinState,  setJoinState]  = useState({ step:"idle", preview:null, error:"", blobId:"" }); // idle | fetching | preview | importing | done | error
+  const [joinName,   setJoinName]   = useState("");
+  const [joinIncludes, setJoinIncludes] = useState({ itinerary:true, packing:true, budget:false });
+  const [copiedMsg,  setCopiedMsg]  = useState("");
+
+  const toggleInclude = (k) => setIncludes(p=>({...p,[k]:!p[k]}));
+  const toggleJoinInclude = (k) => setJoinIncludes(p=>({...p,[k]:!p[k]}));
+
+  // ── Build shareable payload ──────────────────────────────────────────────
+  const buildPayload = () => {
+    const payload = {
+      v: 2,
+      createdAt: new Date().toISOString(),
+      trip, people, baseCurrency, totalBudget,
+    };
+    if (includes.itinerary) payload.itinerary = itinerary;
+    if (includes.packing)   payload.packing   = packing;
+    if (includes.budget)    payload.expenses  = expenses;
+    if (includes.memories)  payload.memories  = memories.map(m=>({...m, photo:null})); // strip photos
+    return payload;
+  };
+
+  // ── Create link ──────────────────────────────────────────────────────────
+  const createLink = async () => {
+    setShareState({ step:"creating", code:"", error:"" });
+    try {
+      const res = await fetch(JSONBLOB, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      if (!res.ok) throw new Error("Server error");
+      const location = res.headers.get("Location") || "";
+      const blobId = location.split("/").pop() || res.url.split("/").pop();
+      const code = blobId.slice(-8).toUpperCase(); // short friendly code from last 8 chars
+      LS.set("tc_share_blobid", blobId);
+      LS.set("tc_share_code", code);
+      setShareState({ step:"ready", code, blobId, error:"" });
+    } catch(e) {
+      setShareState({ step:"error", code:"", error:"Could not create link. Check your connection." });
+    }
+  };
+
+  // ── Push update ──────────────────────────────────────────────────────────
+  const pushUpdate = async () => {
+    const blobId = shareState.blobId || LS.get("tc_share_blobid","");
+    if (!blobId) return;
+    setShareState(p=>({...p, step:"updating"}));
+    try {
+      await fetch(`${JSONBLOB}/${blobId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      setShareState(p=>({...p, step:"ready"}));
+      flash("✓ Updated!");
+    } catch { setShareState(p=>({...p, step:"ready"})); flash("⚠️ Update failed"); }
+  };
+
+  // ── Restore existing link on open ────────────────────────────────────────
+  useEffect(()=>{
+    const savedBlobId = LS.get("tc_share_blobid","");
+    const savedCode   = LS.get("tc_share_code","");
+    if (savedBlobId && savedCode && activeTab==="share") {
+      setShareState({ step:"ready", code:savedCode, blobId:savedBlobId, error:"" });
+    }
+  }, [activeTab]);
+
+  // ── Auto-fetch if initialCode given ─────────────────────────────────────
+  useEffect(()=>{
+    if (initialCode) { setJoinCode(initialCode); fetchPreview(initialCode); }
+  },[]);
+
+  // ── Fetch preview ────────────────────────────────────────────────────────
+  const fetchPreview = async (rawCode) => {
+    const code = (rawCode||joinCode).trim().replace(/\s/g,"");
+    if (!code) return;
+    setJoinState({ step:"fetching", preview:null, error:"", blobId:"" });
+    // Try as full blob ID, or search suffix match
+    try {
+      // jsonblob blob IDs are long numeric strings; user may paste the full ID or the 8-char tail
+      // Strategy: try the input directly first
+      let blobId = code;
+      let data = null;
+      const res = await fetch(`${JSONBLOB}/${blobId}`);
+      if (res.ok) { data = await res.json(); }
+      if (!data) throw new Error("Not found");
+      setJoinState({ step:"preview", preview:data, error:"", blobId });
+    } catch {
+      setJoinState({ step:"error", preview:null, error:"Trip not found. Check the code and try again.", blobId:"" });
+    }
+  };
+
+  // ── Import ────────────────────────────────────────────────────────────────
+  const importTrip = () => {
+    const d = joinState.preview;
+    if (!d) return;
+    setJoinState(p=>({...p, step:"importing"}));
+    // Always import trip basics
+    if (d.trip) saveTrip(d.trip);
+    if (d.baseCurrency) saveBaseCurrency(d.baseCurrency);
+    if (d.totalBudget)  saveBudget(d.totalBudget);
+    // Merge people: add joining user, skip duplicates
+    const existingNames = new Set(people.map(p=>p.name));
+    const incoming = (d.people||[]).filter(p=>!existingNames.has(p.name));
+    const myEntry = joinName.trim() && !existingNames.has(joinName.trim()) ? [{id:Date.now()+1, name:joinName.trim()}] : [];
+    savePeople([...people, ...incoming, ...myEntry]);
+    // Optional sections
+    if (joinIncludes.itinerary && d.itinerary) saveItinerary(d.itinerary);
+    if (joinIncludes.packing   && d.packing)   savePacking(d.packing);
+    if (joinIncludes.budget    && d.expenses)   saveExpenses(d.expenses);
+    setJoinState(p=>({...p, step:"done"}));
+  };
+
+  // ── Share helpers ─────────────────────────────────────────────────────────
+  const tripUrl = () => `${window.location.origin}${window.location.pathname}?trip=${joinState.blobId||shareState.blobId}`;
+  const qrUrl   = (code) => `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(code)}&bgcolor=07101F&color=FFA828&margin=10`;
+
+  const flash = (msg) => { setCopiedMsg(msg); setTimeout(()=>setCopiedMsg(""), 2000); };
+
+  const copyCode = () => { navigator.clipboard?.writeText(shareState.code).then(()=>flash("✓ Code copied!")).catch(()=>{}); };
+  const copyLink = () => { navigator.clipboard?.writeText(tripUrl()).then(()=>flash("✓ Link copied!")).catch(()=>{}); };
+  const nativeShare = () => {
+    if (!navigator.share) { copyLink(); return; }
+    navigator.share({ title: `Join ${trip.name||"my trip"}!`, text:`Join my TravelPal trip${trip.destination?" to "+trip.destination:""}! Use code: ${shareState.code}`, url: tripUrl() }).catch(()=>{});
+  };
+
+  const SECTIONS = [
+    { key:"itinerary", icon:"📅", label:"Itinerary", sub:`${itinerary.length} days` },
+    { key:"packing",   icon:"🧳", label:"Packing list", sub:`${Object.values(packing).flat().length} items` },
+    { key:"budget",    icon:"💰", label:"Budget & expenses", sub:`${expenses.length} expenses` },
+    { key:"memories",  icon:"📸", label:"Memory pins", sub:`${memories.length} memories (no photos)` },
+  ];
+
+  return (
+    <>
+      <div className="share-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+        <div className="share-sheet">
+          <div className="share-header">
+            <div className="share-header-top">
+              <div className="share-title">✈️ Share &amp; Invite</div>
+              <button className="btn-del" style={{fontSize:22}} onClick={onClose}>✕</button>
+            </div>
+            <div className="share-tabs">
+              <button className={`share-tab-btn${activeTab==="share"?" active":""}`} onClick={()=>setActiveTab("share")}>📤 Share Trip</button>
+              <button className={`share-tab-btn${activeTab==="join"?" active":""}`}  onClick={()=>setActiveTab("join")}>📥 Join a Trip</button>
+            </div>
+          </div>
+
+          <div className="share-body">
+            {/* ── SHARE TAB ── */}
+            {activeTab==="share"&&(
+              <div>
+                <div style={{fontSize:13,color:"var(--text-dim)",marginBottom:14,lineHeight:1.6}}>
+                  Create a shareable trip code. Anyone with the code can view and import your trip data.
+                </div>
+
+                {/* What to include */}
+                <div className="card-title-small">What to share</div>
+                {SECTIONS.map(s=>(
+                  <div key={s.key} className="include-row" onClick={()=>toggleInclude(s.key)}>
+                    <div className={`include-check${includes[s.key]?" on":""}`}/>
+                    <span style={{fontSize:16}}>{s.icon}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,fontWeight:500}}>{s.label}</div>
+                      <div style={{fontSize:11,color:"var(--text-dim)"}}>{s.sub}</div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Trip basics always included note */}
+                <div style={{fontSize:11,color:"var(--text-dim)",marginTop:6,marginBottom:14}}>
+                  ✓ Trip details &amp; travellers always included
+                </div>
+
+                {/* Create / Update button */}
+                {shareState.step==="idle"&&(
+                  <button className="btn btn-full" onClick={createLink}>🔗 Create Trip Link</button>
+                )}
+                {(shareState.step==="creating"||shareState.step==="updating")&&(
+                  <button className="btn btn-full" disabled>
+                    <span className="dots"><span>·</span><span>·</span><span>·</span></span>
+                  </button>
+                )}
+                {shareState.step==="error"&&(
+                  <div>
+                    <div style={{color:"#FF5C5C",fontSize:13,marginBottom:10,textAlign:"center"}}>⚠️ {shareState.error}</div>
+                    <button className="btn btn-full" onClick={createLink}>Try Again</button>
+                  </div>
+                )}
+
+                {/* Code + QR ready */}
+                {(shareState.step==="ready")&&(
+                  <div>
+                    <div className="trip-code-box">
+                      <div className="trip-code-label">Your Trip Code</div>
+                      <div className="trip-code" onClick={copyCode} title="Tap to copy">{shareState.code}</div>
+                      <div style={{fontSize:11,color:"var(--text-dim)"}}>Tap code to copy · Anyone can join with this</div>
+                    </div>
+
+                    <div className="qr-wrap">
+                      <img src={qrUrl(shareState.code)} alt="QR Code" />
+                    </div>
+
+                    <div className="share-actions">
+                      {"share" in navigator&&(
+                        <button className="share-action-btn" onClick={nativeShare}>
+                          <span className="sab-icon">📲</span>
+                          <div className="sab-info">
+                            <div className="sab-title">Share via…</div>
+                            <div className="sab-sub">WhatsApp, Messages, Email & more</div>
+                          </div>
+                        </button>
+                      )}
+                      <button className="share-action-btn" onClick={copyLink}>
+                        <span className="sab-icon">🔗</span>
+                        <div className="sab-info">
+                          <div className="sab-title">Copy Link</div>
+                          <div className="sab-sub">{tripUrl().slice(0,42)}…</div>
+                        </div>
+                      </button>
+                      <button className="share-action-btn" onClick={copyCode}>
+                        <span className="sab-icon">📋</span>
+                        <div className="sab-info">
+                          <div className="sab-title">Copy Code Only</div>
+                          <div className="sab-sub">Paste it to your travel group chat</div>
+                        </div>
+                      </button>
+                      <button className="share-action-btn" onClick={pushUpdate}>
+                        <span className="sab-icon">🔄</span>
+                        <div className="sab-info">
+                          <div className="sab-title">Push Update</div>
+                          <div className="sab-sub">Sync latest changes to this link</div>
+                        </div>
+                      </button>
+                    </div>
+
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginTop:14,fontSize:12,color:"var(--text-dim)"}}>
+                      <span className="collab-dot"/>
+                      <span>Link is live · Stored securely on JSONBlob</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── JOIN TAB ── */}
+            {activeTab==="join"&&(
+              <div>
+                <div style={{fontSize:13,color:"var(--text-dim)",marginBottom:14,lineHeight:1.6}}>
+                  Enter a trip code or paste a link shared by a fellow traveller.
+                </div>
+
+                {/* Code input */}
+                <div className="card-title-small">Trip Code</div>
+                <div className="flex gap-8" style={{marginBottom:14}}>
+                  <input className="input flex-1" placeholder="Paste code or full link…"
+                    value={joinCode} onChange={e=>{
+                      let v = e.target.value.trim();
+                      // If it's a URL, extract the trip param
+                      try { const u=new URL(v); const p=u.searchParams.get("trip"); if(p) v=p; } catch{}
+                      setJoinCode(v);
+                      setJoinState({step:"idle",preview:null,error:"",blobId:""});
+                    }}/>
+                  <button className="btn" onClick={()=>fetchPreview()} disabled={!joinCode.trim()||joinState.step==="fetching"}>
+                    {joinState.step==="fetching"?<span className="dots"><span>·</span><span>·</span><span>·</span></span>:"Look up"}
+                  </button>
+                </div>
+
+                {joinState.step==="error"&&(
+                  <div style={{color:"#FF5C5C",fontSize:13,textAlign:"center",marginBottom:14}}>⚠️ {joinState.error}</div>
+                )}
+
+                {/* Preview */}
+                {(joinState.step==="preview"||joinState.step==="importing"||joinState.step==="done")&&joinState.preview&&(
+                  <div>
+                    <div className="join-preview">
+                      <div className="join-preview-title">✈️ {joinState.preview.trip?.name||"Untitled Trip"}</div>
+                      {joinState.preview.trip?.destination&&<div className="join-preview-row">📍 {joinState.preview.trip.destination}</div>}
+                      {joinState.preview.trip?.startDate&&<div className="join-preview-row">🗓️ {joinState.preview.trip.startDate} → {joinState.preview.trip.endDate||"?"}</div>}
+                      {joinState.preview.people?.length>0&&<div className="join-preview-row">👥 {joinState.preview.people.map(p=>p.name).join(", ")}</div>}
+                      <div className="join-preview-row" style={{marginTop:6,flexWrap:"wrap",gap:6}}>
+                        {joinState.preview.itinerary&&<span className="invite-badge">📅 Itinerary</span>}
+                        {joinState.preview.packing&&  <span className="invite-badge">🧳 Packing</span>}
+                        {joinState.preview.expenses&& <span className="invite-badge">💰 Budget</span>}
+                      </div>
+                    </div>
+
+                    {joinState.step!=="done"&&(
+                      <div style={{marginTop:14}}>
+                        <div className="card-title-small">Your name (added to travellers)</div>
+                        <input className="input" style={{marginBottom:12}} placeholder="e.g. Sarah" value={joinName} onChange={e=>setJoinName(e.target.value)}/>
+
+                        <div className="card-title-small">What to import</div>
+                        {[
+                          {key:"itinerary",icon:"📅",label:"Itinerary"},
+                          {key:"packing",  icon:"🧳",label:"Packing list"},
+                          {key:"budget",   icon:"💰",label:"Budget & expenses"},
+                        ].filter(s=>joinState.preview[s.key]).map(s=>(
+                          <div key={s.key} className="include-row" onClick={()=>toggleJoinInclude(s.key)}>
+                            <div className={`include-check${joinIncludes[s.key]?" on":""}`}/>
+                            <span>{s.icon}</span>
+                            <span style={{fontSize:13,fontWeight:500}}>{s.label}</span>
+                          </div>
+                        ))}
+                        <div style={{fontSize:11,color:"var(--text-dim)",margin:"6px 0 12px"}}>✓ Trip details &amp; travellers always imported</div>
+
+                        <button className="btn btn-full" onClick={importTrip} disabled={joinState.step==="importing"}>
+                          {joinState.step==="importing"
+                            ?<span className="dots"><span>·</span><span>·</span><span>·</span></span>
+                            :"📥 Import & Join Trip"}
+                        </button>
+                      </div>
+                    )}
+
+                    {joinState.step==="done"&&(
+                      <div style={{textAlign:"center",padding:"20px 0"}}>
+                        <div style={{fontSize:40,marginBottom:10}}>🎉</div>
+                        <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,color:"#4DB87A",marginBottom:6}}>You're in!</div>
+                        <div style={{fontSize:13,color:"var(--text-dim)"}}>Trip data imported. Welcome aboard!</div>
+                        <button className="btn mt-12" onClick={onClose}>Let's go ✈️</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {copiedMsg&&<div className="copied-flash">{copiedMsg}</div>}
+    </>
   );
 }
 
@@ -1487,7 +2287,7 @@ function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoa
           <input className="input flex-1" placeholder={trip.destination||"Enter city…"}
             value={weatherCity} onChange={e=>setWeatherCity(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&fetchWeather()} />
-          <button className="btn" onClick={fetchWeather} disabled={weatherLoading}>
+          <button className="btn" onClick={()=>fetchWeather(weatherCity||undefined)} disabled={weatherLoading}>
             {weatherLoading?<span className="dots"><span>·</span><span>·</span><span>·</span></span>:"Check"}
           </button>
         </div>
@@ -1572,9 +2372,17 @@ function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoa
 }
 
 /* ── MEMORIES Tab ─────────────────────────────────────────────────────────── */
-function MemoriesTab({ memories, addMemory, updateMemory, deleteMemory, trip }) {
+function MemoriesTab({ memories, addMemory, updateMemory, deleteMemory, trip, quickMemoryCtx, clearQuickMemory }) {
   const mapRef = useRef(null);
   const leafletMap = useRef(null);
+
+  // Pre-fill form from quick-memory context (tapped 📸 on an activity)
+  useEffect(()=>{
+    if(!quickMemoryCtx) return;
+    const {act,day}=quickMemoryCtx;
+    setForm(f=>({...f,title:act.text,date:new Date().toISOString().split("T")[0],notes:`${day.label} · ${act.text}`}));
+    if(clearQuickMemory) clearQuickMemory();
+  },[quickMemoryCtx]);
   const markersRef = useRef({});
   const pendingMarkerRef = useRef(null);
 
@@ -1958,7 +2766,12 @@ function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [quickExpense, setQuickExpense] = useState(null); // {act, day}
+  const [quickMemoryCtx, setQuickMemoryCtx] = useState(null); // {act, day}
+  const [copiedFlash, setCopiedFlash] = useState("");
 
+  // ── Persistent state ──
   const [trip, setTrip] = useState(() => LS.get("tc_trip", {name:"",destination:"",startDate:"",endDate:""}));
   const [itinerary, setItinerary] = useState(() => LS.get("tc_itin", []));
   const [packing, setPacking] = useState(() => {
@@ -1980,7 +2793,7 @@ function App() {
   const [weatherCity, setWeatherCity] = useState("");
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
-  const [currFrom, setCurrFrom] = useState("USD");
+  const [currFrom, setCurrFrom] = useState(baseCurrency);
   const [currTo, setCurrTo] = useState("SGD");
   const [currAmount, setCurrAmount] = useState("100");
   const [currResult, setCurrResult] = useState(null);
@@ -1988,59 +2801,68 @@ function App() {
   const [aiResponse, setAiResponse] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Online/offline detection
+  // Quick expense form
+  const [qeForm, setQeForm] = useState({desc:"",amount:"",currency:baseCurrency,cat:EXPENSE_CATS[0]});
+  const [qeConverting, setQeConverting] = useState(false);
+  const [qePreview, setQePreview] = useState(null);
+
+  // ── Online/offline ──
   useEffect(() => {
-    const on = () => setIsOnline(true);
-    const off = () => setIsOnline(false);
-    window.addEventListener("online", on);
-    window.addEventListener("offline", off);
-    return () => { window.removeEventListener("online",on); window.removeEventListener("offline",off); };
+    const on=()=>setIsOnline(true), off=()=>setIsOnline(false);
+    window.addEventListener("online",on); window.addEventListener("offline",off);
+    return ()=>{ window.removeEventListener("online",on); window.removeEventListener("offline",off); };
   }, []);
 
-  // PWA install prompt
+  // ── PWA install ──
   useEffect(() => {
-    const handler = (e) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    const h=(e)=>{e.preventDefault();setInstallPrompt(e);setShowInstall(true);};
+    window.addEventListener("beforeinstallprompt",h);
+    return ()=>window.removeEventListener("beforeinstallprompt",h);
   }, []);
+
+  // ── Deep-link on load (e.g. ?trip=blobId) ──
+  useEffect(()=>{
+    const params = new URLSearchParams(window.location.search);
+    const tripCode = params.get("trip");
+    if (tripCode) { setShowShare(true); }
+  },[]);
 
   const handleInstall = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
-    const result = await installPrompt.userChoice;
-    setShowInstall(false);
-    setInstallPrompt(null);
+    await installPrompt.userChoice;
+    setShowInstall(false); setInstallPrompt(null);
   };
 
-  // Persist helpers
-  const saveTrip = t => { setTrip(t); LS.set("tc_trip",t); };
-  const saveItinerary = i => { setItinerary(i); LS.set("tc_itin",i); };
-  const savePacking = p => { setPacking(p); LS.set("tc_pack",p); };
-  const saveBudget       = b => { setTotalBudget(b);   LS.set("tc_budget",b); };
-  const saveBaseCurrency = c => { setBaseCurrency(c);  LS.set("tc_basecurr",c); };
-  const saveExpenses     = e => { setExpenses(e);      LS.set("tc_expenses",e); };
-  const savePeople       = p => { setPeople(p);        LS.set("tc_people",p); };
+  // ── Persist helpers ──
+  const saveTrip          = t => { setTrip(t);         LS.set("tc_trip",t); };
+  const saveItinerary     = i => { setItinerary(i);    LS.set("tc_itin",i); };
+  const savePacking       = p => { setPacking(p);      LS.set("tc_pack",p); };
+  const saveBudget        = b => { setTotalBudget(b);  LS.set("tc_budget",b); };
+  const saveBaseCurrency  = c => { setBaseCurrency(c); LS.set("tc_basecurr",c); };
+  const saveExpenses      = e => { setExpenses(e);     LS.set("tc_expenses",e); };
+  const savePeople        = p => { setPeople(p);       LS.set("tc_people",p); };
+  const saveMemories      = m => { setMemories(m);     LS.set("tc_memories",m); };
 
-  // Itinerary
+  // ── Itinerary ──
   const addDay = () => { const n=itinerary.length+1; saveItinerary([...itinerary,{id:Date.now(),day:n,label:`Day ${n}`,activities:[]}]); };
-  const removeDay = id => { const u=itinerary.filter(d=>d.id!==id).map((d,i)=>({...d,day:i+1,label:`Day ${i+1}`})); saveItinerary(u); };
+  const removeDay = id => saveItinerary(itinerary.filter(d=>d.id!==id).map((d,i)=>({...d,day:i+1,label:`Day ${i+1}`})));
   const addActivity = (dayId,text) => saveItinerary(itinerary.map(d=>d.id===dayId?{...d,activities:[...d.activities,{id:Date.now(),text,done:false}]}:d));
   const toggleActivity = (dayId,actId) => saveItinerary(itinerary.map(d=>d.id===dayId?{...d,activities:d.activities.map(a=>a.id===actId?{...a,done:!a.done}:a)}:d));
   const removeActivity = (dayId,actId) => saveItinerary(itinerary.map(d=>d.id===dayId?{...d,activities:d.activities.filter(a=>a.id!==actId)}:d));
 
-  // Packing
-  const togglePacking = (cat,id) => savePacking({...packing,[cat]:packing[cat].map(i=>i.id===id?{...i,checked:!i.checked}:i)});
+  // ── Packing ──
+  const togglePacking  = (cat,id) => savePacking({...packing,[cat]:packing[cat].map(i=>i.id===id?{...i,checked:!i.checked}:i)});
   const addPackingItem = (cat,name) => savePacking({...packing,[cat]:[...packing[cat],{id:`${cat}-${Date.now()}`,name,checked:false}]});
 
-  // Memories
-  const saveMemories = m => { setMemories(m); LS.set("tc_memories",m); };
+  // ── Memories ──
   const addMemory    = mem => saveMemories([...memories, mem]);
   const updateMemory = mem => saveMemories(memories.map(m=>m.id===mem.id?mem:m));
   const deleteMemory = id  => saveMemories(memories.filter(m=>m.id!==id));
 
-  // Weather
-  const fetchWeather = async () => {
-    const city = (weatherCity.trim()||trip.destination).trim();
+  // ── Weather ──
+  const fetchWeather = async (cityOverride) => {
+    const city = (cityOverride||weatherCity||trip.destination||"").trim();
     if(!city) return;
     setWeatherLoading(true); setWeatherData(null);
     try {
@@ -2050,52 +2872,105 @@ function App() {
       const wd = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`).then(r=>r.json());
       const code=wd.current.weather_code;
       setWeatherData({city:name,country,temp:Math.round(wd.current.temperature_2m),humidity:wd.current.relative_humidity_2m,wind:Math.round(wd.current.wind_speed_10m),code,icon:WC_ICON(code),unit:wd.current_units.temperature_2m});
-    } catch { setWeatherData({error:"Failed to fetch weather"}); }
+    } catch { setWeatherData({error:"Failed to fetch"}); }
     setWeatherLoading(false);
   };
 
-  // Currency
+  // ── Currency ──
   const convertCurrency = async () => {
     setCurrResult(null);
-    try {
-      const data = await fetch(`https://api.frankfurter.app/latest?from=${currFrom}&to=${currTo}&amount=${currAmount}`).then(r=>r.json());
-      setCurrResult(data.rates[currTo]);
-    } catch { setCurrResult("Error"); }
+    try { const d=await fetch(`https://api.frankfurter.app/latest?from=${currFrom}&to=${currTo}&amount=${currAmount}`).then(r=>r.json()); setCurrResult(d.rates[currTo]); }
+    catch { setCurrResult("Error"); }
   };
 
-  // AI
+  // ── AI ──
   const getAiTip = async () => {
     if(!aiQuery.trim()) return;
     setAiLoading(true); setAiResponse("");
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
-          max_tokens:1000,
-          system:"You are a helpful travel expert. Give practical, concise, actionable travel tips. Use bullet points with • symbols. Keep responses under 200 words. Be specific and helpful.",
-          messages:[{role:"user",content:aiQuery}],
-        }),
-      });
-      const data = await res.json();
-      setAiResponse(data.content?.[0]?.text||"No response.");
-    } catch { setAiResponse("⚠️ Failed to get tips. Check your connection and try again."); }
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:"You are a helpful travel expert. Give practical, concise, actionable travel tips. Use bullet points with • symbols. Keep responses under 200 words.",messages:[{role:"user",content:aiQuery}]})});
+      const d=await res.json(); setAiResponse(d.content?.[0]?.text||"No response.");
+    } catch { setAiResponse("⚠️ Failed. Check your connection."); }
     setAiLoading(false);
   };
 
+  // ── Quick Expense (from activity) ──
+  useEffect(()=>{
+    if(!quickExpense) return;
+    setQeForm({desc:quickExpense.act.text,amount:"",currency:baseCurrency,cat:EXPENSE_CATS[4]});
+    setQePreview(null);
+  },[quickExpense]);
+
+  useEffect(()=>{
+    setQePreview(null);
+    if(!qeForm.amount||qeForm.currency===baseCurrency) return;
+    let cancelled=false; setQeConverting(true);
+    fetch(`https://api.frankfurter.app/latest?from=${qeForm.currency}&to=${baseCurrency}`)
+      .then(r=>r.json()).then(d=>{
+        if(cancelled) return; setQeConverting(false);
+        const rate=d.rates[baseCurrency];
+        if(rate) setQePreview({rate,amtBase:Number(qeForm.amount)*rate});
+      }).catch(()=>setQeConverting(false));
+    return ()=>{cancelled=true;};
+  },[qeForm.amount,qeForm.currency]);
+
+  const submitQuickExpense = async () => {
+    if(!qeForm.amount||!qeForm.desc) return;
+    const originalAmount=Number(qeForm.amount);
+    let amtBase=originalAmount, usedRate=1;
+    if(qeForm.currency!==baseCurrency){
+      const rate=qePreview?.rate;
+      if(rate){amtBase=originalAmount*rate;usedRate=rate;}
+    }
+    saveExpenses([...expenses,{
+      id:Date.now(),desc:qeForm.desc,cat:qeForm.cat,
+      originalAmount,currency:qeForm.currency,amtBase,usedRate,
+      paidBy:"Me",splits:null,
+      activityId:quickExpense.act.id,activityText:quickExpense.act.text,
+      dayId:quickExpense.day.id,dayLabel:quickExpense.day.label,
+      date:new Date().toLocaleDateString(),
+    }]);
+    setQuickExpense(null);
+    flash("💰 Expense logged!");
+  };
+
+  // ── Quick Memory (from activity) ──
+  const onQuickMemory = (act, day) => {
+    setQuickMemoryCtx({act,day});
+    setTab(5); // navigate to Memories tab — map handles pre-filling
+  };
+
+  const flash = (msg) => { setCopiedFlash(msg); setTimeout(()=>setCopiedFlash(""),2200); };
+
+  // ── Navigate ──
+  const navigateTo = (dest) => {
+    if(dest==="share") { setShowShare(true); return; }
+    setTab(dest);
+  };
+
+  // ── Derived ──
   const packingTotal = Object.values(packing).flat().length;
   const packingDone  = Object.values(packing).flat().filter(i=>i.checked).length;
   const subtitle = [trip.destination, trip.startDate&&trip.endDate&&`${trip.startDate} → ${trip.endDate}`].filter(Boolean).join("  ·  ")||"Where are you headed?";
 
-  const TABS = [{label:"Plan",icon:"📋"},{label:"Pack",icon:"🧳"},{label:"Budget",icon:"💰"},{label:"Explore",icon:"🌍"},{label:"Memories",icon:"📸"}];
+  const TABS = [
+    {label:"Home",   icon:"🏠"},
+    {label:"Plan",   icon:"📋"},
+    {label:"Pack",   icon:"🧳"},
+    {label:"Budget", icon:"💰"},
+    {label:"Explore",icon:"🌍"},
+    {label:"Memories",icon:"📸"},
+  ];
+
+  // ── Deep-link trip code ──
+  const initialShareCode = (() => {
+    try { return new URLSearchParams(window.location.search).get("trip")||""; } catch { return ""; }
+  })();
 
   return (
     <div className="app">
-      {/* Offline banner */}
-      {!isOnline&&<div className="offline-toast">📡 You're offline — saved data still available</div>}
+      {!isOnline&&<div className="offline-toast">📡 Offline — saved data still available</div>}
 
-      {/* Install banner */}
       {showInstall&&(
         <div className="install-banner">
           <span>✈️</span>
@@ -2110,7 +2985,10 @@ function App() {
         <div className="header-top">
           <input className="trip-name-input flex-1" value={trip.name}
             onChange={e=>saveTrip({...trip,name:e.target.value})} placeholder="✈️ Name Your Trip" />
-          <div className="progress-pill">🧳 {packingDone}/{packingTotal}</div>
+          <div style={{display:"flex",gap:7,alignItems:"center",flexShrink:0}}>
+            <div className="progress-pill">🧳 {packingDone}/{packingTotal}</div>
+            <button className="header-share-btn" onClick={()=>setShowShare(true)} title="Share & Invite">📤</button>
+          </div>
         </div>
         <div className="header-sub">{subtitle}</div>
       </div>
@@ -2118,11 +2996,12 @@ function App() {
       {/* Content */}
       <div className="content">
         <div className="content-inner">
-          {tab===0&&<PlanTab trip={trip} saveTrip={saveTrip} itinerary={itinerary} addDay={addDay} addActivity={addActivity} toggleActivity={toggleActivity} removeDay={removeDay} removeActivity={removeActivity} />}
-          {tab===1&&<PackTab packing={packing} togglePacking={togglePacking} addPackingItem={addPackingItem} packingTotal={packingTotal} packingDone={packingDone} trip={trip} itinerary={itinerary} />}
-          {tab===2&&<BudgetTab totalBudget={totalBudget} saveBudget={saveBudget} baseCurrency={baseCurrency} saveBaseCurrency={saveBaseCurrency} expenses={expenses} saveExpenses={saveExpenses} people={people} savePeople={savePeople} />}
-          {tab===3&&<ExploreTab trip={trip} weatherCity={weatherCity} setWeatherCity={setWeatherCity} weatherData={weatherData} weatherLoading={weatherLoading} fetchWeather={fetchWeather} currFrom={currFrom} setCurrFrom={setCurrFrom} currTo={currTo} setCurrTo={setCurrTo} currAmount={currAmount} setCurrAmount={setCurrAmount} currResult={currResult} convertCurrency={convertCurrency} aiQuery={aiQuery} setAiQuery={setAiQuery} aiResponse={aiResponse} aiLoading={aiLoading} getAiTip={getAiTip} />}
-          {tab===4&&<MemoriesTab memories={memories} addMemory={addMemory} updateMemory={updateMemory} deleteMemory={deleteMemory} trip={trip} />}
+          {tab===0&&<Dashboard trip={trip} itinerary={itinerary} packing={packing} expenses={expenses} baseCurrency={baseCurrency} memories={memories} weatherData={weatherData} fetchWeather={fetchWeather} navigateTo={navigateTo} toggleActivity={toggleActivity} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
+          {tab===1&&<PlanTab trip={trip} saveTrip={saveTrip} itinerary={itinerary} addDay={addDay} addActivity={addActivity} toggleActivity={toggleActivity} removeDay={removeDay} removeActivity={removeActivity} expenses={expenses} baseCurrency={baseCurrency} memories={memories} navigateTo={navigateTo} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
+          {tab===2&&<PackTab packing={packing} togglePacking={togglePacking} addPackingItem={addPackingItem} packingTotal={packingTotal} packingDone={packingDone} trip={trip} itinerary={itinerary}/>}
+          {tab===3&&<BudgetTab totalBudget={totalBudget} saveBudget={saveBudget} baseCurrency={baseCurrency} saveBaseCurrency={saveBaseCurrency} expenses={expenses} saveExpenses={saveExpenses} people={people} savePeople={savePeople}/>}
+          {tab===4&&<ExploreTab trip={trip} weatherCity={weatherCity} setWeatherCity={setWeatherCity} weatherData={weatherData} weatherLoading={weatherLoading} fetchWeather={fetchWeather} currFrom={currFrom} setCurrFrom={setCurrFrom} currTo={currTo} setCurrTo={setCurrTo} currAmount={currAmount} setCurrAmount={setCurrAmount} currResult={currResult} convertCurrency={convertCurrency} aiQuery={aiQuery} setAiQuery={setAiQuery} aiResponse={aiResponse} aiLoading={aiLoading} getAiTip={getAiTip}/>}
+          {tab===5&&<MemoriesTab memories={memories} addMemory={addMemory} updateMemory={updateMemory} deleteMemory={deleteMemory} trip={trip} quickMemoryCtx={quickMemoryCtx} clearQuickMemory={()=>setQuickMemoryCtx(null)}/>}
         </div>
       </div>
 
@@ -2135,6 +3014,59 @@ function App() {
           </button>
         ))}
       </div>
+
+      {/* ── Quick Expense Overlay ── */}
+      {quickExpense&&(
+        <div className="pin-form-overlay" onClick={e=>e.target===e.currentTarget&&setQuickExpense(null)}>
+          <div className="pin-form">
+            <div className="pin-form-title">💰 Log Expense</div>
+            <div style={{fontSize:12,color:"var(--text-dim)",marginBottom:12}}>
+              📅 {quickExpense.day.label} · {quickExpense.act.text}
+            </div>
+            <div className="flex flex-col gap-8">
+              <select className="input" value={qeForm.cat} onChange={e=>setQeForm(f=>({...f,cat:e.target.value}))}>
+                {EXPENSE_CATS.map(c=><option key={c} value={c}>{c}</option>)}
+              </select>
+              <input className="input" placeholder="Description" value={qeForm.desc}
+                onChange={e=>setQeForm(f=>({...f,desc:e.target.value}))}/>
+              <div className="flex gap-8">
+                <input className="input flex-1" type="number" placeholder="Amount"
+                  value={qeForm.amount} onChange={e=>setQeForm(f=>({...f,amount:e.target.value}))}/>
+                <select className="input" style={{width:86}} value={qeForm.currency}
+                  onChange={e=>setQeForm(f=>({...f,currency:e.target.value}))}>
+                  {CURRENCIES.map(c=><option key={c}>{c}</option>)}
+                </select>
+              </div>
+              {qeForm.currency!==baseCurrency&&qeForm.amount&&(
+                <div className="rate-note">
+                  {qeConverting?"Fetching rate…":qePreview?`≈ ${baseCurrency} ${qePreview.amtBase.toFixed(2)}`:"Could not fetch rate"}
+                </div>
+              )}
+            </div>
+            <div className="flex gap-8 mt-12">
+              <button className="btn-ghost flex-1" onClick={()=>setQuickExpense(null)}>Cancel</button>
+              <button className="btn flex-1" onClick={submitQuickExpense}
+                disabled={!qeForm.amount||!qeForm.desc||qeConverting}>Save 💰</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Share Modal ── */}
+      {showShare&&(
+        <ShareModal
+          onClose={()=>setShowShare(false)}
+          trip={trip} itinerary={itinerary} packing={packing}
+          expenses={expenses} people={people} baseCurrency={baseCurrency}
+          totalBudget={totalBudget} memories={memories}
+          saveTrip={saveTrip} saveItinerary={saveItinerary} savePacking={savePacking}
+          saveExpenses={saveExpenses} savePeople={savePeople}
+          saveBudget={saveBudget} saveBaseCurrency={saveBaseCurrency}
+          initialCode={initialShareCode}
+        />
+      )}
+
+      {copiedFlash&&<div className="copied-flash">{copiedFlash}</div>}
     </div>
   );
 }
