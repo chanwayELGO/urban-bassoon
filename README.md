@@ -64,11 +64,11 @@ We welcome contributions! Please follow these guidelines:
 
 ## License
 
-This project is licensed under the [Add your license here - MIT, Apache, GPL, etc.]
+This project is licensed under the GPL-3.0 license.
 
 ## Support
 
-For support, email [your-email] or open an issue on GitHub.
+For support, open an issue on GitHub
 
 ## Roadmap
 
