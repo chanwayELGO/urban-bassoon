@@ -66,6 +66,17 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+// ── Notification click: open the app ────────────────────────────────────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type:'window', includeUncontrolled:true }).then(list => {
+      for (const c of list) { if (c.url.includes('index.html') && 'focus' in c) return c.focus(); }
+      return clients.openWindow('./index.html');
+    })
+  );
+});
+
 // ── Background sync placeholder ──────────────────────────────────────────────
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
