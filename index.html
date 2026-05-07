@@ -317,6 +317,74 @@
     .act-text { font-size: 13px; flex: 1; cursor: pointer; user-select: none; transition: all 0.15s; }
     .act-text.done { text-decoration: line-through; color: rgba(230,217,194,0.3); }
 
+    /* ── Swipeable activity rows ─────────────────────────────────────────── */
+    .swipe-wrap {
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .swipe-wrap:last-child { border-bottom: none; }
+    .swipe-wrap.collapsing {
+      max-height: 0 !important; opacity: 0;
+      transition: max-height 0.32s ease, opacity 0.22s ease;
+    }
+    .swipe-bg {
+      position: absolute; inset: 0;
+      display: flex; align-items: center;
+      pointer-events: none;
+    }
+    .swipe-bg-right {
+      background: linear-gradient(90deg, rgba(77,184,122,0.28) 0%, transparent 100%);
+      padding-left: 18px; justify-content: flex-start;
+    }
+    .swipe-bg-left {
+      background: linear-gradient(270deg, rgba(255,92,92,0.28) 0%, transparent 100%);
+      padding-right: 18px; justify-content: flex-end;
+    }
+    .swipe-bg-icon {
+      font-size: 20px; line-height: 1;
+      transition: transform 0.12s ease;
+    }
+    .swipe-bg-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .4px;
+    }
+    .swipe-content {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; min-height: 44px;
+      will-change: transform;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: pan-y;
+    }
+    .swipe-content.has-transition {
+      transition: transform 0.28s cubic-bezier(0.34, 1.46, 0.64, 1),
+                  background 0.18s ease;
+    }
+    .swipe-content.flash-done  { background: rgba(77,184,122,0.10); }
+    .swipe-content.flash-delete{ background: rgba(255,92,92,0.08); }
+
+    .swipe-status-dot {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900; transition: all 0.2s;
+      border: 2px solid rgba(255,255,255,0.12);
+    }
+    .swipe-status-dot.done {
+      background: #4DB87A; border-color: #4DB87A; color: #07101F;
+    }
+    .swipe-act-text {
+      flex: 1; font-size: 13px; line-height: 1.45;
+      user-select: none; cursor: default;
+      transition: color 0.2s, text-decoration 0.2s;
+    }
+    .swipe-act-text.done { text-decoration: line-through; color: rgba(230,217,194,0.28); }
+
+    /* Swipe hint label on first-ever activity */
+    .swipe-hint {
+      font-size: 10px; color: rgba(230,217,194,0.25);
+      text-align: center; padding: 4px 0 8px;
+      letter-spacing: .3px; animation: fadeIn .4s ease .8s both;
+    }
+
     /* ─── Empty State ──────────────────────────────────────────────────────── */
     .empty { text-align: center; padding: 36px 16px; color: rgba(230,217,194,0.28); }
     .empty-icon { font-size: 40px; margin-bottom: 12px; }
@@ -552,6 +620,541 @@
     }
     .rate-note { font-size: 10px; color: var(--text-dim); margin-top: 4px; text-align: right; }
 
+    /* ─── Daily Spend Limit & Nudges ───────────────────────────────────────── */
+
+    /* Slide-down nudge banner */
+    .nudge-banner {
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; z-index: 5000;
+      padding: calc(var(--safe-top) + 10px) 16px 12px;
+      display: flex; align-items: flex-start; gap: 12px;
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      animation: nudgeSlideIn .38s cubic-bezier(0.34,1.46,0.64,1);
+      cursor: pointer;
+    }
+    .nudge-banner.warn {
+      background: rgba(255,168,40,0.96);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+    .nudge-banner.over {
+      background: rgba(220,50,50,0.97);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+    @keyframes nudgeSlideIn {
+      from { transform: translateX(-50%) translateY(-110%); }
+      to   { transform: translateX(-50%) translateY(0); }
+    }
+    .nudge-icon  { font-size: 24px; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+    .nudge-body  { flex: 1; min-width: 0; }
+    .nudge-title { font-size: 13px; font-weight: 700; color: #07101F; line-height: 1.3; }
+    .nudge-sub   { font-size: 11px; color: rgba(7,16,31,0.7); margin-top: 3px; line-height: 1.5; }
+    .nudge-close { background: rgba(7,16,31,0.15); border: none; border-radius: 99px;
+                   color: #07101F; font-size: 14px; cursor: pointer; padding: 3px 8px;
+                   font-family: 'DM Sans',sans-serif; flex-shrink: 0; align-self: flex-start; }
+
+    /* Daily limit card in BudgetTab */
+    .daily-prog-bar {
+      height: 12px; background: rgba(255,255,255,0.07);
+      border-radius: 99px; overflow: hidden; margin: 10px 0 6px; position: relative;
+    }
+    .daily-prog-fill {
+      height: 100%; border-radius: 99px;
+      transition: width .5s ease; position: relative;
+    }
+    .daily-prog-fill::after {
+      content: ''; position: absolute; right: 0; top: 0; bottom: 0;
+      width: 4px; background: rgba(255,255,255,0.4); border-radius: 2px;
+    }
+
+    /* 7-day chart */
+    .seven-day-chart {
+      display: flex; gap: 6px; align-items: flex-end;
+      height: 80px; margin: 14px 0 4px;
+    }
+    .day-bar-wrap {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 5px; position: relative; height: 100%;
+      justify-content: flex-end;
+    }
+    .day-bar-val {
+      font-size: 9px; color: var(--text-dim); white-space: nowrap;
+      line-height: 1; text-align: center;
+    }
+    .day-bar {
+      width: 100%; border-radius: 5px 5px 0 0;
+      min-height: 3px; transition: height .4s ease;
+      position: relative;
+    }
+    .day-bar.today { box-shadow: 0 0 8px rgba(255,168,40,0.5); }
+    .day-bar-label {
+      font-size: 9px; color: var(--text-dim); white-space: nowrap;
+      padding-top: 4px; font-weight: 500;
+    }
+    .day-bar-label.today { color: var(--amber); font-weight: 700; }
+    .day-limit-line {
+      position: absolute; left: 0; right: 0;
+      height: 1px; background: rgba(255,168,40,0.35);
+      border-top: 1px dashed rgba(255,168,40,0.45);
+      pointer-events: none; z-index: 2;
+    }
+
+    /* Permission request */
+    .notif-perm-card {
+      background: rgba(91,164,255,0.07); border: 1px solid rgba(91,164,255,0.2);
+      border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: flex-start;
+    }
+    .notif-perm-icon  { font-size: 26px; flex-shrink: 0; }
+    .notif-perm-body  { flex: 1; }
+    .notif-perm-title { font-size: 13px; font-weight: 600; color: #5BA4FF; margin-bottom: 4px; }
+    .notif-perm-sub   { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+
+    /* Daily stat chips */
+    .daily-stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
+    .daily-chip {
+      flex: 1; min-width: 80px; background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;
+      padding: 10px 10px; text-align: center;
+    }
+    .daily-chip-val { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:var(--amber); }
+    .daily-chip-lbl { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
+
+    /* ─── Expense Photo Gallery ─────────────────────────────────────────────── */
+
+    /* List / Grid toggle buttons */
+    .view-toggle {
+      display: flex; gap: 4px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; padding: 3px;
+    }
+    .vt-btn {
+      padding: 4px 9px; border-radius: 6px; border: none; cursor: pointer;
+      font-size: 14px; line-height: 1; transition: all .15s;
+      background: transparent; color: rgba(230,217,194,0.35);
+    }
+    .vt-btn.active { background: var(--amber); color: #07101F; }
+
+    /* Filter chips row */
+    .gallery-filters {
+      display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .gallery-filters::-webkit-scrollbar { display: none; }
+    .gf-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 11px; border-radius: 99px; font-size: 11px; font-weight: 600;
+      white-space: nowrap; cursor: pointer; transition: all .15s; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04);
+      color: rgba(230,217,194,0.55);
+    }
+    .gf-chip.on {
+      background: rgba(255,168,40,0.14); border-color: rgba(255,168,40,0.4);
+      color: var(--amber);
+    }
+
+    /* Gallery grid */
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+      margin-top: 8px;
+    }
+    .gallery-cell {
+      position: relative; aspect-ratio: 1; border-radius: 10px;
+      overflow: hidden; cursor: pointer;
+      transition: transform .15s, opacity .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .gallery-cell:active { transform: scale(0.94); opacity: .85; }
+    .gallery-cell-img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .gallery-cell-bg {
+      width: 100%; height: 100%; display: flex; align-items: center;
+      justify-content: center; font-size: 28px;
+    }
+    .gallery-cell-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%);
+      padding: 18px 7px 7px;
+    }
+    .gallery-cell-amount {
+      font-size: 11px; font-weight: 700; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .gallery-cell-cat {
+      font-size: 10px; color: rgba(255,255,255,0.6);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+    .gallery-cell-badge {
+      position: absolute; top: 5px; right: 5px;
+      background: rgba(255,168,40,0.9); border-radius: 5px;
+      font-size: 9px; padding: 2px 5px; color: #07101F; font-weight: 700;
+    }
+    .gallery-cell-date-badge {
+      position: absolute; top: 5px; left: 5px;
+      background: rgba(7,16,31,0.75); border-radius: 5px;
+      font-size: 9px; padding: 2px 5px; color: rgba(255,255,255,0.7);
+    }
+
+    /* Empty gallery state */
+    .gallery-empty {
+      grid-column: 1 / -1; text-align: center; padding: 40px 16px;
+      color: rgba(230,217,194,0.28);
+    }
+    .gallery-empty-icon { font-size: 42px; margin-bottom: 12px; }
+    .gallery-empty-msg  { font-size: 13px; line-height: 1.6; }
+
+    /* Expense detail sheet */
+    .exp-detail-overlay {
+      position: fixed; inset: 0; z-index: 3000;
+      background: rgba(7,16,31,0.82); backdrop-filter: blur(10px);
+      display: flex; align-items: flex-end;
+      animation: fadeIn .2s ease;
+    }
+    .exp-detail-sheet {
+      background: linear-gradient(160deg, #0C1B34 0%, #07101F 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px 22px 0 0;
+      width: 100%; max-width: 480px; margin: 0 auto;
+      max-height: 88vh; overflow-y: auto;
+      animation: slideUp .32s cubic-bezier(0.34,1.46,0.64,1);
+      padding-bottom: var(--safe-bottom);
+    }
+    .exp-detail-sheet::-webkit-scrollbar { display: none; }
+
+    .exp-detail-photo {
+      width: 100%; max-height: 260px; object-fit: cover;
+      border-radius: 22px 22px 0 0; display: block;
+    }
+    .exp-detail-nophoto {
+      height: 120px; display: flex; align-items: center; justify-content: center;
+      font-size: 52px; background: rgba(255,255,255,0.03);
+      border-radius: 22px 22px 0 0;
+    }
+    .exp-detail-body { padding: 18px 20px; }
+    .exp-detail-title {
+      font-family: 'Playfair Display', serif; font-size: 20px;
+      font-weight: 700; color: var(--amber); margin-bottom: 14px; line-height: 1.3;
+    }
+    .exp-detail-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 13px;
+    }
+    .exp-detail-row:last-of-type { border-bottom: none; }
+    .exp-detail-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+    .exp-detail-lbl  { color: var(--text-dim); font-size: 11px; min-width: 64px; }
+    .exp-detail-val  { flex: 1; font-weight: 500; }
+    .exp-detail-actions { display: flex; gap: 8px; padding: 14px 20px 0; }
+
+    /* Category background colours for no-photo tiles */
+    .cat-bg-food   { background: linear-gradient(135deg,#2D1B00,#4A2E00); }
+    .cat-bg-trans  { background: linear-gradient(135deg,#001A2D,#002E4A); }
+    .cat-bg-hotel  { background: linear-gradient(135deg,#1A002D,#2E004A); }
+    .cat-bg-act    { background: linear-gradient(135deg,#002D1A,#004A2E); }
+    .cat-bg-shop   { background: linear-gradient(135deg,#2D001A,#4A002E); }
+    .cat-bg-health { background: linear-gradient(135deg,#002D2D,#004A4A); }
+    .cat-bg-other  { background: linear-gradient(135deg,#1A1A2D,#2E2E4A); }
+
+    /* ─── Receipt OCR ──────────────────────────────────────────────────────── */
+    .ocr-scan-zone {
+      background: linear-gradient(135deg, rgba(255,168,40,0.06), rgba(7,16,31,0));
+      border: 2px dashed rgba(255,168,40,0.25);
+      border-radius: 16px; padding: 18px 14px;
+      text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative; overflow: hidden;
+    }
+    .ocr-scan-zone:hover, .ocr-scan-zone:active { border-color: rgba(255,168,40,0.55); background: rgba(255,168,40,0.08); }
+    .ocr-scan-zone input[type="file"] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+    .ocr-scan-icon { font-size:32px; line-height:1; margin-bottom:6px; }
+    .ocr-scan-label { font-size:13px; font-weight:600; color:var(--amber); }
+    .ocr-scan-sub { font-size:11px; color:var(--text-dim); margin-top:3px; }
+
+    .ocr-analyzing {
+      border: 1px solid rgba(255,168,40,0.2); border-radius:16px; overflow:hidden;
+      animation: fadeUp .25s ease;
+    }
+    .ocr-img-strip { position:relative; }
+    .ocr-img-strip img { width:100%; max-height:180px; object-fit:cover; display:block; }
+    .ocr-scan-line {
+      position:absolute; top:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg, transparent, var(--amber), transparent);
+      animation: scanLine 1.4s ease-in-out infinite;
+    }
+    @keyframes scanLine { 0%{top:0;opacity:1} 100%{top:100%;opacity:0} }
+    .ocr-analyzing-label {
+      padding:12px 14px; font-size:12px; color:var(--text-dim);
+      background:rgba(255,168,40,0.04); display:flex; align-items:center; gap:8px;
+    }
+
+    .ocr-result {
+      border: 1px solid rgba(255,168,40,0.25); border-radius:16px;
+      overflow:hidden; animation: fadeUp .3s ease;
+    }
+    .ocr-result-img { width:100%; max-height:130px; object-fit:cover; display:block; }
+    .ocr-result-body { padding:14px; }
+    .ocr-result-title {
+      font-family:'Playfair Display',serif; font-size:14px; color:var(--amber);
+      margin-bottom:10px; display:flex; align-items:center; gap:6px;
+    }
+    .ocr-field { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .ocr-field:last-child { border-bottom:none; }
+    .ocr-field-label { font-size:11px; color:var(--text-dim); width:70px; flex-shrink:0; text-transform:uppercase; letter-spacing:.5px; }
+    .ocr-field-val { font-size:13px; font-weight:500; flex:1; }
+    .ocr-field-conf {
+      width:6px; height:6px; border-radius:50%; flex-shrink:0;
+    }
+    .ocr-conf-high { background:#4DB87A; }
+    .ocr-conf-mid  { background:#FFA828; }
+    .ocr-conf-low  { background:#FF5C5C; }
+    .ocr-items-list { font-size:11px; color:var(--text-dim); margin-top:4px; line-height:1.7; }
+    .ocr-result-footer { display:flex; gap:8px; padding:12px 14px; background:rgba(255,168,40,0.04); border-top:1px solid rgba(255,168,40,0.1); }
+    .ocr-error {
+      background:rgba(255,92,92,0.07); border:1px solid rgba(255,92,92,0.2);
+      border-radius:12px; padding:12px 14px; font-size:13px;
+      color:rgba(255,92,92,0.85); display:flex; align-items:center; gap:8px;
+      animation: fadeUp .25s ease;
+    }
+
+    /* ─── Attachments & Docs ───────────────────────────────────────────────── */
+    .attach-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 7px; padding: 3px 8px; font-size: 11px; color: var(--text-dim);
+      cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    }
+    .attach-btn:active, .attach-btn:hover { background: rgba(255,168,40,0.1); border-color: rgba(255,168,40,0.25); color: var(--amber); }
+    .attach-btn.has-docs { border-color: rgba(255,168,40,0.3); color: var(--amber); background: rgba(255,168,40,0.07); }
+
+    .doc-thumb-strip { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .doc-thumb {
+      width:56px; height:56px; border-radius:10px; object-fit:cover;
+      border: 1px solid rgba(255,255,255,0.08); cursor:pointer;
+      transition: transform 0.15s;
+    }
+    .doc-thumb:active { transform: scale(0.94); }
+    .doc-file-thumb {
+      width:56px; height:56px; border-radius:10px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:3px; cursor:pointer; transition: all 0.15s;
+    }
+    .doc-file-thumb:active { transform: scale(0.94); }
+    .doc-file-icon { font-size:22px; line-height:1; }
+    .doc-file-ext { font-size:9px; color:var(--text-dim); font-weight:700; text-transform:uppercase; }
+
+    /* Viewer modal */
+    .viewer-overlay {
+      position: fixed; inset:0; z-index:3500;
+      background: rgba(0,0,0,0.92); backdrop-filter:blur(8px);
+      display:flex; flex-direction:column;
+      animation: fadeIn 0.15s ease;
+    }
+    .viewer-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: calc(12px + var(--safe-top)) 16px 12px;
+      background: rgba(7,16,31,0.9);
+      flex-shrink:0;
+    }
+    .viewer-title { font-family:'Playfair Display',serif; font-size:15px; color:var(--amber); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .viewer-body { flex:1; overflow-y:auto; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .viewer-img { max-width:100%; max-height:100%; border-radius:12px; object-fit:contain; }
+    .viewer-footer { padding:12px 16px calc(12px + var(--safe-bottom)); background:rgba(7,16,31,0.9); display:flex; gap:8px; flex-shrink:0; }
+
+    /* Docs vault tab */
+    .doc-vault-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius:16px; padding:14px; margin-bottom:10px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .doc-vault-card:active { transform: scale(0.98); }
+    .doc-vault-hdr { display:flex; align-items:center; gap:10px; }
+    .doc-vault-icon { font-size:26px; flex-shrink:0; }
+    .doc-vault-info { flex:1; min-width:0; }
+    .doc-vault-name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .doc-vault-meta { font-size:11px; color:var(--text-dim); margin-top:2px; }
+    .doc-vault-preview { margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; }
+
+    /* Attach area inside forms */
+    .attach-upload-zone {
+      border: 2px dashed rgba(255,168,40,0.18); border-radius:12px;
+      padding:14px; text-align:center; position:relative;
+      overflow:hidden; transition:border-color 0.2s; cursor:pointer;
+    }
+    .attach-upload-zone:hover { border-color: rgba(255,168,40,0.38); }
+    .attach-upload-zone input[type="file"] {
+      position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+    }
+    .attach-upload-label { font-size:12px; color:var(--text-dim); display:flex; align-items:center; justify-content:center; gap:8px; }
+
+    /* Doc category chips */
+    .doc-cat-chip {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:5px 12px; border-radius:99px; font-size:12px; font-weight:500;
+      cursor:pointer; border:1px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.04); color:rgba(230,217,194,0.6);
+      transition:all 0.15s; user-select:none;
+    }
+    .doc-cat-chip.on { background:rgba(255,168,40,0.14); border-color:rgba(255,168,40,0.45); color:var(--amber); font-weight:600; }
+
+    /* Dashboard docs snapshot */
+    .doc-mini { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .doc-mini:last-child { border-bottom:none; }
+
+    /* ─── Trip Brief ───────────────────────────────────────────────────────── */
+    .brief-modal-overlay {
+      position: fixed; inset: 0; z-index: 4000;
+      background: rgba(4,9,18,0.97);
+      display: flex; flex-direction: column;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      animation: fadeIn .25s ease;
+    }
+    .brief-modal-overlay::-webkit-scrollbar { display:none; }
+
+    .brief-hero {
+      position: relative; overflow: hidden; flex-shrink: 0;
+      padding: calc(22px + var(--safe-top)) 24px 28px;
+      background: linear-gradient(160deg, #0C1B34 0%, #0A0A20 60%, #07101F 100%);
+    }
+    .brief-hero::after {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background: radial-gradient(ellipse 80% 60% at 80% 20%, rgba(255,168,40,.12), transparent);
+    }
+    .brief-hero-eyebrow {
+      font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+      color:rgba(255,168,40,.6); margin-bottom:8px;
+    }
+    .brief-hero-title {
+      font-family:'Playfair Display',serif; font-size:28px; font-weight:700;
+      color:#fff; line-height:1.2; margin-bottom:6px;
+    }
+    .brief-hero-dest {
+      font-size:15px; color:rgba(255,255,255,.55); display:flex; align-items:center; gap:7px;
+    }
+    .brief-hero-weather {
+      position:absolute; top:calc(22px + var(--safe-top)); right:22px;
+      text-align:center; z-index:1;
+    }
+    .brief-hero-weather-icon { font-size:38px; line-height:1; }
+    .brief-hero-weather-temp { font-family:'Playfair Display',serif; font-size:22px; color:var(--amber); font-weight:700; }
+
+    .brief-body { padding: 20px 20px calc(20px + var(--safe-bottom)); flex:1; }
+
+    .brief-section {
+      background: rgba(255,255,255,0.033);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px; padding: 16px;
+      margin-bottom: 12px; animation: fadeUp .35s ease both;
+    }
+    .brief-section:nth-child(1){animation-delay:.05s}
+    .brief-section:nth-child(2){animation-delay:.10s}
+    .brief-section:nth-child(3){animation-delay:.15s}
+    .brief-section:nth-child(4){animation-delay:.20s}
+    .brief-section:nth-child(5){animation-delay:.25s}
+    .brief-section:nth-child(6){animation-delay:.30s}
+
+    .brief-section-hdr {
+      display:flex; align-items:center; gap:9px; margin-bottom:11px;
+    }
+    .brief-section-icon { font-size:20px; flex-shrink:0; }
+    .brief-section-title {
+      font-family:'Playfair Display',serif; font-size:14px; color:var(--amber); font-weight:600;
+    }
+
+    .brief-weather-row {
+      display:flex; gap:10px; margin-bottom:10px;
+    }
+    .brief-weather-chip {
+      background: rgba(91,164,255,.1); border:1px solid rgba(91,164,255,.2);
+      border-radius:10px; padding:8px 12px; text-align:center; flex:1;
+    }
+    .brief-weather-chip-val { font-size:15px; font-weight:700; color:#5BA4FF; }
+    .brief-weather-chip-lbl { font-size:10px; color:var(--text-dim); margin-top:2px; text-transform:uppercase; letter-spacing:.5px; }
+    .brief-weather-tip { font-size:13px; color:rgba(230,217,194,.75); line-height:1.6; }
+
+    .brief-custom-item { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .brief-custom-item:last-child { border-bottom:none; }
+    .brief-custom-emoji { font-size:18px; flex-shrink:0; margin-top:1px; }
+    .brief-custom-title { font-size:13px; font-weight:600; margin-bottom:2px; }
+    .brief-custom-detail { font-size:12px; color:var(--text-dim); line-height:1.55; }
+
+    .brief-currency-rate {
+      font-family:'Playfair Display',serif; font-size:22px; color:var(--amber);
+      font-weight:700; margin-bottom:6px;
+    }
+    .brief-currency-tip { font-size:13px; color:rgba(230,217,194,.75); line-height:1.6; }
+
+    .brief-step { display:flex; gap:12px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .brief-step:last-child { border-bottom:none; }
+    .brief-step-num {
+      width:24px; height:24px; border-radius:50%; flex-shrink:0;
+      background:rgba(255,168,40,.15); border:1px solid rgba(255,168,40,.3);
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:800; color:var(--amber);
+    }
+    .brief-step-action { font-size:13px; font-weight:600; margin-bottom:2px; }
+    .brief-step-detail { font-size:12px; color:var(--text-dim); line-height:1.55; }
+
+    .brief-phrase-box {
+      background:rgba(255,168,40,.06); border:1px solid rgba(255,168,40,.15);
+      border-radius:12px; padding:14px; text-align:center;
+    }
+    .brief-phrase-text { font-family:'Playfair Display',serif; font-size:22px; color:var(--amber); margin-bottom:4px; }
+    .brief-phrase-pronunc { font-size:12px; color:var(--text-dim); margin-bottom:2px; }
+    .brief-phrase-meaning { font-size:13px; font-weight:600; }
+
+    .brief-insider {
+      background:linear-gradient(135deg,rgba(255,168,40,.08),rgba(7,16,31,0));
+      border:1px solid rgba(255,168,40,.2); border-radius:12px; padding:14px;
+      font-size:13px; color:rgba(230,217,194,.85); line-height:1.7;
+      position:relative; overflow:hidden;
+    }
+    .brief-insider::before { content:'💡'; position:absolute; right:12px; bottom:8px; font-size:28px; opacity:.12; }
+
+    .brief-footer {
+      padding: 0 20px calc(20px + var(--safe-bottom));
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .brief-dismiss-btn {
+      background:linear-gradient(135deg,#FFA828,#E07C00); color:#07101F;
+      border:none; border-radius:14px; padding:14px; font-family:'DM Sans',sans-serif;
+      font-size:15px; font-weight:700; cursor:pointer; width:100%; letter-spacing:.2px;
+    }
+    .brief-regen-btn {
+      background:transparent; border:1px solid rgba(255,255,255,.1); border-radius:12px;
+      padding:10px; color:var(--text-dim); font-size:12px; cursor:pointer;
+      font-family:'DM Sans',sans-serif; transition:background .15s;
+    }
+    .brief-regen-btn:hover { background:rgba(255,255,255,.05); }
+
+    /* Compact brief card on dashboard */
+    .brief-dash-card {
+      background:linear-gradient(135deg,rgba(255,168,40,.07),rgba(7,16,31,0));
+      border:1px solid rgba(255,168,40,.2); border-radius:18px;
+      padding:16px; margin-bottom:12px; cursor:pointer;
+      transition:border-color .15s;
+    }
+    .brief-dash-card:hover { border-color:rgba(255,168,40,.4); }
+    .brief-dash-hdr { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .brief-dash-icon { font-size:24px; }
+    .brief-dash-title { font-family:'Playfair Display',serif; font-size:15px; color:var(--amber); font-weight:700; flex:1; }
+    .brief-dash-chips { display:flex; gap:7px; flex-wrap:wrap; }
+    .brief-dash-chip {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+      border-radius:8px; padding:5px 10px; font-size:11px; color:rgba(230,217,194,.65);
+    }
+
+    /* Loading state */
+    .brief-loading-hero {
+      padding: calc(22px + var(--safe-top)) 24px 28px;
+      background:linear-gradient(160deg,#0C1B34,#07101F);
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .brief-loading-shimmer {
+      border-radius:10px;
+      background:linear-gradient(90deg,rgba(255,168,40,.04) 25%,rgba(255,168,40,.1) 50%,rgba(255,168,40,.04) 75%);
+      background-size:200% 100%; animation:shimmer 1.4s infinite;
+    }
+
     /* ─── Dashboard ────────────────────────────────────────────────────────── */
     .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     .dash-card {
@@ -572,18 +1175,7 @@
       background: linear-gradient(135deg,rgba(255,168,40,0.08),rgba(7,16,31,0));
       border: 1px solid rgba(255,168,40,0.18); border-radius:18px; padding:16px; margin-bottom:12px;
     }
-    .today-activity {
-      display:flex; align-items:center; gap:10px;
-      padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.04);
-    }
-    .today-activity:last-child { border-bottom:none; }
-    .today-act-check {
-      width:22px; height:22px; border-radius:6px; flex-shrink:0;
-      border:2px solid rgba(255,168,40,0.3); display:flex; align-items:center;
-      justify-content:center; transition:all 0.15s; cursor:pointer;
-    }
-    .today-act-check.on { background:var(--amber); border-color:var(--amber); }
-    .today-act-check.on::after { content:'✓'; color:#07101F; font-size:11px; font-weight:900; }
+    .today-activity { /* layout now owned by SwipeableActivity */ }
     .today-act-text { font-size:13px; flex:1; line-height:1.4; }
     .today-act-text.done { text-decoration:line-through; color:var(--text-dim); }
     .act-quick-btns { display:flex; gap:5px; flex-shrink:0; }
@@ -659,6 +1251,89 @@
     button, .check-item, .mood-btn, .occ-chip, .person-chip, .suggest-chip,
     .tab-btn, .act-q-btn, .quick-action-btn, .dash-card { min-height:36px; }
     .tab-btn { min-height:52px; }
+
+    /* ─── Packing Re-check ─────────────────────────────────────────────────── */
+    .recheck-card {
+      background: linear-gradient(135deg, rgba(91,164,255,0.07) 0%, rgba(7,16,31,0) 100%);
+      border: 1px solid rgba(91,164,255,0.22);
+      border-radius: 18px; padding: 16px; margin-bottom: 12px;
+      position: relative; overflow: hidden;
+    }
+    .recheck-card::before {
+      content:'🌤️'; position:absolute; right:14px; top:10px;
+      font-size:32px; opacity:.15; pointer-events:none;
+    }
+    .recheck-alert {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(91,164,255,0.1); border: 1px solid rgba(91,164,255,0.25);
+      border-radius: 12px; padding: 10px 14px; margin-bottom: 14px;
+      cursor: pointer; transition: background .15s;
+    }
+    .recheck-alert:hover { background: rgba(91,164,255,0.16); }
+    .recheck-alert-icon { font-size: 22px; flex-shrink: 0; }
+    .recheck-alert-text { flex: 1; }
+    .recheck-alert-title { font-size: 13px; font-weight: 600; color: #5BA4FF; }
+    .recheck-alert-sub   { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Forecast mini-strip */
+    .forecast-strip { display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin:10px 0 14px; -webkit-overflow-scrolling:touch; }
+    .forecast-strip::-webkit-scrollbar { display:none; }
+    .forecast-day {
+      flex-shrink:0; width:52px; background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07); border-radius:10px;
+      padding:8px 4px; text-align:center;
+    }
+    .forecast-day.today { border-color:rgba(91,164,255,0.35); background:rgba(91,164,255,0.08); }
+    .forecast-day-label { font-size:10px; color:var(--text-dim); margin-bottom:4px; }
+    .forecast-day-icon  { font-size:18px; line-height:1; margin-bottom:4px; }
+    .forecast-day-temp  { font-size:11px; font-weight:600; color:var(--amber); }
+    .forecast-day-rain  { font-size:9px;  color:rgba(91,164,255,.7); margin-top:2px; }
+
+    /* Re-check result sections */
+    .recheck-section { margin-bottom: 14px; }
+    .recheck-section-hdr {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; margin-bottom: 8px;
+    }
+    .recheck-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 12px; border-radius: 11px; margin-bottom: 6px;
+      font-size: 13px; transition: background .15s;
+    }
+    .recheck-item-gap {
+      background: rgba(255,92,92,0.07); border: 1px solid rgba(255,92,92,0.18);
+    }
+    .recheck-item-overkill {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    }
+    .recheck-item-ok {
+      background: rgba(77,184,122,0.07); border: 1px solid rgba(77,184,122,0.15);
+    }
+    .recheck-item-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .recheck-item-body { flex: 1; }
+    .recheck-item-name { font-weight: 500; line-height: 1.4; }
+    .recheck-item-reason { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.5; }
+    .recheck-add-btn {
+      background: rgba(255,92,92,0.12); border: 1px solid rgba(255,92,92,0.25);
+      border-radius: 7px; padding: 3px 9px; font-size: 11px; font-weight: 600;
+      color: #FF5C5C; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      transition: all .15s; align-self: flex-start; margin-top: 2px;
+    }
+    .recheck-add-btn.added { background:rgba(77,184,122,0.12); border-color:rgba(77,184,122,0.25); color:#4DB87A; }
+    .recheck-add-btn:active { transform: scale(.95); }
+
+    .weather-summary-box {
+      background: rgba(91,164,255,0.07); border: 1px solid rgba(91,164,255,0.18);
+      border-radius: 12px; padding: 10px 14px; margin-bottom: 14px;
+      font-size: 12px; color: rgba(230,217,194,0.75); line-height: 1.7;
+    }
+    .recheck-loading { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+    .recheck-shimmer {
+      background: linear-gradient(90deg,rgba(91,164,255,0.04) 25%,rgba(91,164,255,0.1) 50%,rgba(91,164,255,0.04) 75%);
+      background-size:200% 100%; animation:shimmer 1.4s infinite;
+      border-radius:10px;
+    }
 
     /* ─── Smart Pack ───────────────────────────────────────────────────────── */
     .smart-pack-card {
@@ -965,25 +1640,480 @@ const LS = {
   set: (k, v)  => { try { localStorage.setItem(k, JSON.stringify(v)); } catch{} },
 };
 
+/* ── ATTACHMENT UTILITIES ─────────────────────────────────────────────────── */
+
+// Compress image file to base64 (max 800px, jpeg 0.78)
+const compressImage = (file) => new Promise((resolve) => {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width * ratio; canvas.height = img.height * ratio;
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve({ data: canvas.toDataURL("image/jpeg", 0.78), type: "image/jpeg", name: file.name });
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Read file as base64 (for PDFs / non-image docs)
+const readFileAsBase64 = (file) => new Promise((resolve) => {
+  const reader = new FileReader();
+  reader.onload = (ev) => resolve({ data: ev.target.result, type: file.type, name: file.name });
+  reader.readAsDataURL(file);
+});
+
+const isImage = (type) => type && type.startsWith("image/");
+const isPDF   = (type) => type === "application/pdf";
+const fileExt = (name) => (name||"").split(".").pop().toUpperCase().slice(0,4);
+const fileIcon = (type) => isPDF(type) ? "📄" : isImage(type) ? "🖼️" : "📎";
+const formatBytes = (str) => { const b = Math.round(str.length * 0.75); return b > 1048576 ? `${(b/1048576).toFixed(1)} MB` : `${Math.round(b/1024)} KB`; };
+
+// Process uploaded files → attachment objects
+const processFiles = async (fileList) => {
+  const results = [];
+  for (const file of Array.from(fileList)) {
+    if (file.size > 10 * 1024 * 1024) continue; // skip >10MB
+    const att = isImage(file.type) ? await compressImage(file) : await readFileAsBase64(file);
+    results.push({ id: Date.now() + Math.random(), ...att, uploadedAt: new Date().toISOString() });
+  }
+  return results;
+};
+
+/* ── ATTACHMENT INLINE COMPONENT ──────────────────────────────────────────── */
+// Inline attachment upload strip used inside expense rows / activity rows
+function AttachStrip({ attachments = [], onAdd, onRemove, onView, compact = false }) {
+  const fileRef = useRef(null);
+
+  const handleFiles = async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+    const processed = await processFiles(files);
+    if (processed.length) onAdd(processed);
+    e.target.value = "";
+  };
+
+  return (
+    <div>
+      <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center", marginTop: compact ? 4 : 8 }}>
+        {attachments.map(att => (
+          isImage(att.type)
+            ? <img key={att.id} src={att.data} className="doc-thumb" alt={att.name} onClick={() => onView(att)} />
+            : <div key={att.id} className="doc-file-thumb" onClick={() => onView(att)}>
+                <div className="doc-file-icon">{fileIcon(att.type)}</div>
+                <div className="doc-file-ext">{fileExt(att.name)}</div>
+              </div>
+        ))}
+        {/* Upload trigger */}
+        <div className="attach-btn" style={{ minHeight:compact?28:36, padding: compact?"4px 8px":"6px 10px" }}
+          onClick={() => fileRef.current?.click()}>
+          📎 {attachments.length > 0 ? `+` : "Attach"}
+          <input ref={fileRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv"
+            style={{ display:"none" }} onChange={handleFiles} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── VIEWER MODAL ─────────────────────────────────────────────────────────── */
+function ViewerModal({ att, onClose, onDelete }) {
+  if (!att) return null;
+  return (
+    <div className="viewer-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="viewer-header">
+        <div className="viewer-title">{att.name}</div>
+        <div style={{ display:"flex", gap:8 }}>
+          <a href={att.data} download={att.name}
+            style={{ background:"rgba(255,168,40,0.1)", border:"1px solid rgba(255,168,40,0.2)", borderRadius:9, padding:"6px 12px", fontSize:12, color:"var(--amber)", textDecoration:"none", fontWeight:600 }}>
+            ⬇ Save
+          </a>
+          {onDelete && <button className="btn-del" style={{ fontSize:18, color:"rgba(255,92,92,0.6)" }} onClick={onDelete}>🗑</button>}
+          <button className="btn-del" style={{ fontSize:22 }} onClick={onClose}>✕</button>
+        </div>
+      </div>
+      <div className="viewer-body">
+        {isImage(att.type)
+          ? <img src={att.data} className="viewer-img" alt={att.name} />
+          : isPDF(att.type)
+            ? <div style={{ textAlign:"center" }}>
+                <div style={{ fontSize:64, marginBottom:16 }}>📄</div>
+                <div style={{ color:"var(--text-dim)", fontSize:14, marginBottom:20 }}>{att.name}</div>
+                <a href={att.data} download={att.name} className="btn" style={{ textDecoration:"none", display:"inline-block" }}>
+                  ⬇ Download PDF
+                </a>
+              </div>
+            : <div style={{ textAlign:"center" }}>
+                <div style={{ fontSize:64, marginBottom:16 }}>📎</div>
+                <div style={{ color:"var(--text-dim)", fontSize:14, marginBottom:20 }}>{att.name}</div>
+                <a href={att.data} download={att.name} className="btn" style={{ textDecoration:"none", display:"inline-block" }}>
+                  ⬇ Download File
+                </a>
+              </div>
+        }
+      </div>
+      <div className="viewer-footer">
+        <div style={{ fontSize:11, color:"var(--text-dim)", flex:1 }}>
+          {formatBytes(att.data)} · {new Date(att.uploadedAt).toLocaleDateString()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── DOCS VAULT TAB ───────────────────────────────────────────────────────── */
+const DOC_CATS = [
+  { id:"passport",  icon:"🛂", label:"Passport / Visa" },
+  { id:"insurance", icon:"🏥", label:"Insurance" },
+  { id:"flights",   icon:"✈️", label:"Flights" },
+  { id:"hotel",     icon:"🏨", label:"Hotels" },
+  { id:"receipt",   icon:"🧾", label:"Receipts" },
+  { id:"ticket",    icon:"🎟️", label:"Tickets / Bookings" },
+  { id:"map",       icon:"🗺️", label:"Maps / Guides" },
+  { id:"other",     icon:"📎", label:"Other" },
+];
+
+function DocsTab({ docs, saveDocs, expenses, itinerary, navigateTo }) {
+  const [filterCat, setFilterCat] = useState("all");
+  const [viewingAtt, setViewingAtt] = useState(null);
+  const [addingDoc,  setAddingDoc]  = useState(false);
+  const [newDocForm, setNewDocForm] = useState({ name:"", cat:"other", linkedTo:"none", linkedId:"" });
+  const fileRef = useRef(null);
+
+  // All activities flat list for linking
+  const allActivities = itinerary.flatMap(d => d.activities.map(a => ({ ...a, dayLabel: d.label, dayId: d.id })));
+
+  const filtered = filterCat === "all" ? docs : docs.filter(d => d.cat === filterCat);
+
+  const handleUpload = async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+    const attachments = await processFiles(files);
+    const newDocs = attachments.map(att => ({
+      id: att.id,
+      name: newDocForm.name || att.name,
+      cat: newDocForm.cat,
+      linkedTo: newDocForm.linkedTo,
+      linkedId: newDocForm.linkedId,
+      ...att,
+      uploadedAt: att.uploadedAt,
+    }));
+    saveDocs([...docs, ...newDocs]);
+    setAddingDoc(false);
+    setNewDocForm({ name:"", cat:"other", linkedTo:"none", linkedId:"" });
+    e.target.value = "";
+  };
+
+  const deleteDoc = (id) => saveDocs(docs.filter(d => d.id !== id));
+
+  const getLinkedLabel = (doc) => {
+    if (doc.linkedTo === "expense") {
+      const exp = expenses.find(e => String(e.id) === String(doc.linkedId));
+      return exp ? `💰 ${exp.desc}` : null;
+    }
+    if (doc.linkedTo === "activity") {
+      const act = allActivities.find(a => String(a.id) === String(doc.linkedId));
+      return act ? `📅 ${act.dayLabel} — ${act.text}` : null;
+    }
+    return null;
+  };
+
+  const catCounts = {};
+  docs.forEach(d => { catCounts[d.cat] = (catCounts[d.cat] || 0) + 1; });
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="card" style={{ marginBottom:12 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom:12 }}>
+          <div className="card-title" style={{ marginBottom:0 }}>🗄️ Document Vault</div>
+          <button className="btn btn-sm" onClick={() => setAddingDoc(true)}>+ Upload</button>
+        </div>
+        <div style={{ fontSize:13, color:"var(--text-dim)", lineHeight:1.6 }}>
+          {docs.length === 0
+            ? "Store passports, visas, bookings, receipts — all in one place."
+            : `${docs.length} document${docs.length !== 1 ? "s" : ""} stored`}
+        </div>
+        {/* Category filter */}
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginTop:12 }}>
+          <div className={`doc-cat-chip${filterCat==="all"?" on":""}`} onClick={() => setFilterCat("all")}>
+            All {docs.length > 0 && `(${docs.length})`}
+          </div>
+          {DOC_CATS.filter(c => catCounts[c.id]).map(c => (
+            <div key={c.id} className={`doc-cat-chip${filterCat===c.id?" on":""}`} onClick={() => setFilterCat(c.id)}>
+              {c.icon} {c.label} ({catCounts[c.id]})
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Upload Form */}
+      {addingDoc && (
+        <div className="card" style={{ border:"1px solid rgba(255,168,40,0.2)" }}>
+          <div className="card-title">📎 Upload Document</div>
+          <div className="flex flex-col gap-8">
+            <input className="input" placeholder="Document name (optional)" value={newDocForm.name}
+              onChange={e => setNewDocForm(f => ({...f, name: e.target.value}))} />
+
+            <div>
+              <div className="card-title-small">Category</div>
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginTop:4 }}>
+                {DOC_CATS.map(c => (
+                  <div key={c.id} className={`doc-cat-chip${newDocForm.cat===c.id?" on":""}`}
+                    onClick={() => setNewDocForm(f => ({...f, cat:c.id}))}>
+                    {c.icon} {c.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="card-title-small">Link to (optional)</div>
+              <select className="input" value={newDocForm.linkedTo}
+                onChange={e => setNewDocForm(f => ({...f, linkedTo: e.target.value, linkedId:""}))}>
+                <option value="none">No link</option>
+                <option value="expense">An expense</option>
+                <option value="activity">An activity</option>
+                <option value="trip">The whole trip</option>
+              </select>
+            </div>
+
+            {newDocForm.linkedTo === "expense" && expenses.length > 0 && (
+              <select className="input" value={newDocForm.linkedId}
+                onChange={e => setNewDocForm(f => ({...f, linkedId: e.target.value}))}>
+                <option value="">— choose expense —</option>
+                {[...expenses].reverse().map(exp => (
+                  <option key={exp.id} value={exp.id}>{exp.desc} · {new Date(exp.date||"").toLocaleDateString()}</option>
+                ))}
+              </select>
+            )}
+
+            {newDocForm.linkedTo === "activity" && allActivities.length > 0 && (
+              <select className="input" value={newDocForm.linkedId}
+                onChange={e => setNewDocForm(f => ({...f, linkedId: e.target.value}))}>
+                <option value="">— choose activity —</option>
+                {allActivities.map(a => (
+                  <option key={a.id} value={a.id}>{a.dayLabel} — {a.text}</option>
+                ))}
+              </select>
+            )}
+
+            <div className="attach-upload-zone" onClick={() => fileRef.current?.click()}>
+              <input ref={fileRef} type="file" multiple
+                accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx"
+                style={{ display:"none" }} onChange={handleUpload} />
+              <div className="attach-upload-label">
+                <span style={{ fontSize:24 }}>📎</span>
+                <span>Tap to pick files<br/><span style={{ fontSize:10 }}>Images, PDFs, docs — up to 10 MB each</span></span>
+              </div>
+            </div>
+
+            <button className="btn-ghost" onClick={() => setAddingDoc(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Doc list */}
+      {filtered.length === 0 ? (
+        <div className="empty">
+          <div className="empty-icon">📁</div>
+          <div className="empty-msg">{filterCat === "all" ? "No documents yet.\nTap + Upload to add your first." : "No documents in this category."}</div>
+        </div>
+      ) : filtered.map(doc => {
+        const linkedLabel = getLinkedLabel(doc);
+        const catObj = DOC_CATS.find(c => c.id === doc.cat) || DOC_CATS[DOC_CATS.length - 1];
+        return (
+          <div key={doc.id} className="doc-vault-card" onClick={() => setViewingAtt(doc)}>
+            <div className="doc-vault-hdr">
+              <div className="doc-vault-icon">{isImage(doc.type) ? "🖼️" : catObj.icon}</div>
+              <div className="doc-vault-info">
+                <div className="doc-vault-name">{doc.name}</div>
+                <div className="doc-vault-meta">
+                  {catObj.label} · {formatBytes(doc.data)}
+                  {linkedLabel && <span style={{ color:"#5BA4FF", marginLeft:6 }}>🔗 {linkedLabel}</span>}
+                </div>
+              </div>
+              <button className="btn-del" onClick={e => { e.stopPropagation(); deleteDoc(doc.id); }}>✕</button>
+            </div>
+            {isImage(doc.type) && (
+              <img src={doc.data} alt={doc.name}
+                style={{ width:"100%", height:100, objectFit:"cover", borderRadius:10, marginTop:10, border:"1px solid rgba(255,255,255,0.06)" }} />
+            )}
+          </div>
+        );
+      })}
+
+      {/* Viewer */}
+      {viewingAtt && (
+        <ViewerModal
+          att={viewingAtt}
+          onClose={() => setViewingAtt(null)}
+          onDelete={() => { deleteDoc(viewingAtt.id); setViewingAtt(null); }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ── SWIPEABLE ACTIVITY ───────────────────────────────────────────────────── */
+function SwipeableActivity({ act, dayId, onToggle, onDelete, onExpense, onMemory, isFirst }) {
+  const THRESHOLD  = 72;   // px to trigger action
+  const MAX_DRAG   = 115;  // max px drag before clamping
+  const MIN_INTENT = 8;    // px before we commit to horizontal swipe
+
+  const [dx,    setDx]    = useState(0);
+  const [phase, setPhase] = useState('idle'); // idle | drag | snap | done-flash | delete-flash | collapsing
+  const touch  = useRef({ x0:0, y0:0, decided:false, horiz:false });
+  const wrapRef = useRef(null);
+
+  const clamp = (v) => Math.max(-MAX_DRAG, Math.min(MAX_DRAG, v));
+  const rProg = Math.min(1, Math.max(0,  dx / THRESHOLD));  // right progress 0→1
+  const lProg = Math.min(1, Math.max(0, -dx / THRESHOLD));  // left  progress 0→1
+
+  // ── Touch handlers ──────────────────────────────────────────────────────
+  const onStart = (e) => {
+    const t = e.touches[0];
+    touch.current = { x0: t.clientX, y0: t.clientY, decided: false, horiz: false };
+    setPhase('drag');
+  };
+
+  const onMove = (e) => {
+    const t = e.touches[0];
+    const diffX = t.clientX - touch.current.x0;
+    const diffY = t.clientY - touch.current.y0;
+    // Decide direction once past MIN_INTENT
+    if (!touch.current.decided && Math.hypot(diffX, diffY) > MIN_INTENT) {
+      touch.current.decided = true;
+      touch.current.horiz   = Math.abs(diffX) >= Math.abs(diffY);
+    }
+    if (!touch.current.decided) return;
+    if (!touch.current.horiz) { setPhase('idle'); return; }
+    e.preventDefault();
+    setDx(clamp(diffX));
+  };
+
+  const onEnd = () => {
+    const cur = clamp(dx);
+    if (cur > THRESHOLD) {
+      // ── right swipe: toggle done ───────────────────────────────────────
+      setPhase('done-flash'); setDx(0);
+      setTimeout(() => { onToggle(); setPhase('idle'); }, 320);
+    } else if (cur < -THRESHOLD) {
+      // ── left swipe: delete ────────────────────────────────────────────
+      setPhase('collapsing'); setDx(0);
+      if (wrapRef.current) {
+        wrapRef.current.style.maxHeight = wrapRef.current.offsetHeight + 'px';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (wrapRef.current) wrapRef.current.style.maxHeight = '0px';
+          });
+        });
+      }
+      setTimeout(() => onDelete(), 340);
+    } else {
+      // ── snap back ─────────────────────────────────────────────────────
+      setDx(0); setPhase('snap');
+      setTimeout(() => setPhase('idle'), 280);
+    }
+    touch.current.decided = false;
+  };
+
+  // ── Mouse fallback (desktop testing) ────────────────────────────────────
+  const mouse = useRef({ down:false, x0:0 });
+  const onMouseDown = (e) => { mouse.current = { down:true, x0:e.clientX }; setPhase('drag'); };
+  const onMouseMove = (e) => {
+    if (!mouse.current.down) return;
+    setDx(clamp(e.clientX - mouse.current.x0));
+  };
+  const onMouseUp = () => { if (!mouse.current.down) return; mouse.current.down=false; onEnd(); };
+
+  const isDone       = act.done;
+  const isTransition = phase !== 'drag';
+  const flashClass   = phase==='done-flash' ? ' flash-done' : phase==='collapsing'||phase==='delete-flash' ? ' flash-delete' : '';
+
+  return (
+    <div
+      ref={wrapRef}
+      className={`swipe-wrap${phase==='collapsing'?' collapsing':''}`}
+      style={{ maxHeight: phase==='collapsing' ? undefined : 'none',
+               overflow: 'hidden',
+               transition: phase==='collapsing' ? 'max-height 0.32s ease, opacity 0.22s ease' : undefined,
+               opacity: phase==='collapsing' ? 0 : 1 }}
+    >
+      {/* ── Background layers ── */}
+      <div className="swipe-bg swipe-bg-right" style={{ opacity: rProg }}>
+        <div className="swipe-bg-icon" style={{ transform:`scale(${0.65+rProg*0.5})` }}>
+          {isDone ? '↩️' : '✅'}
+        </div>
+        <span className="swipe-bg-label" style={{ color:'#4DB87A', marginLeft:8 }}>
+          {isDone ? 'Undo' : 'Done'}
+        </span>
+      </div>
+      <div className="swipe-bg swipe-bg-left" style={{ opacity: lProg }}>
+        <span className="swipe-bg-label" style={{ color:'#FF5C5C', marginRight:8 }}>Delete</span>
+        <div className="swipe-bg-icon" style={{ transform:`scale(${0.65+lProg*0.5})` }}>🗑️</div>
+      </div>
+
+      {/* ── Content row ── */}
+      <div
+        className={`swipe-content${isTransition?' has-transition':''}${flashClass}`}
+        style={{ transform: `translateX(${phase==='drag' ? dx : 0}px)` }}
+        onTouchStart={onStart}
+        onTouchMove={onMove}
+        onTouchEnd={onEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+      >
+        {/* Status dot */}
+        <div className={`swipe-status-dot${isDone?' done':''}`}
+          style={{ cursor:'pointer' }}
+          onClick={(e) => { e.stopPropagation(); onToggle(); }}>
+          {isDone && '✓'}
+        </div>
+
+        {/* Text */}
+        <span className={`swipe-act-text${isDone?' done':''}`}
+          onClick={onToggle}>{act.text}</span>
+
+        {/* Quick actions — only visible when not swiping */}
+        <div className="act-quick-btns" style={{ opacity: Math.max(0, 1-Math.abs(dx)/30), flexShrink:0 }}>
+          {onExpense && (
+            <div className="act-q-btn" title="Log expense"
+              onClick={(e) => { e.stopPropagation(); onExpense(); }}>💰</div>
+          )}
+          {onMemory && (
+            <div className="act-q-btn" title="Add memory"
+              onClick={(e) => { e.stopPropagation(); onMemory(); }}>📸</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── DASHBOARD ────────────────────────────────────────────────────────────── */
-function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories, weatherData, fetchWeather, navigateTo, toggleActivity, onQuickExpense, onQuickMemory }) {
+function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories, weatherData, fetchWeather, navigateTo, toggleActivity, removeActivity, onQuickExpense, onQuickMemory }) {
   const today = new Date();
 
-  // Countdown
-  const daysUntil = trip.startDate ? Math.ceil((new Date(trip.startDate) - today) / 86400000) : null;
-  const isOnTrip = daysUntil !== null && daysUntil <= 0 &&
-    (!trip.endDate || new Date(trip.endDate) >= today);
-  const tripOver = trip.endDate && new Date(trip.endDate) < today;
+  // ── Timing ────────────────────────────────────────────────────────────────
+  const daysUntil      = trip.startDate ? Math.ceil((new Date(trip.startDate) - today) / 86400000) : null;
+  const isDepartureDay = daysUntil === 0;
+  const isDayBefore    = daysUntil === 1;
+  const isOnTrip       = daysUntil !== null && daysUntil <= 0 && (!trip.endDate || new Date(trip.endDate) >= today);
+  const tripOver       = trip.endDate && new Date(trip.endDate) < today;
+  const currentDayIdx  = trip.startDate ? Math.floor((today - new Date(trip.startDate)) / 86400000) : -1;
+  const todayDay       = currentDayIdx >= 0 && currentDayIdx < itinerary.length ? itinerary[currentDayIdx] : null;
+  const todayISO       = today.toISOString().split("T")[0];
+  const briefCacheKey  = `tc_brief_${trip.startDate}_${todayISO}`;
+  const briefSeenKey   = `tc_brief_seen_${trip.startDate}_${todayISO}`;
 
-  // Today's day in itinerary
-  const todayISO = today.toISOString().split("T")[0];
-  const currentDayIndex = trip.startDate
-    ? Math.floor((today - new Date(trip.startDate)) / 86400000)
-    : -1;
-  const todayDay = currentDayIndex >= 0 && currentDayIndex < itinerary.length
-    ? itinerary[currentDayIndex] : null;
-
-  // Stats
+  // ── Stats ─────────────────────────────────────────────────────────────────
   const packingTotal = Object.values(packing).flat().length;
   const packingDone  = Object.values(packing).flat().filter(i=>i.checked).length;
   const packingPct   = packingTotal ? Math.round(packingDone/packingTotal*100) : 0;
@@ -993,46 +2123,365 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
   const allActs      = itinerary.flatMap(d=>d.activities);
   const doneActs     = allActs.filter(a=>a.done).length;
 
-  // Auto-fetch weather for destination
+  // ── Brief state ───────────────────────────────────────────────────────────
+  const [brief,          setBrief]          = useState(()=>{ try{const c=LS.get(briefCacheKey,null); return c?{step:"ready",data:c}:{step:"idle",data:null};}catch{return{step:"idle",data:null};} });
+  const [showModal,      setShowModal]      = useState(false);
+  const [exchangeRate,   setExchangeRate]   = useState(null);
+
+  // ── Auto-fetch weather ────────────────────────────────────────────────────
   useEffect(()=>{
     if(trip.destination && !weatherData) fetchWeather(trip.destination);
   },[trip.destination]);
 
-  // Ring SVG helper
-  const Ring = ({pct, color, size=64, stroke=6}) => {
-    const r = (size-stroke*2)/2;
-    const circ = 2*Math.PI*r;
+  // ── Auto-show modal on departure day (once per day) ───────────────────────
+  useEffect(()=>{
+    if(!trip.destination||!trip.startDate) return;
+    if(!(isDepartureDay||isDayBefore||(isOnTrip&&currentDayIdx===0))) return;
+    const alreadySeen = LS.get(briefSeenKey,"");
+    if(brief.step==="ready"&&!alreadySeen){ setShowModal(true); return; }
+    if(brief.step==="idle") generateBrief();
+  },[trip.startDate, trip.destination, isDepartureDay]);
+
+  // ── Generate brief ────────────────────────────────────────────────────────
+  const generateBrief = async () => {
+    if(!trip.destination||brief.step==="loading") return;
+    setBrief({step:"loading",data:null});
+
+    try {
+      // 1. Geocode + fetch forecast (re-use pattern from recheck)
+      const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trip.destination)}&count=1`).then(r=>r.json());
+      const loc = geo.results?.[0];
+      let forecastDesc = "Weather data unavailable";
+      let todayWeather = weatherData;
+      if(loc){
+        const fw = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max&current=temperature_2m,weather_code,relative_humidity_2m&timezone=auto&forecast_days=4`).then(r=>r.json());
+        const d=fw.daily; const curr=fw.current;
+        forecastDesc = d.time.slice(0,4).map((date,i)=>`${date}: ${WC_ICON(d.weathercode[i])} ${WC_DESC(d.weathercode[i])}, ${Math.round(d.temperature_2m_max[i])}/${Math.round(d.temperature_2m_min[i])}°C, rain ${d.precipitation_probability_max[i]||0}%`).join(" | ");
+        if(curr&&!todayWeather){ todayWeather={temp:Math.round(curr.temperature_2m),icon:WC_ICON(curr.weather_code),unit:"°C",humidity:curr.relative_humidity_2m}; }
+      }
+
+      // 2. Fetch exchange rate
+      let rateText = "";
+      try{
+        const destCurrMap = {"Japan":"JPY","Thailand":"THB","UK":"GBP","France":"EUR","Germany":"EUR","Spain":"EUR","Italy":"EUR","Australia":"AUD","Singapore":"SGD","Malaysia":"MYR","Indonesia":"IDR","Vietnam":"VND","South Korea":"KRW","China":"CNY","India":"INR","UAE":"AED","Canada":"CAD","Mexico":"MXN","Brazil":"BRL","South Africa":"ZAR"};
+        const localCurr = Object.entries(destCurrMap).find(([c])=>trip.destination.toLowerCase().includes(c.toLowerCase()))?.[1] || "USD";
+        if(localCurr!==baseCurrency){
+          const rd = await fetch(`https://api.frankfurter.app/latest?from=${baseCurrency}&to=${localCurr}`).then(r=>r.json());
+          const rate = rd.rates[localCurr];
+          if(rate){ rateText=`1 ${baseCurrency} = ${Number(rate).toFixed(2)} ${localCurr}`; setExchangeRate({from:baseCurrency,to:localCurr,rate}); }
+        }
+      }catch{}
+
+      // 3. Build activities context
+      const day1Acts = itinerary[0]?.activities.map(a=>a.text).join(", ") || "none planned yet";
+      const unpackedCritical = Object.values(packing).flat().filter(i=>!i.checked&&["Passport","Travel insurance","Flight tickets"].some(k=>i.name.includes(k))).map(i=>i.name);
+
+      // 4. Call Claude
+      const res = await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:1400,
+          system:`You are a world-class travel concierge generating a personalised departure day brief. Return ONLY valid JSON — no markdown.
+
+Shape:
+{
+  "greeting": "warm, exciting 1-sentence opener personalised to destination (mention city name)",
+  "weather": {
+    "today_summary": "1 sentence on today's conditions",
+    "wear_tip": "specific clothing tip for today based on forecast",
+    "days_ahead": "1 sentence pattern for next 3 days"
+  },
+  "customs": [
+    {"emoji":"…","title":"short title","detail":"1-2 sentence practical tip"}
+  ],
+  "currency": {
+    "practical_tip": "1-2 sentences on best way to get/use local currency, avoid common tourist traps",
+    "atm_tip": "brief ATM/payment tip"
+  },
+  "first_hours": [
+    {"step":1,"action":"first thing to do on arrival","detail":"specific, practical detail"}
+  ],
+  "local_phrase": {"phrase":"most useful phrase in local language","pronunciation":"phonetic guide","meaning":"English meaning"},
+  "insider_tip": "single powerful insider tip most first-timers miss — be very specific to destination"
+}
+
+Rules:
+- customs: 3 items, specific and actionable (not generic "be respectful")
+- first_hours: 3–4 steps covering transport, SIM, cash, first meal/check-in
+- All tips must be specific to the destination, not generic travel advice
+- Return ONLY the JSON`,
+          messages:[{role:"user",content:
+`Destination: ${trip.destination}
+Departure: ${trip.startDate}${trip.endDate?" → "+trip.endDate:""}
+Trip duration: ${trip.startDate&&trip.endDate?Math.round((new Date(trip.endDate)-new Date(trip.startDate))/86400000)+1:"unknown"} days
+Traveller's base currency: ${baseCurrency}${rateText?" ("+rateText+")":""}
+Today's weather at destination: ${todayWeather?`${todayWeather.icon} ${todayWeather.temp}${todayWeather.unit}, humidity ${todayWeather.humidity||"?"}%`:"unavailable"}
+4-day forecast: ${forecastDesc}
+Day 1 planned activities: ${day1Acts}
+Unpacked critical items: ${unpackedCritical.length?unpackedCritical.join(", "):"all clear"}
+
+Generate the departure day brief.`
+          }]
+        })
+      });
+      const data = await res.json();
+      const parsed = JSON.parse((data.content?.[0]?.text||"{}").replace(/```json|```/g,"").trim());
+      if(!parsed.greeting) throw new Error("Empty response");
+
+      LS.set(briefCacheKey, parsed);
+      setBrief({step:"ready",data:parsed});
+      setShowModal(true);
+
+    }catch(e){
+      setBrief({step:"error",data:null,error:e.message});
+    }
+  };
+
+  const dismissModal = () => {
+    setShowModal(false);
+    LS.set(briefSeenKey, "1");
+  };
+
+  // ── Ring SVG ───────────────────────────────────────────────────────────────
+  const Ring = ({pct,color,size=64,stroke=6}) => {
+    const r=(size-stroke*2)/2, circ=2*Math.PI*r;
+    return(<svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={stroke}/>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+        strokeDasharray={circ} strokeDashoffset={circ*(1-pct/100)} strokeLinecap="round"
+        style={{transition:"stroke-dashoffset 0.6s ease"}}/>
+    </svg>);
+  };
+
+  // ── Brief Modal ───────────────────────────────────────────────────────────
+  const BriefModal = () => {
+    const d = brief.data;
     return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={stroke}/>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
-          strokeDasharray={circ} strokeDashoffset={circ*(1-pct/100)} strokeLinecap="round"
-          style={{transition:"stroke-dashoffset 0.6s ease"}}/>
-      </svg>
+      <div className="brief-modal-overlay">
+        {/* Loading state */}
+        {brief.step==="loading"&&(
+          <div className="brief-loading-hero">
+            <div style={{fontSize:11,color:"rgba(255,168,40,.5)",letterSpacing:"1px",textTransform:"uppercase",fontWeight:700}}>Preparing your brief…</div>
+            <div className="brief-loading-shimmer" style={{height:36,width:"70%"}}/>
+            <div className="brief-loading-shimmer" style={{height:18,width:"50%",opacity:.6}}/>
+            <div style={{marginTop:20,display:"flex",flexDirection:"column",gap:10,padding:"0 0 20px"}}>
+              {[90,70,80,60].map((w,i)=><div key={i} className="brief-loading-shimmer" style={{height:14,width:`${w}%`,opacity:.4-i*.07}}/>)}
+            </div>
+            <div style={{textAlign:"center",padding:"20px 0",color:"rgba(255,168,40,.4)",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              <span className="dots"><span>·</span><span>·</span><span>·</span></span> Claude is writing your trip brief
+            </div>
+          </div>
+        )}
+
+        {/* Error */}
+        {brief.step==="error"&&(
+          <div style={{padding:40,textAlign:"center"}}>
+            <div style={{fontSize:40,marginBottom:16}}>⚠️</div>
+            <div style={{color:"rgba(255,92,92,.8)",fontSize:14,marginBottom:20}}>{brief.error||"Could not generate brief"}</div>
+            <button className="btn" onClick={generateBrief}>Try Again</button>
+            <br/><button className="brief-regen-btn" style={{marginTop:12}} onClick={dismissModal}>Skip for now</button>
+          </div>
+        )}
+
+        {/* Ready */}
+        {brief.step==="ready"&&d&&(
+          <>
+            {/* Hero */}
+            <div className="brief-hero">
+              <div className="brief-hero-eyebrow">
+                {isDepartureDay?"✈️ Departure Day":"🌅 Departure Tomorrow"}
+              </div>
+              <div className="brief-hero-title">{d.greeting}</div>
+              <div className="brief-hero-dest">📍 {trip.destination}</div>
+              {weatherData&&!weatherData.error&&(
+                <div className="brief-hero-weather">
+                  <div className="brief-hero-weather-icon">{weatherData.icon}</div>
+                  <div className="brief-hero-weather-temp">{weatherData.temp}{weatherData.unit}</div>
+                </div>
+              )}
+            </div>
+
+            <div className="brief-body">
+              {/* Weather */}
+              {d.weather&&(
+                <div className="brief-section">
+                  <div className="brief-section-hdr">
+                    <div className="brief-section-icon">🌤️</div>
+                    <div className="brief-section-title">Today's Weather</div>
+                  </div>
+                  {weatherData&&!weatherData.error&&(
+                    <div className="brief-weather-row">
+                      <div className="brief-weather-chip">
+                        <div className="brief-weather-chip-val">{weatherData.temp}{weatherData.unit}</div>
+                        <div className="brief-weather-chip-lbl">Now</div>
+                      </div>
+                      {weatherData.humidity&&<div className="brief-weather-chip">
+                        <div className="brief-weather-chip-val">{weatherData.humidity}%</div>
+                        <div className="brief-weather-chip-lbl">Humidity</div>
+                      </div>}
+                      <div className="brief-weather-chip">
+                        <div className="brief-weather-chip-val">{weatherData.wind}km/h</div>
+                        <div className="brief-weather-chip-lbl">Wind</div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="brief-weather-tip">👕 {d.weather.wear_tip}</div>
+                  {d.weather.days_ahead&&<div className="brief-weather-tip" style={{marginTop:6}}>📅 {d.weather.days_ahead}</div>}
+                </div>
+              )}
+
+              {/* Customs */}
+              {d.customs?.length>0&&(
+                <div className="brief-section">
+                  <div className="brief-section-hdr">
+                    <div className="brief-section-icon">🎎</div>
+                    <div className="brief-section-title">Local Customs</div>
+                  </div>
+                  {d.customs.map((c,i)=>(
+                    <div key={i} className="brief-custom-item">
+                      <div className="brief-custom-emoji">{c.emoji}</div>
+                      <div>
+                        <div className="brief-custom-title">{c.title}</div>
+                        <div className="brief-custom-detail">{c.detail}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Currency */}
+              {d.currency&&(
+                <div className="brief-section">
+                  <div className="brief-section-hdr">
+                    <div className="brief-section-icon">💱</div>
+                    <div className="brief-section-title">Currency</div>
+                  </div>
+                  {exchangeRate&&(
+                    <div className="brief-currency-rate">
+                      1 {exchangeRate.from} = {Number(exchangeRate.rate).toFixed(2)} {exchangeRate.to}
+                    </div>
+                  )}
+                  <div className="brief-currency-tip">{d.currency.practical_tip}</div>
+                  {d.currency.atm_tip&&<div className="brief-currency-tip" style={{marginTop:6}}>🏧 {d.currency.atm_tip}</div>}
+                </div>
+              )}
+
+              {/* First hours */}
+              {d.first_hours?.length>0&&(
+                <div className="brief-section">
+                  <div className="brief-section-hdr">
+                    <div className="brief-section-icon">🚀</div>
+                    <div className="brief-section-title">First Hours</div>
+                  </div>
+                  {d.first_hours.map((s,i)=>(
+                    <div key={i} className="brief-step">
+                      <div className="brief-step-num">{s.step||i+1}</div>
+                      <div>
+                        <div className="brief-step-action">{s.action}</div>
+                        <div className="brief-step-detail">{s.detail}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Local phrase */}
+              {d.local_phrase&&(
+                <div className="brief-section">
+                  <div className="brief-section-hdr">
+                    <div className="brief-section-icon">💬</div>
+                    <div className="brief-section-title">Useful Phrase</div>
+                  </div>
+                  <div className="brief-phrase-box">
+                    <div className="brief-phrase-text">{d.local_phrase.phrase}</div>
+                    <div className="brief-phrase-pronunc">{d.local_phrase.pronunciation}</div>
+                    <div className="brief-phrase-meaning">"{d.local_phrase.meaning}"</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Insider tip */}
+              {d.insider_tip&&(
+                <div className="brief-section">
+                  <div className="brief-section-hdr">
+                    <div className="brief-section-icon">💡</div>
+                    <div className="brief-section-title">Insider Tip</div>
+                  </div>
+                  <div className="brief-insider">{d.insider_tip}</div>
+                </div>
+              )}
+            </div>
+
+            <div className="brief-footer">
+              <button className="brief-dismiss-btn" onClick={dismissModal}>
+                Let's go! ✈️
+              </button>
+              <button className="brief-regen-btn" onClick={()=>{LS.set(briefCacheKey,""); generateBrief();}}>
+                ↺ Regenerate brief
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     );
   };
 
   return (
     <div>
+      {/* Brief modal */}
+      {showModal&&(brief.step==="loading"||brief.step==="ready"||brief.step==="error")&&<BriefModal/>}
+
+      {/* ── Compact brief card (when modal dismissed) ── */}
+      {!showModal&&brief.step==="ready"&&brief.data&&(isDepartureDay||isDayBefore||isOnTrip)&&(
+        <div className="brief-dash-card" onClick={()=>setShowModal(true)}>
+          <div className="brief-dash-hdr">
+            <div className="brief-dash-icon">{isDepartureDay?"✈️":"🌅"}</div>
+            <div className="brief-dash-title">
+              {isDepartureDay?"Your Departure Brief":"Day-before Brief"} — {trip.destination}
+            </div>
+            <div style={{fontSize:18,color:"rgba(255,168,40,.4)"}}>›</div>
+          </div>
+          <div className="brief-dash-chips">
+            {brief.data.weather&&<div className="brief-dash-chip">🌤️ Weather</div>}
+            {brief.data.customs&&<div className="brief-dash-chip">🎎 Customs</div>}
+            {brief.data.currency&&<div className="brief-dash-chip">💱 Currency</div>}
+            {brief.data.first_hours&&<div className="brief-dash-chip">🚀 First hours</div>}
+            {brief.data.insider_tip&&<div className="brief-dash-chip">💡 Insider tip</div>}
+          </div>
+        </div>
+      )}
+
+      {/* Generate brief button — when conditions met but not yet generated */}
+      {!showModal&&brief.step==="idle"&&(isDepartureDay||isDayBefore)&&trip.destination&&(
+        <div className="brief-dash-card" onClick={generateBrief} style={{textAlign:"center"}}>
+          <div style={{fontSize:28,marginBottom:8}}>✈️</div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:16,color:"var(--amber)",marginBottom:4}}>
+            {isDepartureDay?"Today's the day!":"Departure tomorrow"}
+          </div>
+          <div style={{fontSize:12,color:"var(--text-dim)",marginBottom:14}}>Tap to generate your personalised trip brief for {trip.destination}</div>
+          <button className="btn" style={{width:"100%"}}>Generate Trip Brief ✨</button>
+        </div>
+      )}
+
       {/* ── Countdown / Status Banner ── */}
-      {trip.destination && (
+      {trip.destination&&(
         <div className="countdown-banner">
           <div>
-            {tripOver ? <div className="countdown-num">✈️</div>
-              : isOnTrip ? <div className="countdown-num" style={{fontSize:28}}>🌍</div>
-              : <div className="countdown-num">{daysUntil}</div>
-            }
+            {tripOver?<div className="countdown-num">✈️</div>
+              :isOnTrip?<div className="countdown-num" style={{fontSize:28}}>🌍</div>
+              :<div className="countdown-num">{daysUntil}</div>}
           </div>
           <div className="countdown-info">
             <div className="countdown-label">
-              {tripOver ? "Trip completed" : isOnTrip ? "You're on your trip!" : "days until departure"}
+              {tripOver?"Trip completed":isOnTrip?"You're on your trip!":"days until departure"}
             </div>
             <div className="countdown-dest">📍 {trip.destination}</div>
-            {trip.startDate && <div style={{fontSize:11,color:"var(--text-dim)",marginTop:3}}>
+            {trip.startDate&&<div style={{fontSize:11,color:"var(--text-dim)",marginTop:3}}>
               {trip.startDate}{trip.endDate?" → "+trip.endDate:""}
             </div>}
           </div>
-          {weatherData && !weatherData.error && (
+          {weatherData&&!weatherData.error&&(
             <div style={{textAlign:"center",flexShrink:0}}>
               <div style={{fontSize:30,lineHeight:1}}>{weatherData.icon}</div>
               <div style={{fontSize:16,fontWeight:700,color:"var(--amber)"}}>{weatherData.temp}{weatherData.unit}</div>
@@ -1042,50 +2491,43 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
       )}
 
       {/* ── Today's Activities ── */}
-      {todayDay && (
+      {todayDay&&(
         <div className="today-card">
           <div className="flex items-center justify-between" style={{marginBottom:10}}>
-            <div className="card-title" style={{marginBottom:0,fontSize:14}}>
-              📅 {todayDay.label} — Today
-            </div>
+            <div className="card-title" style={{marginBottom:0,fontSize:14}}>📅 {todayDay.label} — Today</div>
             <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px"}} onClick={()=>navigateTo(1)}>Full plan</button>
           </div>
-          {todayDay.activities.length === 0
-            ? <div style={{fontSize:13,color:"var(--text-dim)"}}>No activities planned for today</div>
-            : todayDay.activities.map(act=>(
-              <div key={act.id} className="today-activity">
-                <div className={`today-act-check${act.done?" on":""}`} onClick={()=>toggleActivity(todayDay.id,act.id)}/>
-                <div style={{flex:1,minWidth:0}}>
-                  <div className={`today-act-text${act.done?" done":""}`}>{act.text}</div>
-                </div>
-                <div className="act-quick-btns">
-                  <div className="act-q-btn" title="Log expense" onClick={()=>onQuickExpense(act,todayDay)}>💰</div>
-                  <div className="act-q-btn" title="Add memory" onClick={()=>onQuickMemory(act,todayDay)}>📸</div>
-                </div>
-              </div>
-            ))
+          {todayDay.activities.length===0
+            ?<div style={{fontSize:13,color:"var(--text-dim)"}}>No activities planned for today</div>
+            :<div>
+              {todayDay.activities.map((act,i)=>(
+                <SwipeableActivity key={act.id}
+                  act={act} dayId={todayDay.id}
+                  onToggle={()=>toggleActivity(todayDay.id,act.id)}
+                  onDelete={()=>removeActivity(todayDay.id,act.id)}
+                  onExpense={()=>onQuickExpense(act,todayDay)}
+                  onMemory={()=>onQuickMemory(act,todayDay)}
+                  isFirst={i===0}
+                />
+              ))}
+              <div className="swipe-hint">← swipe to delete · swipe to complete →</div>
+            </div>
           }
         </div>
       )}
 
       {/* ── Stats Grid ── */}
       <div className="dash-grid">
-        <div className="dash-card" onClick={()=>navigateTo(2)}>
-          <div className="dash-ring-wrap">
-            <Ring pct={budgetPct} color={budgetPct>85?"#FF5C5C":"#FFA828"}/>
-            <div className="dash-ring-center">
-              <div style={{fontSize:12,fontWeight:700,color:"var(--amber)"}}>{budgetPct}%</div>
-            </div>
+        <div className="dash-card" onClick={()=>navigateTo(3)}>
+          <div className="dash-ring-wrap"><Ring pct={budgetPct} color={budgetPct>85?"#FF5C5C":"#FFA828"}/>
+            <div className="dash-ring-center"><div style={{fontSize:12,fontWeight:700,color:"var(--amber)"}}>{budgetPct}%</div></div>
           </div>
           <div className="dash-card-label">Budget Used</div>
           <div className="dash-card-sub">{baseCurrency} {spent.toFixed(0)} of {totalBudget}</div>
         </div>
         <div className="dash-card" onClick={()=>navigateTo(2)}>
-          <div className="dash-ring-wrap">
-            <Ring pct={packingPct} color="#4DB87A"/>
-            <div className="dash-ring-center">
-              <div style={{fontSize:12,fontWeight:700,color:"#4DB87A"}}>{packingPct}%</div>
-            </div>
+          <div className="dash-ring-wrap"><Ring pct={packingPct} color="#4DB87A"/>
+            <div className="dash-ring-center"><div style={{fontSize:12,fontWeight:700,color:"#4DB87A"}}>{packingPct}%</div></div>
           </div>
           <div className="dash-card-label">Packed</div>
           <div className="dash-card-sub">{packingDone} of {packingTotal} items</div>
@@ -1099,7 +2541,7 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
           <div className="dash-card-icon">📸</div>
           <div className="dash-card-val">{memories.length}</div>
           <div className="dash-card-label">Memories</div>
-          {memories.length > 0 && <div className="dash-card-sub">{memories[memories.length-1].title}</div>}
+          {memories.length>0&&<div className="dash-card-sub">{memories[memories.length-1].title}</div>}
         </div>
       </div>
 
@@ -1114,7 +2556,7 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
           {icon:"📤",label:"Share Trip",sub:"Invite travellers",action:"share"},
         ].map((qa,i)=>(
           <div key={i} className="quick-action-btn"
-            onClick={()=>qa.action==="share" ? navigateTo("share") : navigateTo(qa.tab)}>
+            onClick={()=>qa.action==="share"?navigateTo("share"):navigateTo(qa.tab)}>
             <span className="qa-icon">{qa.icon}</span>
             <div><div className="qa-label">{qa.label}</div><div className="qa-sub">{qa.sub}</div></div>
           </div>
@@ -1122,7 +2564,7 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
       </div>
 
       {/* ── Recent Memories Strip ── */}
-      {memories.length > 0 && (
+      {memories.length>0&&(
         <div className="card">
           <div className="flex items-center justify-between" style={{marginBottom:10}}>
             <div className="card-title" style={{marginBottom:0,fontSize:14}}>📸 Recent Memories</div>
@@ -1133,7 +2575,7 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
               <div key={mem.id} className="mem-mini-card" onClick={()=>navigateTo(5)}>
                 <div className="mem-mini-mood">{mem.mood}</div>
                 <div className="mem-mini-title">{mem.title}</div>
-                {mem.photo && <img src={mem.photo} style={{width:74,height:50,objectFit:"cover",borderRadius:8,marginTop:6}} alt=""/>}
+                {mem.photo&&<img src={mem.photo} style={{width:74,height:50,objectFit:"cover",borderRadius:8,marginTop:6}} alt=""/>}
               </div>
             ))}
           </div>
@@ -1141,7 +2583,7 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
       )}
 
       {/* ── Recent Expenses ── */}
-      {expenses.length > 0 && (
+      {expenses.length>0&&(
         <div className="card">
           <div className="flex items-center justify-between" style={{marginBottom:10}}>
             <div className="card-title" style={{marginBottom:0,fontSize:14}}>💳 Recent Expenses</div>
@@ -1152,7 +2594,7 @@ function Dashboard({ trip, itinerary, packing, expenses, baseCurrency, memories,
               <div className="exp-cat" style={{fontSize:18}}>{exp.cat.split(" ")[0]}</div>
               <div className="exp-info">
                 <div className="exp-desc" style={{fontSize:12}}>{exp.desc}</div>
-                {exp.activityText && <div className="linked-badge">📅 {exp.activityText.slice(0,20)}</div>}
+                {exp.activityText&&<div className="linked-badge">📅 {exp.activityText.slice(0,20)}</div>}
               </div>
               <div className="exp-amt" style={{fontSize:12}}>{baseCurrency} {Number(exp.amtBase??exp.amount).toFixed(2)}</div>
             </div>
@@ -1223,20 +2665,19 @@ function PlanTab({ trip, saveTrip, itinerary, addDay, addActivity, toggleActivit
                   <button className="btn-del" onClick={()=>removeDay(day.id)}>✕</button>
                 </div>
               </div>
-              {day.activities.map(act=>(
-                <div key={act.id} className="act-row">
-                  <div className="check-box" style={{cursor:"pointer",flexShrink:0}}
-                    onClick={()=>toggleActivity(day.id,act.id)}>
-                    {act.done&&<span style={{color:"#07101F",fontSize:11,fontWeight:900}}>✓</span>}
-                  </div>
-                  <span className={`act-text${act.done?" done":""}`} onClick={()=>toggleActivity(day.id,act.id)}>{act.text}</span>
-                  <div className="act-quick-btns">
-                    <div className="act-q-btn" title="Log expense for this activity" onClick={()=>onQuickExpense(act,day)}>💰</div>
-                    <div className="act-q-btn" title="Add memory for this activity" onClick={()=>onQuickMemory(act,day)}>📸</div>
-                    <button className="btn-del" style={{fontSize:12}} onClick={()=>removeActivity(day.id,act.id)}>✕</button>
-                  </div>
-                </div>
+              {day.activities.map((act,i)=>(
+                <SwipeableActivity key={act.id}
+                  act={act} dayId={day.id}
+                  onToggle={()=>toggleActivity(day.id,act.id)}
+                  onDelete={()=>removeActivity(day.id,act.id)}
+                  onExpense={()=>onQuickExpense(act,day)}
+                  onMemory={()=>onQuickMemory(act,day)}
+                  isFirst={i===0}
+                />
               ))}
+              {day.activities.length===0&&(
+                <div className="swipe-hint" style={{textAlign:"left",paddingLeft:2}}>Add activities below</div>
+              )}
               <div className="flex gap-8 mt-8">
                 <input className="input flex-1" style={{padding:"7px 11px",fontSize:12}} placeholder="Add activity…"
                   value={newActs[day.id]||""} onChange={e=>setNewActs(p=>({...p,[day.id]:e.target.value}))}
@@ -1256,6 +2697,150 @@ function PackTab({ packing, togglePacking, addPackingItem, packingTotal, packing
   const [newItems, setNewItems] = useState({});
   const [collapsed, setCollapsed] = useState({});
   const pct = packingTotal ? Math.round((packingDone/packingTotal)*100) : 0;
+
+  // ── Re-check state ────────────────────────────────────────────────────────
+  const [recheck, setRecheck]   = useState({ step:"idle", forecast:null, result:null, error:"" });
+  // step: idle | fetching | analyzing | ready | error
+  const [rcAdded, setRcAdded]   = useState({}); // {itemName: true}
+  const [rcDismissed, setRcDismissed] = useState(() => LS.get("tc_rc_dismissed",""));
+
+  // Days until departure
+  const today = new Date(); today.setHours(0,0,0,0);
+  const depDate = trip.startDate ? new Date(trip.startDate) : null;
+  const daysUntil = depDate ? Math.ceil((depDate - today) / 86400000) : null;
+  const showAlert = daysUntil !== null && daysUntil >= -1 && daysUntil <= 3
+    && trip.destination && rcDismissed !== trip.startDate;
+  const alertLabel = daysUntil === 0 ? "Departure day" : daysUntil < 0 ? "Trip underway" : `${daysUntil} day${daysUntil!==1?"s":""} to go`;
+
+  // ── Fetch multi-day forecast + run Claude re-check ────────────────────────
+  const runRecheck = async () => {
+    if (!trip.destination) return;
+    setRecheck({ step:"fetching", forecast:null, result:null, error:"" });
+    setRcAdded({});
+
+    try {
+      // 1. Geocode destination
+      const geo = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trip.destination)}&count=1`
+      ).then(r=>r.json());
+      if (!geo.results?.length) throw new Error(`"${trip.destination}" not found`);
+      const { latitude, longitude, name, country } = geo.results[0];
+
+      // 2. Fetch 7-day daily forecast starting from departure (or today)
+      const startDate = trip.startDate
+        ? (depDate < today ? today.toISOString().split("T")[0] : trip.startDate)
+        : today.toISOString().split("T")[0];
+      const fRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
+        `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max` +
+        `&timezone=auto&forecast_days=7&start_date=${startDate}`
+      ).then(r=>r.json());
+
+      const d = fRes.daily;
+      const days = d.time.map((date,i) => ({
+        date, icon: WC_ICON(d.weathercode[i]),
+        maxT: Math.round(d.temperature_2m_max[i]),
+        minT: Math.round(d.temperature_2m_min[i]),
+        rain: d.precipitation_sum[i]??0,
+        rainPct: d.precipitation_probability_max[i]??0,
+        wind: Math.round(d.windspeed_10m_max[i]),
+        code: d.weathercode[i],
+      }));
+
+      const forecastSummary = {
+        city: `${name}, ${country}`,
+        days,
+        avgMaxTemp: Math.round(days.reduce((s,d)=>s+d.maxT,0)/days.length),
+        avgMinTemp: Math.round(days.reduce((s,d)=>s+d.minT,0)/days.length),
+        rainyDays:  days.filter(d=>d.rain>2).length,
+        windyDays:  days.filter(d=>d.wind>40).length,
+        unit: fRes.daily_units?.temperature_2m_max || "°C",
+        conditions: [...new Set(days.map(d=>WC_DESC(d.code)))].join(", "),
+      };
+      setRecheck(p=>({...p, step:"analyzing", forecast:days}));
+
+      // 3. Build packing list text
+      const packingText = Object.entries(packing)
+        .map(([cat, items]) => `${cat}:\n` + items.map(i=>`  - ${i.name}${i.checked?" ✓ (packed)":""}`).join("\n"))
+        .join("\n\n");
+
+      const tripDuration = trip.startDate && trip.endDate
+        ? Math.round((new Date(trip.endDate)-new Date(trip.startDate))/86400000)+1
+        : "unknown";
+      const activities = itinerary.flatMap(d=>d.activities.map(a=>a.text)).filter(Boolean);
+
+      // 4. Claude analysis
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1200,
+          system: `You are a meticulous travel packing advisor. Compare the traveller's packing list against the actual weather forecast and return ONLY valid JSON — no markdown, no extra text.
+
+Shape:
+{
+  "weather_summary": "2 sentences describing forecast conditions and what they mean for packing",
+  "gaps": [
+    {"item": "item name (be specific, e.g. 'compact folding umbrella')", "reason": "why needed, citing specific forecast data", "category": "which packing category it belongs to e.g. 🧴 Toiletries"}
+  ],
+  "overkill": [
+    {"item": "existing item in list that seems unnecessary", "reason": "why, citing forecast e.g. 'avg 28°C forecast, heavy winter coat unnecessary'"}
+  ],
+  "confirmed": ["item already in list that forecast confirms as essential"],
+  "overall": "1-line verdict: ready | minor gaps | needs attention"
+}
+
+Rules:
+- gaps: only flag genuinely weather-driven gaps (rain gear if rainy, sunscreen if hot, layers if temp swing >10°C). Max 8.
+- overkill: only flag items clearly wrong for the weather. Be conservative. Max 4.
+- confirmed: flag 3–6 items already packed that are exactly right for this forecast.
+- Match item names to existing list items where possible for overkill.
+- Return ONLY the JSON.`,
+          messages: [{ role:"user", content:
+            `Destination: ${forecastSummary.city}
+Trip duration: ${tripDuration} days
+Planned activities: ${activities.length ? activities.join(", ") : "general sightseeing"}
+
+WEATHER FORECAST (${forecastSummary.days.length} days from ${startDate}):
+- Avg high: ${forecastSummary.avgMaxTemp}${forecastSummary.unit}, avg low: ${forecastSummary.avgMinTemp}${forecastSummary.unit}
+- Rainy days: ${forecastSummary.rainyDays}/${forecastSummary.days.length}
+- Windy days (>40km/h): ${forecastSummary.windyDays}/${forecastSummary.days.length}
+- Conditions: ${forecastSummary.conditions}
+- Day-by-day: ${days.map(d=>`${d.date}: ${d.icon} ${d.maxT}/${d.minT}${forecastSummary.unit}, rain ${d.rain}mm (${d.rainPct}%), wind ${d.wind}km/h`).join(" | ")}
+
+CURRENT PACKING LIST:
+${packingText}
+
+Analyse this and return the JSON re-check report.`
+          }]
+        })
+      });
+      const data = await res.json();
+      const raw = data.content?.[0]?.text || "";
+      const parsed = JSON.parse(raw.replace(/```json|```/g,"").trim());
+      setRecheck({ step:"ready", forecast:days, result:parsed, error:"" });
+
+    } catch(e) {
+      setRecheck({ step:"error", forecast:null, result:null,
+        error: e.message.includes("not found") ? e.message : "Re-check failed — check connection and try again." });
+    }
+  };
+
+  const addGapItem = (item, category) => {
+    const cats = Object.keys(packing);
+    const matched = cats.find(c => c.toLowerCase().includes((category||"").toLowerCase().replace(/^[\p{Emoji}\s]+/u,"").split(" ")[0].toLowerCase())) || cats[0];
+    addPackingItem(matched, item);
+    setRcAdded(p=>({...p,[item]:true}));
+  };
+
+  const dismissAlert = () => {
+    setRcDismissed(trip.startDate);
+    LS.set("tc_rc_dismissed", trip.startDate);
+  };
+
+  const verdictColor = v => v==="ready"?"#4DB87A":v==="minor gaps"?"#FFA828":"#FF5C5C";
+  const verdictIcon  = v => v==="ready"?"✅":v==="minor gaps"?"⚠️":"🚨";
 
   // Smart Pack state
   const [occasions, setOccasions] = useState([]);
@@ -1399,6 +2984,175 @@ Rules:
         </div>
         <div className="prog-track"><div className="prog-fill" style={{width:`${pct}%`}} /></div>
         <div style={{textAlign:"right",fontSize:11,color:"rgba(230,217,194,0.35)",marginTop:5}}>{pct}% complete</div>
+      </div>
+
+      {/* ── Weather Re-check Card ── */}
+      <div className="recheck-card">
+
+        {/* Header */}
+        <div className="flex items-center justify-between" style={{marginBottom: showAlert||recheck.step!=="idle" ? 12 : 0}}>
+          <div className="card-title" style={{marginBottom:0,fontSize:14,color:"#5BA4FF"}}>
+            🌤️ Weather Re-check
+          </div>
+          <div style={{display:"flex",gap:6,alignItems:"center"}}>
+            {recheck.step==="ready"&&recheck.result&&(
+              <span style={{fontSize:12,fontWeight:700,color:verdictColor(recheck.result.overall)}}>
+                {verdictIcon(recheck.result.overall)} {recheck.result.overall}
+              </span>
+            )}
+            {recheck.step!=="fetching"&&recheck.step!=="analyzing"&&(
+              <button className="btn-ghost" style={{fontSize:11,padding:"4px 10px",borderColor:"rgba(91,164,255,0.3)",color:"#5BA4FF"}}
+                onClick={runRecheck} disabled={!trip.destination}>
+                {recheck.step==="idle"?"Run check":"↺ Re-run"}
+              </button>
+            )}
+            {(recheck.step==="fetching"||recheck.step==="analyzing")&&(
+              <div style={{fontSize:11,color:"rgba(91,164,255,0.7)",display:"flex",alignItems:"center",gap:6}}>
+                <span className="dots"><span>·</span><span>·</span><span>·</span></span>
+                {recheck.step==="fetching"?"Fetching forecast":"Analysing list"}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Auto-trigger alert */}
+        {showAlert && recheck.step==="idle" && (
+          <div className="recheck-alert" onClick={runRecheck}>
+            <div className="recheck-alert-icon">⏰</div>
+            <div className="recheck-alert-text">
+              <div className="recheck-alert-title">{alertLabel} — run your packing weather check</div>
+              <div className="recheck-alert-sub">Claude will compare the forecast for {trip.destination} against your list</div>
+            </div>
+            <div style={{fontSize:20,color:"rgba(91,164,255,.5)"}}>›</div>
+          </div>
+        )}
+
+        {/* No destination */}
+        {!trip.destination && recheck.step==="idle" && (
+          <div style={{fontSize:12,color:"var(--text-dim)"}}>Add a destination in the Plan tab to enable weather re-check.</div>
+        )}
+
+        {/* Idle with destination, no alert */}
+        {trip.destination && recheck.step==="idle" && !showAlert && (
+          <div style={{fontSize:12,color:"var(--text-dim)"}}>
+            Check your packing list against the {trip.destination} forecast any time.
+          </div>
+        )}
+
+        {/* Loading shimmer */}
+        {(recheck.step==="fetching"||recheck.step==="analyzing")&&(
+          <div className="recheck-loading">
+            <div className="recheck-shimmer" style={{height:60}}/>
+            <div className="recheck-shimmer" style={{height:80,opacity:.7}}/>
+            <div className="recheck-shimmer" style={{height:50,opacity:.4}}/>
+          </div>
+        )}
+
+        {/* Error */}
+        {recheck.step==="error"&&(
+          <div className="ocr-error" style={{marginTop:8}}>⚠️ {recheck.error}</div>
+        )}
+
+        {/* Results */}
+        {recheck.step==="ready"&&recheck.result&&(
+          <div style={{animation:"fadeUp .3s ease"}}>
+
+            {/* Weather summary */}
+            <div className="weather-summary-box">🌡️ {recheck.result.weather_summary}</div>
+
+            {/* Forecast mini-strip */}
+            {recheck.forecast&&(
+              <div className="forecast-strip">
+                {recheck.forecast.map((day,i)=>(
+                  <div key={day.date} className={`forecast-day${i===0?" today":""}`}>
+                    <div className="forecast-day-label">
+                      {i===0?"Today":new Date(day.date+"T12:00").toLocaleDateString("en",{weekday:"short"})}
+                    </div>
+                    <div className="forecast-day-icon">{day.icon}</div>
+                    <div className="forecast-day-temp">{day.maxT}°</div>
+                    <div className="forecast-day-rain">{day.rainPct>0?`${day.rainPct}%`:""}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Gaps */}
+            {recheck.result.gaps?.length>0&&(
+              <div className="recheck-section">
+                <div className="recheck-section-hdr" style={{color:"#FF5C5C"}}>
+                  <span>🚨</span> {recheck.result.gaps.length} gap{recheck.result.gaps.length!==1?"s":""} — consider adding
+                </div>
+                {recheck.result.gaps.map((g,i)=>(
+                  <div key={i} className="recheck-item recheck-item-gap">
+                    <div className="recheck-item-icon">➕</div>
+                    <div className="recheck-item-body">
+                      <div className="recheck-item-name">{g.item}</div>
+                      <div className="recheck-item-reason">{g.reason}</div>
+                    </div>
+                    <button
+                      className={`recheck-add-btn${rcAdded[g.item]?" added":""}`}
+                      onClick={()=>!rcAdded[g.item]&&addGapItem(g.item,g.category)}>
+                      {rcAdded[g.item]?"✓ Added":"+ Add"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Overkill */}
+            {recheck.result.overkill?.length>0&&(
+              <div className="recheck-section">
+                <div className="recheck-section-hdr" style={{color:"var(--text-dim)"}}>
+                  <span>🤔</span> May not need
+                </div>
+                {recheck.result.overkill.map((o,i)=>(
+                  <div key={i} className="recheck-item recheck-item-overkill">
+                    <div className="recheck-item-icon">📦</div>
+                    <div className="recheck-item-body">
+                      <div className="recheck-item-name" style={{textDecoration:"line-through",color:"var(--text-dim)"}}>{o.item}</div>
+                      <div className="recheck-item-reason">{o.reason}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Confirmed */}
+            {recheck.result.confirmed?.length>0&&(
+              <div className="recheck-section">
+                <div className="recheck-section-hdr" style={{color:"#4DB87A"}}>
+                  <span>✅</span> Already covered
+                </div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:7}}>
+                  {recheck.result.confirmed.map((c,i)=>(
+                    <div key={i} className="recheck-item recheck-item-ok"
+                      style={{padding:"5px 11px",marginBottom:0,display:"inline-flex",alignItems:"center",gap:6}}>
+                      <span style={{fontSize:13}}>✓</span>
+                      <span style={{fontSize:12,color:"#4DB87A",fontWeight:500}}>{c}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add-all gaps shortcut */}
+            {recheck.result.gaps?.filter(g=>!rcAdded[g.item]).length>1&&(
+              <button className="btn-ghost" style={{width:"100%",marginTop:4,borderColor:"rgba(255,92,92,0.3)",color:"#FF5C5C"}}
+                onClick={()=>recheck.result.gaps.filter(g=>!rcAdded[g.item]).forEach(g=>addGapItem(g.item,g.category))}>
+                + Add all {recheck.result.gaps.filter(g=>!rcAdded[g.item]).length} missing items
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Dismiss auto-alert */}
+        {showAlert&&recheck.step==="idle"&&(
+          <div style={{textAlign:"right",marginTop:8}}>
+            <button className="btn-del" style={{fontSize:11,color:"var(--text-dim)"}} onClick={dismissAlert}>
+              Dismiss
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Smart Pack Card ── */}
@@ -1582,18 +3336,18 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
     try {
       const res = await fetch(JSONBLOB, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(buildPayload()),
       });
-      if (!res.ok) throw new Error("Server error");
-      const location = res.headers.get("Location") || "";
-      const blobId = location.split("/").pop() || res.url.split("/").pop();
-      const code = blobId.slice(-8).toUpperCase(); // short friendly code from last 8 chars
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      // JSONBlob returns the blob ID in the Location header OR response URL
+      const location = res.headers.get("X-id") || res.headers.get("Location") || res.url || "";
+      const blobId = location.replace(/.*\//, "").trim();
+      if (!blobId) throw new Error("No blob ID returned");
       LS.set("tc_share_blobid", blobId);
-      LS.set("tc_share_code", code);
-      setShareState({ step:"ready", code, blobId, error:"" });
+      setShareState({ step:"ready", code:blobId, blobId, error:"" });
     } catch(e) {
-      setShareState({ step:"error", code:"", error:"Could not create link. Check your connection." });
+      setShareState({ step:"error", code:"", error:"Could not create link — " + e.message });
     }
   };
 
@@ -1616,9 +3370,8 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
   // ── Restore existing link on open ────────────────────────────────────────
   useEffect(()=>{
     const savedBlobId = LS.get("tc_share_blobid","");
-    const savedCode   = LS.get("tc_share_code","");
-    if (savedBlobId && savedCode && activeTab==="share") {
-      setShareState({ step:"ready", code:savedCode, blobId:savedBlobId, error:"" });
+    if (savedBlobId && activeTab==="share") {
+      setShareState({ step:"ready", code:savedBlobId, blobId:savedBlobId, error:"" });
     }
   }, [activeTab]);
 
@@ -1629,21 +3382,27 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
 
   // ── Fetch preview ────────────────────────────────────────────────────────
   const fetchPreview = async (rawCode) => {
-    const code = (rawCode||joinCode).trim().replace(/\s/g,"");
-    if (!code) return;
-    setJoinState({ step:"fetching", preview:null, error:"", blobId:"" });
-    // Try as full blob ID, or search suffix match
+    let input = (rawCode||joinCode).trim();
+    if (!input) return;
+    // If user pasted a full URL, extract the ?trip= param or the last path segment
     try {
-      // jsonblob blob IDs are long numeric strings; user may paste the full ID or the 8-char tail
-      // Strategy: try the input directly first
-      let blobId = code;
-      let data = null;
-      const res = await fetch(`${JSONBLOB}/${blobId}`);
-      if (res.ok) { data = await res.json(); }
-      if (!data) throw new Error("Not found");
-      setJoinState({ step:"preview", preview:data, error:"", blobId });
-    } catch {
-      setJoinState({ step:"error", preview:null, error:"Trip not found. Check the code and try again.", blobId:"" });
+      const u = new URL(input);
+      input = u.searchParams.get("trip") || u.pathname.replace(/.*\//, "") || input;
+    } catch {}
+    // Strip any trailing slashes or whitespace
+    input = input.replace(/\/+$/, "").trim();
+    if (!input) return;
+    setJoinState({ step:"fetching", preview:null, error:"", blobId:"" });
+    try {
+      const res = await fetch(`${JSONBLOB}/${input}`, {
+        headers: { "Accept": "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!data || !data.trip) throw new Error("Invalid trip data");
+      setJoinState({ step:"preview", preview:data, error:"", blobId:input });
+    } catch(e) {
+      setJoinState({ step:"error", preview:null, error:`Trip not found (${e.message}). Paste the full link or ID shared by the trip creator.`, blobId:"" });
     }
   };
 
@@ -1749,13 +3508,15 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
                 {(shareState.step==="ready")&&(
                   <div>
                     <div className="trip-code-box">
-                      <div className="trip-code-label">Your Trip Code</div>
-                      <div className="trip-code" onClick={copyCode} title="Tap to copy">{shareState.code}</div>
-                      <div style={{fontSize:11,color:"var(--text-dim)"}}>Tap code to copy · Anyone can join with this</div>
+                      <div className="trip-code-label">Trip ID (tap to copy)</div>
+                      <div className="trip-code" onClick={copyCode} title="Tap to copy" style={{fontSize:13,letterSpacing:1,wordBreak:"break-all"}}>
+                        {shareState.code}
+                      </div>
+                      <div style={{fontSize:11,color:"var(--text-dim)"}}>Share the link below — anyone can join with it</div>
                     </div>
 
                     <div className="qr-wrap">
-                      <img src={qrUrl(shareState.code)} alt="QR Code" />
+                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(tripUrl())}&bgcolor=07101F&color=FFA828&margin=10`} alt="QR Code" />
                     </div>
 
                     <div className="share-actions">
@@ -1890,7 +3651,7 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
 }
 
 /* ── BUDGET Tab ───────────────────────────────────────────────────────────── */
-function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, expenses, saveExpenses, people, savePeople }) {
+function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, expenses, saveExpenses, people, savePeople, docs, saveDocs, dailyBudget, saveDailyBudget, notifPerm, requestNotifPermission }) {
 
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput,   setBudgetInput]   = useState(String(totalBudget));
@@ -1943,8 +3704,28 @@ function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, ex
       const participants=[...new Set([form.paidBy,...form.splitWith])];
       splits=participants.map(name=>({name, amtBase:amtBase/participants.length}));
     }
-    saveExpenses([...expenses,{id:Date.now(),desc:form.desc.trim(),cat:form.cat,originalAmount,currency:form.currency,amtBase,usedRate,paidBy:form.paidBy,splits,date:new Date().toLocaleDateString()}]);
-    setForm({...EMPTY_EXP,currency:form.currency,paidBy:form.paidBy});
+    const expId = Date.now();
+    // Build attachments from scanned receipt if present
+    const receiptAtts = form.receiptImage
+      ? [{ id: expId+"_r", data: form.receiptImage, type:"image/jpeg", name:"Receipt.jpg", uploadedAt:new Date().toISOString() }]
+      : [];
+    saveExpenses([...expenses,{
+      id:expId, desc:form.desc.trim(), cat:form.cat,
+      originalAmount, currency:form.currency, amtBase, usedRate,
+      paidBy:form.paidBy, splits,
+      attachments: receiptAtts,
+      date:new Date().toLocaleDateString(),
+      dateISO: new Date().toISOString().split("T")[0],
+    }]);
+    // Auto-save receipt to docs vault
+    if(receiptAtts.length) {
+      saveDocs([...(docs||[]), {
+        ...receiptAtts[0], cat:"receipt",
+        name: `Receipt — ${form.desc.trim()}`,
+        linkedTo:"expense", linkedId:String(expId),
+      }]);
+    }
+    setForm({...EMPTY_EXP, currency:form.currency, paidBy:form.paidBy});
     setConvertedPreview(null);
   };
 
@@ -1996,6 +3777,110 @@ function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, ex
   const fmtOrig=(exp)=>exp.currency!==baseCurrency?`${exp.currency} ${Number(exp.originalAmount).toFixed(2)}`:null;
   const myShare=(exp)=>{if(!exp.splits) return exp.amtBase??Number(exp.amount); const me=exp.splits.find(s=>s.name==="Me"); return me?me.amtBase:0;};
 
+  const [viewingAtt,    setViewingAtt]    = useState(null);
+  const [viewMode,      setViewMode]      = useState("list");
+  const [galleryFilter, setGalleryFilter] = useState("all");
+  const [selectedExp,   setSelectedExp]   = useState(null);
+  const [ocrState,   setOcrState]   = useState({ step:"idle", image:null, result:null, error:"" });
+  // step: idle | compressing | analyzing | ready | error
+  const ocrFileRef = useRef(null);
+
+  // ── OCR: scan a receipt photo with Claude vision ──────────────────────────
+  const scanReceipt = async (file) => {
+    if (!file) return;
+    setOcrState({ step:"compressing", image:null, result:null, error:"" });
+
+    // Compress image to reasonable size for API
+    const compressed = await compressImage(file);
+    const base64 = compressed.data.split(",")[1]; // strip data: prefix
+
+    setOcrState({ step:"analyzing", image:compressed.data, result:null, error:"" });
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 600,
+          system: `You are a receipt OCR engine. Extract data and return ONLY valid JSON — no markdown, no extra text.
+Shape:
+{
+  "merchant": "store/restaurant name or best guess",
+  "amount": "total amount as a number string e.g. 24.50",
+  "currency": "3-letter ISO code inferred from receipt symbols, language or country (e.g. USD, SGD, EUR, GBP, JPY, THB)",
+  "date": "YYYY-MM-DD format if found, else today",
+  "category": "one of: 🍜 Food & Drink | 🚌 Transport | 🏨 Accommodation | 🎡 Activities | 🛍️ Shopping | 💊 Health | 📱 Other",
+  "items": ["line item 1", "line item 2"],
+  "confidence": "high | medium | low",
+  "notes": "anything unusual — split bill, tip included, etc."
+}
+If you can't read a field clearly, make your best inference and lower confidence. Return ONLY the JSON object.`,
+          messages: [{
+            role: "user",
+            content: [
+              {
+                type: "image",
+                source: { type: "base64", media_type: "image/jpeg", data: base64 }
+              },
+              { type: "text", text: "Extract all receipt data from this image and return the JSON." }
+            ]
+          }]
+        })
+      });
+
+      const data = await res.json();
+      const raw  = data.content?.[0]?.text || "";
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+
+      setOcrState({ step:"ready", image:compressed.data, result:parsed, error:"" });
+
+    } catch(e) {
+      setOcrState({ step:"error", image:null, result:null,
+        error: "Could not read receipt. Try a clearer photo with good lighting." });
+    }
+  };
+
+  // Accept OCR result → pre-fill the form
+  const acceptOcr = () => {
+    const r = ocrState.result;
+    if (!r) return;
+    // Map OCR category to EXPENSE_CATS
+    const matchedCat = EXPENSE_CATS.find(c => c === r.category) || EXPENSE_CATS[0];
+    setForm(f => ({
+      ...f,
+      desc:     r.merchant || f.desc,
+      amount:   r.amount   || f.amount,
+      currency: CURRENCIES.includes(r.currency) ? r.currency : baseCurrency,
+      cat:      matchedCat,
+      receiptImage: ocrState.image, // attach photo to expense
+    }));
+    setOcrState({ step:"idle", image:null, result:null, error:"" });
+  };
+
+  // Confidence colour helper
+  const confClass = c => c === "high" ? "ocr-conf-high" : c === "medium" ? "ocr-conf-mid" : "ocr-conf-low";
+
+  // Attach a receipt to an expense
+  const addReceiptToExp = (expId, attachments) => {
+    saveExpenses(expenses.map(e => e.id === expId
+      ? { ...e, attachments: [...(e.attachments||[]), ...attachments] }
+      : e));
+    // also save to docs vault with auto-link
+    const newDocs = attachments.map(att => ({
+      ...att, cat:"receipt", name: att.name,
+      linkedTo:"expense", linkedId: String(expId),
+    }));
+    saveDocs([...(docs||[]), ...newDocs]);
+  };
+
+  const removeReceiptFromExp = (expId, attId) => {
+    saveExpenses(expenses.map(e => e.id === expId
+      ? { ...e, attachments: (e.attachments||[]).filter(a => a.id !== attId) }
+      : e));
+  };
+
   const Avatar=({name,size=26})=><div style={{width:size,height:size,borderRadius:"50%",background:name==="Me"?"rgba(255,168,40,0.2)":personColor(name)+"22",color:name==="Me"?"var(--amber)":personColor(name),display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.42,fontWeight:800,flexShrink:0}}>{name.slice(0,2).toUpperCase()}</div>;
 
   return (
@@ -2046,7 +3931,7 @@ function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, ex
 
       {/* Sub-tabs */}
       <div style={{display:"flex",gap:6,marginBottom:12}}>
-        {[["add","➕ Add"],["transactions","🧾 Log"],["balances","⚖️ Balances"]].map(([id,label])=>(
+        {[["add","➕ Add"],["transactions","🧾 Log"],["balances","⚖️ Balances"],["daily","📅 Daily"]].map(([id,label])=>(
           <button key={id} onClick={()=>setActiveTab(id)}
             style={{flex:1,padding:"8px 4px",fontSize:11,fontWeight:600,borderRadius:10,border:"none",cursor:"pointer",
               background:activeTab===id?"var(--amber)":"rgba(255,255,255,0.05)",
@@ -2059,7 +3944,122 @@ function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, ex
       {/* ADD */}
       {activeTab==="add"&&(
         <div className="card">
-          <div className="card-title">➕ Add Expense</div>
+          <div className="flex items-center justify-between" style={{marginBottom:12}}>
+            <div className="card-title" style={{marginBottom:0}}>➕ Add Expense</div>
+            {ocrState.step==="idle"&&(
+              <button className="ai-gen-btn" style={{fontSize:11}} onClick={()=>ocrFileRef.current?.click()}>
+                📸 Scan Receipt
+              </button>
+            )}
+            {(ocrState.step==="compressing"||ocrState.step==="analyzing")&&(
+              <div className="ai-gen-btn" style={{fontSize:11,opacity:.7,pointerEvents:"none"}}>
+                <span className="dots"><span>·</span><span>·</span><span>·</span></span> Reading…
+              </div>
+            )}
+            {(ocrState.step==="ready"||ocrState.step==="error")&&(
+              <button className="btn-ghost" style={{fontSize:11,padding:"4px 10px"}}
+                onClick={()=>setOcrState({step:"idle",image:null,result:null,error:""})}>
+                ✕ Clear scan
+              </button>
+            )}
+          </div>
+
+          {/* Hidden file input for OCR */}
+          <input ref={ocrFileRef} type="file" accept="image/*" capture="environment"
+            style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)scanReceipt(f);e.target.value="";}}/>
+
+          {/* ── OCR STATES ── */}
+
+          {/* Idle: show scan zone only when form is empty */}
+          {ocrState.step==="idle" && !form.desc && !form.amount && (
+            <div className="ocr-scan-zone" style={{marginBottom:12}} onClick={()=>ocrFileRef.current?.click()}>
+              <input type="file" accept="image/*" capture="environment" style={{display:"none"}}
+                onChange={e=>{const f=e.target.files[0];if(f)scanReceipt(f);e.target.value="";}}/>
+              <div className="ocr-scan-icon">🧾</div>
+              <div className="ocr-scan-label">Snap or upload a receipt</div>
+              <div className="ocr-scan-sub">Claude reads the total, merchant, date & category automatically</div>
+            </div>
+          )}
+
+          {/* Analyzing */}
+          {(ocrState.step==="compressing"||ocrState.step==="analyzing")&&ocrState.image&&(
+            <div className="ocr-analyzing" style={{marginBottom:12}}>
+              <div className="ocr-img-strip">
+                <img src={ocrState.image} alt="Receipt being scanned"/>
+                <div className="ocr-scan-line"/>
+              </div>
+              <div className="ocr-analyzing-label">
+                <span className="dots"><span>·</span><span>·</span><span>·</span></span>
+                {ocrState.step==="compressing" ? "Preparing image…" : "Claude is reading your receipt…"}
+              </div>
+            </div>
+          )}
+
+          {/* Error */}
+          {ocrState.step==="error"&&(
+            <div className="ocr-error" style={{marginBottom:12}}>
+              ⚠️ {ocrState.error}
+              <button className="btn-ghost" style={{marginLeft:"auto",fontSize:11,padding:"3px 9px"}}
+                onClick={()=>ocrFileRef.current?.click()}>Retry</button>
+            </div>
+          )}
+
+          {/* OCR Result */}
+          {ocrState.step==="ready"&&ocrState.result&&(
+            <div className="ocr-result" style={{marginBottom:14}}>
+              {ocrState.image&&<img className="ocr-result-img" src={ocrState.image} alt="Receipt"/>}
+              <div className="ocr-result-body">
+                <div className="ocr-result-title">
+                  ✨ Receipt read
+                  <span style={{fontSize:10,background:"rgba(77,184,122,0.12)",border:"1px solid rgba(77,184,122,0.25)",borderRadius:5,padding:"1px 7px",color:"#4DB87A",fontFamily:"'DM Sans',sans-serif",fontWeight:600}}>
+                    {ocrState.result.confidence||"—"} confidence
+                  </span>
+                </div>
+
+                {[
+                  {label:"Merchant", val:ocrState.result.merchant},
+                  {label:"Total",    val:ocrState.result.amount ? `${ocrState.result.currency||""} ${ocrState.result.amount}` : null},
+                  {label:"Date",     val:ocrState.result.date},
+                  {label:"Category", val:ocrState.result.category},
+                ].filter(f=>f.val).map(f=>(
+                  <div key={f.label} className="ocr-field">
+                    <div className="ocr-field-label">{f.label}</div>
+                    <div className="ocr-field-val">{f.val}</div>
+                    <div className={`ocr-field-conf ${confClass(ocrState.result.confidence)}`}/>
+                  </div>
+                ))}
+
+                {ocrState.result.items?.length>0&&(
+                  <div className="ocr-items-list">
+                    {ocrState.result.items.slice(0,5).join(" · ")}
+                    {ocrState.result.items.length>5&&` +${ocrState.result.items.length-5} more`}
+                  </div>
+                )}
+                {ocrState.result.notes&&(
+                  <div style={{fontSize:11,color:"var(--text-dim)",marginTop:6}}>💬 {ocrState.result.notes}</div>
+                )}
+              </div>
+              <div className="ocr-result-footer">
+                <button className="btn flex-1" onClick={acceptOcr}>Use this ✓</button>
+                <button className="btn-ghost" style={{fontSize:12}}
+                  onClick={()=>setOcrState(s=>({...s,step:"idle",result:null}))}>Edit manually</button>
+              </div>
+            </div>
+          )}
+
+          {/* Show attached receipt thumbnail on form when accepted */}
+          {form.receiptImage&&ocrState.step==="idle"&&(
+            <div style={{position:"relative",marginBottom:10}}>
+              <img src={form.receiptImage} alt="Receipt"
+                style={{width:"100%",maxHeight:80,objectFit:"cover",borderRadius:10,border:"1px solid rgba(255,168,40,0.2)"}}/>
+              <div style={{position:"absolute",top:6,right:6}}>
+                <button className="btn-del" style={{background:"rgba(7,16,31,0.75)",borderRadius:6,padding:"3px 6px",fontSize:12}}
+                  onClick={()=>setForm(f=>({...f,receiptImage:null}))}>✕</button>
+              </div>
+              <div style={{fontSize:10,color:"var(--amber)",marginTop:3}}>📎 Receipt attached</div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-8">
             <select className="input" value={form.cat} onChange={e=>setForm(f=>({...f,cat:e.target.value}))}>
               {EXPENSE_CATS.map(c=><option key={c} value={c}>{c}</option>)}
@@ -2134,7 +4134,7 @@ function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, ex
                 )}
               </>
             )}
-            <button className="btn btn-full" onClick={addExpense} disabled={!form.desc.trim()||!form.amount||converting}>
+            <button className="btn btn-full" onClick={addExpense} disabled={!form.desc.trim()||!form.amount||converting||ocrState.step==="analyzing"}>
               {converting?"Fetching rate…":"Add Expense"}
             </button>
           </div>
@@ -2142,52 +4142,284 @@ function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, ex
       )}
 
       {/* TRANSACTIONS */}
-      {activeTab==="transactions"&&(
-        <div>
-          {catBreakdown.length>0&&(
+      {activeTab==="transactions"&&(()=>{
+        // ── Gallery helpers ──────────────────────────────────────────────────
+        const todayISO = new Date().toISOString().split("T")[0];
+
+        const catBgClass = (cat) => {
+          if(!cat) return "cat-bg-other";
+          if(cat.includes("Food"))  return "cat-bg-food";
+          if(cat.includes("Trans")) return "cat-bg-trans";
+          if(cat.includes("Accom")) return "cat-bg-hotel";
+          if(cat.includes("Act"))   return "cat-bg-act";
+          if(cat.includes("Shop"))  return "cat-bg-shop";
+          if(cat.includes("Health"))return "cat-bg-health";
+          return "cat-bg-other";
+        };
+
+        const isToday = (exp) => {
+          if(exp.dateISO) return exp.dateISO === todayISO;
+          try{ return new Date(exp.date).toISOString().split("T")[0]===todayISO; }catch{ return false; }
+        };
+
+        const firstImg = (exp) => {
+          const atts = exp.attachments||[];
+          return atts.find(a=>isImage(a.type));
+        };
+
+        // Build filter options from categories actually used
+        const usedCats = [...new Set(expenses.map(e=>e.cat))].slice(0,5);
+
+        // Apply filter
+        const filtered = expenses.filter(exp => {
+          if(galleryFilter==="photos") return !!firstImg(exp);
+          if(galleryFilter==="today")  return isToday(exp);
+          if(galleryFilter!=="all")    return exp.cat===galleryFilter;
+          return true;
+        });
+        const sortedExps = [...filtered].reverse();
+
+        return (
+          <div>
+            {/* Category breakdown (list mode only) */}
+            {viewMode==="list"&&catBreakdown.length>0&&(
+              <div className="card">
+                <div className="card-title">📊 Breakdown</div>
+                {catBreakdown.map(({cat,total})=>(
+                  <div key={cat} style={{marginBottom:10}}>
+                    <div className="flex items-center justify-between" style={{fontSize:13,marginBottom:4}}>
+                      <span style={{cursor:"pointer"}} onClick={()=>{setGalleryFilter(cat);setViewMode("gallery");}}>{cat}</span>
+                      <span style={{color:"var(--amber)",fontWeight:600}}>{fmt(total)}</span>
+                    </div>
+                    <div className="prog-track" style={{height:4}}><div className="prog-fill" style={{width:`${Math.min(100,(total/spent)*100)}%`}}/></div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="card">
-              <div className="card-title">📊 Breakdown</div>
-              {catBreakdown.map(({cat,total})=>(
-                <div key={cat} style={{marginBottom:10}}>
-                  <div className="flex items-center justify-between" style={{fontSize:13,marginBottom:4}}>
-                    <span>{cat}</span><span style={{color:"var(--amber)",fontWeight:600}}>{fmt(total)}</span>
-                  </div>
-                  <div className="prog-track" style={{height:4}}><div className="prog-fill" style={{width:`${Math.min(100,(total/spent)*100)}%`}}/></div>
+              {/* Header with toggle */}
+              <div className="flex items-center justify-between" style={{marginBottom:0}}>
+                <div className="card-title" style={{marginBottom:0}}>
+                  {viewMode==="gallery"?"📷 Receipt Gallery":"🧾 Transactions"}
                 </div>
-              ))}
-            </div>
-          )}
-          <div className="card">
-            <div className="card-title">🧾 Transactions</div>
-            {expenses.length===0
-              ?<div className="empty"><div className="empty-icon">💳</div><div className="empty-msg">No expenses yet</div></div>
-              :[...expenses].reverse().map(exp=>{
-                const orig=fmtOrig(exp); const isSplit=!!exp.splits; const share=myShare(exp);
-                return(
-                  <div key={exp.id} className="exp-row">
-                    <div className="exp-cat">{exp.cat.split(" ")[0]}</div>
-                    <div className="exp-info">
-                      <div className="exp-desc">{exp.desc}</div>
-                      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginTop:3}}>
-                        {orig&&<span className="curr-badge">{exp.currency}</span>}
-                        {isSplit&&<span className="exp-split-tag">👥 Split {exp.splits.length}</span>}
-                        {exp.paidBy&&exp.paidBy!=="Me"&&<span className="payer-tag">💳 {exp.paidBy}</span>}
-                      </div>
-                      <div className="exp-meta">{exp.date}</div>
-                    </div>
-                    <div style={{textAlign:"right",flexShrink:0}}>
-                      <div className="exp-amt">{fmt(exp.amtBase??exp.amount)}</div>
-                      {isSplit&&<div style={{fontSize:10,color:"var(--text-dim)"}}>your share: {fmt(share)}</div>}
-                      {orig&&<div style={{fontSize:10,color:"var(--text-dim)"}}>{orig}</div>}
-                    </div>
-                    <button className="btn-del" onClick={()=>saveExpenses(expenses.filter(e=>e.id!==exp.id))}>✕</button>
+                <div className="view-toggle">
+                  <button className={`vt-btn${viewMode==="list"?" active":""}`}
+                    onClick={()=>setViewMode("list")} title="List view">☰</button>
+                  <button className={`vt-btn${viewMode==="gallery"?" active":""}`}
+                    onClick={()=>setViewMode("gallery")} title="Gallery view">⊞</button>
+                </div>
+              </div>
+
+              {/* Filter chips */}
+              <div className="gallery-filters">
+                {[
+                  {id:"all",   label:"All"},
+                  {id:"photos",label:"📎 With receipts"},
+                  {id:"today", label:"Today"},
+                  ...usedCats.map(c=>({id:c, label:c.split(" ").slice(0,2).join(" ")})),
+                ].map(f=>(
+                  <div key={f.id} className={`gf-chip${galleryFilter===f.id?" on":""}`}
+                    onClick={()=>setGalleryFilter(f.id)}>
+                    {f.label}
+                    {f.id==="all"&&<span style={{opacity:.5}}>({expenses.length})</span>}
+                    {f.id==="photos"&&<span style={{opacity:.5}}>({expenses.filter(e=>firstImg(e)).length})</span>}
                   </div>
-                );
-              })
-            }
+                ))}
+              </div>
+
+              {/* ── LIST VIEW ── */}
+              {viewMode==="list"&&(
+                sortedExps.length===0
+                  ?<div className="empty" style={{padding:"24px 0"}}>
+                    <div className="empty-icon">💳</div>
+                    <div className="empty-msg">No expenses match this filter</div>
+                  </div>
+                  :sortedExps.map(exp=>{
+                    const orig=fmtOrig(exp); const isSplit=!!exp.splits; const share=myShare(exp);
+                    const atts=exp.attachments||[]; const img=firstImg(exp);
+                    return(
+                      <div key={exp.id} style={{paddingBottom:10,marginBottom:6,borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                        <div className="exp-row" style={{borderBottom:"none",paddingBottom:0}}>
+                          {/* Tap thumbnail to open gallery detail */}
+                          {img
+                            ?<img src={img.data} alt="" style={{width:40,height:40,objectFit:"cover",borderRadius:8,cursor:"pointer",flexShrink:0}} onClick={()=>setSelectedExp(exp)}/>
+                            :<div className="exp-cat" style={{cursor:"pointer"}} onClick={()=>setSelectedExp(exp)}>{exp.cat.split(" ")[0]}</div>
+                          }
+                          <div className="exp-info" onClick={()=>setSelectedExp(exp)} style={{cursor:"pointer"}}>
+                            <div className="exp-desc">{exp.desc}</div>
+                            <div style={{display:"flex",gap:5,flexWrap:"wrap",marginTop:3}}>
+                              {orig&&<span className="curr-badge">{exp.currency}</span>}
+                              {isSplit&&<span className="exp-split-tag">👥 Split {exp.splits.length}</span>}
+                              {exp.paidBy&&exp.paidBy!=="Me"&&<span className="payer-tag">💳 {exp.paidBy}</span>}
+                              {atts.length>0&&<span style={{fontSize:10,color:"var(--amber)",background:"rgba(255,168,40,0.08)",border:"1px solid rgba(255,168,40,0.2)",borderRadius:5,padding:"1px 6px"}}>📎 {atts.length}</span>}
+                            </div>
+                            <div className="exp-meta">{exp.date}</div>
+                          </div>
+                          <div style={{textAlign:"right",flexShrink:0}}>
+                            <div className="exp-amt">{fmt(exp.amtBase??exp.amount)}</div>
+                            {isSplit&&<div style={{fontSize:10,color:"var(--text-dim)"}}>your share: {fmt(share)}</div>}
+                            {orig&&<div style={{fontSize:10,color:"var(--text-dim)"}}>{orig}</div>}
+                          </div>
+                          <button className="btn-del" onClick={()=>saveExpenses(expenses.filter(e=>e.id!==exp.id))}>✕</button>
+                        </div>
+                        <div style={{paddingLeft:38}}>
+                          <AttachStrip attachments={atts} compact={true}
+                            onAdd={newAtts=>addReceiptToExp(exp.id,newAtts)}
+                            onRemove={attId=>removeReceiptFromExp(exp.id,attId)}
+                            onView={att=>setViewingAtt(att)}/>
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
+
+              {/* ── GALLERY VIEW ── */}
+              {viewMode==="gallery"&&(
+                <div className="gallery-grid">
+                  {sortedExps.length===0&&(
+                    <div className="gallery-empty">
+                      <div className="gallery-empty-icon">
+                        {galleryFilter==="photos"?"🧾":"💳"}
+                      </div>
+                      <div className="gallery-empty-msg">
+                        {galleryFilter==="photos"
+                          ?"No receipts yet — snap a receipt when adding an expense"
+                          :"No expenses match this filter"}
+                      </div>
+                    </div>
+                  )}
+                  {sortedExps.map(exp=>{
+                    const img = firstImg(exp);
+                    const isExpToday = isToday(exp);
+                    return(
+                      <div key={exp.id} className="gallery-cell" onClick={()=>setSelectedExp(exp)}>
+                        {img
+                          ?<img src={img.data} className="gallery-cell-img" alt={exp.desc}/>
+                          :<div className={`gallery-cell-bg ${catBgClass(exp.cat)}`}>
+                            {exp.cat?.split(" ")[0]||"💳"}
+                          </div>
+                        }
+                        <div className="gallery-cell-overlay">
+                          <div className="gallery-cell-amount">{fmt(exp.amtBase??exp.amount)}</div>
+                          <div className="gallery-cell-cat">{exp.desc?.slice(0,18)}</div>
+                        </div>
+                        {img&&<div className="gallery-cell-badge">📎</div>}
+                        {isExpToday&&<div className="gallery-cell-date-badge">Today</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ── Expense Detail Sheet ── */}
+            {selectedExp&&(
+              <div className="exp-detail-overlay" onClick={e=>e.target===e.currentTarget&&setSelectedExp(null)}>
+                <div className="exp-detail-sheet">
+                  {/* Photo or placeholder */}
+                  {(()=>{
+                    const img=firstImg(selectedExp);
+                    return img
+                      ?<img src={img.data} className="exp-detail-photo" alt="Receipt" onClick={()=>setViewingAtt(img)}/>
+                      :<div className={`exp-detail-nophoto ${catBgClass(selectedExp.cat)}`}>
+                        {selectedExp.cat?.split(" ")[0]||"💳"}
+                      </div>;
+                  })()}
+
+                  <div className="exp-detail-body">
+                    <div className="exp-detail-title">{selectedExp.desc}</div>
+
+                    <div className="exp-detail-row">
+                      <div className="exp-detail-icon">💰</div>
+                      <div className="exp-detail-lbl">Amount</div>
+                      <div className="exp-detail-val" style={{color:"var(--amber)",fontWeight:700,fontSize:16}}>
+                        {fmt(selectedExp.amtBase??selectedExp.amount)}
+                        {fmtOrig(selectedExp)&&<span style={{fontSize:11,color:"var(--text-dim)",marginLeft:6}}>({fmtOrig(selectedExp)})</span>}
+                      </div>
+                    </div>
+
+                    <div className="exp-detail-row">
+                      <div className="exp-detail-icon">{selectedExp.cat?.split(" ")[0]||"📎"}</div>
+                      <div className="exp-detail-lbl">Category</div>
+                      <div className="exp-detail-val">{selectedExp.cat?.split(" ").slice(1).join(" ")||"Other"}</div>
+                    </div>
+
+                    <div className="exp-detail-row">
+                      <div className="exp-detail-icon">🗓️</div>
+                      <div className="exp-detail-lbl">Date</div>
+                      <div className="exp-detail-val">{selectedExp.date}{isToday(selectedExp)&&<span className="exp-split-tag" style={{marginLeft:6}}>Today</span>}</div>
+                    </div>
+
+                    <div className="exp-detail-row">
+                      <div className="exp-detail-icon">💳</div>
+                      <div className="exp-detail-lbl">Paid by</div>
+                      <div className="exp-detail-val">{selectedExp.paidBy||"Me"}</div>
+                    </div>
+
+                    {selectedExp.splits&&(
+                      <div className="exp-detail-row">
+                        <div className="exp-detail-icon">👥</div>
+                        <div className="exp-detail-lbl">Split</div>
+                        <div className="exp-detail-val">{selectedExp.splits.map(s=>`${s.name} (${fmt(s.amtBase)})`).join(", ")}</div>
+                      </div>
+                    )}
+
+                    {selectedExp.activityText&&(
+                      <div className="exp-detail-row">
+                        <div className="exp-detail-icon">📅</div>
+                        <div className="exp-detail-lbl">Activity</div>
+                        <div className="exp-detail-val">{selectedExp.dayLabel} — {selectedExp.activityText}</div>
+                      </div>
+                    )}
+
+                    {/* All attachments */}
+                    {(selectedExp.attachments||[]).length>0&&(
+                      <div style={{marginTop:14}}>
+                        <div className="card-title-small" style={{marginBottom:8}}>Attachments</div>
+                        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                          {(selectedExp.attachments||[]).map(att=>(
+                            isImage(att.type)
+                              ?<img key={att.id} src={att.data} onClick={()=>setViewingAtt(att)}
+                                style={{width:72,height:72,objectFit:"cover",borderRadius:10,cursor:"pointer",border:"1px solid rgba(255,255,255,0.08)"}} alt=""/>
+                              :<div key={att.id} className="doc-file-thumb" onClick={()=>setViewingAtt(att)}>
+                                <div className="doc-file-icon">{fileIcon(att.type)}</div>
+                                <div className="doc-file-ext">{fileExt(att.name)}</div>
+                              </div>
+                          ))}
+                          {/* Add more receipts */}
+                          <div className="attach-btn" style={{width:72,height:72,flexDirection:"column",gap:4,justifyContent:"center",borderRadius:10,fontSize:20,position:"relative"}}>
+                            📎
+                            <span style={{fontSize:9}}>Add</span>
+                            <input type="file" multiple accept="image/*,.pdf" style={{position:"absolute",inset:0,opacity:0,cursor:"pointer"}}
+                              onChange={async e=>{ const p=await processFiles(e.target.files); if(p.length){addReceiptToExp(selectedExp.id,p); setSelectedExp(s=>({...s,attachments:[...(s.attachments||[]),...p]}));} e.target.value=""; }}/>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="exp-detail-actions">
+                    {firstImg(selectedExp)&&(
+                      <button className="btn-ghost flex-1" onClick={()=>setViewingAtt(firstImg(selectedExp))}>
+                        🔍 Full Receipt
+                      </button>
+                    )}
+                    <button className="btn-ghost flex-1" style={{borderColor:"rgba(255,92,92,.3)",color:"#FF5C5C"}}
+                      onClick={()=>{ saveExpenses(expenses.filter(e=>e.id!==selectedExp.id)); setSelectedExp(null); }}>
+                      🗑 Delete
+                    </button>
+                    <button className="btn flex-1" onClick={()=>setSelectedExp(null)}>Done</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
-        </div>
-      )}
+        );
+      })()}
+
+      {viewingAtt && <ViewerModal att={viewingAtt} onClose={()=>setViewingAtt(null)} />}
 
       {/* BALANCES */}
       {activeTab==="balances"&&(
@@ -2252,11 +4484,167 @@ function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, ex
           }
         </div>
       )}
+      {/* DAILY */}
+      {activeTab==="daily"&&(()=>{
+        const todayISO = new Date().toISOString().split("T")[0];
+        // Build 7-day data
+        const days = Array.from({length:7},(_,i)=>{
+          const d = new Date(); d.setDate(d.getDate()-6+i);
+          const iso = d.toISOString().split("T")[0];
+          const dayExps = expenses.filter(e=>(e.dateISO||"")===iso || (() => { try { return new Date(e.date).toISOString().split("T")[0]===iso; } catch{return false;} })());
+          const spent = dayExps.reduce((s,e)=>s+(e.amtBase??Number(e.amount??0)),0);
+          return { iso, spent, isToday: iso===todayISO,
+            label: i===6?"Today":d.toLocaleDateString("en",{weekday:"short"}) };
+        });
+        const maxSpent = Math.max(...days.map(d=>d.spent), dailyBudget||1, 1);
+        const todaySpent = days.find(d=>d.isToday)?.spent||0;
+        const todayPct = dailyBudget>0 ? Math.min(100,Math.round(todaySpent/dailyBudget*100)) : 0;
+        const todayOver = dailyBudget>0 && todaySpent>dailyBudget;
+        const barColor = todayPct>100?"#FF5C5C":todayPct>80?"#FFA828":"#4DB87A";
+
+        return (
+          <div>
+            {/* Notification permission */}
+            {notifPerm !== "granted" && (
+              <div className="notif-perm-card" style={{marginBottom:12}}>
+                <div className="notif-perm-icon">🔔</div>
+                <div className="notif-perm-body">
+                  <div className="notif-perm-title">Enable spending nudges</div>
+                  <div className="notif-perm-sub">Get push notifications at 80% and 100% of your daily limit — even when the app is in the background.</div>
+                  <button className="btn btn-sm" style={{marginTop:10}}
+                    onClick={async()=>{ const r=await requestNotifPermission(); if(r==="granted") setActiveTab("daily"); }}>
+                    {notifPerm==="denied"?"Blocked by browser — enable in settings":"Enable notifications"}
+                  </button>
+                </div>
+              </div>
+            )}
+            {notifPerm==="granted"&&(
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,fontSize:12,color:"#4DB87A"}}>
+                <span className="collab-dot"/>
+                Nudges active — alerts at 80% and 100% of daily limit
+              </div>
+            )}
+
+            {/* Set daily limit */}
+            <div className="card">
+              <div className="card-title">📅 Daily Limit</div>
+              <div style={{fontSize:12,color:"var(--text-dim)",marginBottom:10}}>
+                Set how much you want to spend per day. You'll be nudged at 80% and 100%.
+              </div>
+              <div className="flex gap-8">
+                <input className="input flex-1" type="number" placeholder={`e.g. 80 (${baseCurrency})`}
+                  value={dailyBudget||""} onChange={e=>saveDailyBudget(Number(e.target.value)||0)}/>
+                <div style={{display:"flex",alignItems:"center",padding:"0 10px",fontSize:13,color:"var(--text-dim)",
+                  background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:11,flexShrink:0}}>
+                  {baseCurrency}
+                </div>
+              </div>
+              {dailyBudget>0&&(
+                <div style={{marginTop:10,fontSize:11,color:"var(--text-dim)"}}>
+                  = {baseCurrency} {(dailyBudget*7).toFixed(0)}/week · {baseCurrency} {(dailyBudget*30).toFixed(0)}/month
+                </div>
+              )}
+            </div>
+
+            {/* Today's progress */}
+            {dailyBudget>0&&(
+              <div className="card">
+                <div className="flex items-center justify-between" style={{marginBottom:6}}>
+                  <div className="card-title" style={{marginBottom:0}}>Today's Spending</div>
+                  <span style={{fontSize:12,fontWeight:700,color:barColor}}>
+                    {todayPct}% {todayOver?"— over limit ⚠️":""}
+                  </span>
+                </div>
+                <div className="daily-stat-row">
+                  <div className="daily-chip">
+                    <div className="daily-chip-val" style={{color:barColor}}>{baseCurrency} {todaySpent.toFixed(2)}</div>
+                    <div className="daily-chip-lbl">Spent</div>
+                  </div>
+                  <div className="daily-chip">
+                    <div className="daily-chip-val">{baseCurrency} {dailyBudget.toFixed(2)}</div>
+                    <div className="daily-chip-lbl">Limit</div>
+                  </div>
+                  <div className="daily-chip">
+                    <div className="daily-chip-val" style={{color:todayOver?"#FF5C5C":"#4DB87A"}}>
+                      {todayOver?"-":""}{baseCurrency} {Math.abs(dailyBudget-todaySpent).toFixed(2)}
+                    </div>
+                    <div className="daily-chip-lbl">{todayOver?"Over":"Left"}</div>
+                  </div>
+                </div>
+                <div className="daily-prog-bar">
+                  <div className="daily-prog-fill" style={{
+                    width:`${Math.min(100,todayPct)}%`,
+                    background:todayPct>100?"linear-gradient(90deg,#FF5C5C,#C93030)":
+                               todayPct>80 ?"linear-gradient(90deg,#FFA828,#E07C00)":
+                                            "linear-gradient(90deg,#4DB87A,#2D9E5A)"
+                  }}/>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text-dim)"}}>
+                  <span>0</span><span style={{color:"rgba(255,168,40,.5)"}}>80%</span><span>{baseCurrency} {dailyBudget}</span>
+                </div>
+
+                {/* Today's transactions */}
+                {days.find(d=>d.isToday)&&expenses.filter(e=>(e.dateISO||"")===todayISO||(()=>{try{return new Date(e.date).toISOString().split("T")[0]===todayISO;}catch{return false;}})()).length>0&&(
+                  <div style={{marginTop:12}}>
+                    <div style={{fontSize:11,color:"var(--text-dim)",textTransform:"uppercase",letterSpacing:".6px",marginBottom:6}}>Today's Expenses</div>
+                    {expenses.filter(e=>(e.dateISO||"")===todayISO||(()=>{try{return new Date(e.date).toISOString().split("T")[0]===todayISO;}catch{return false;}})()).map(exp=>(
+                      <div key={exp.id} className="exp-row" style={{padding:"7px 0",borderBottom:"1px solid rgba(255,255,255,.04)"}}>
+                        <div className="exp-cat" style={{fontSize:17}}>{exp.cat.split(" ")[0]}</div>
+                        <div className="exp-info">
+                          <div className="exp-desc" style={{fontSize:12}}>{exp.desc}</div>
+                          <div className="exp-meta">{exp.cat.split(" ").slice(1).join(" ")}</div>
+                        </div>
+                        <div className="exp-amt" style={{fontSize:12}}>{fmt(exp.amtBase??exp.amount)}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 7-day chart */}
+            <div className="card">
+              <div className="card-title">📊 Last 7 Days</div>
+              {dailyBudget>0&&<div style={{fontSize:11,color:"rgba(255,168,40,.5)",marginBottom:2}}>
+                — dashed line = daily limit ({baseCurrency} {dailyBudget})
+              </div>}
+              <div className="seven-day-chart" style={{position:"relative"}}>
+                {/* Limit reference line */}
+                {dailyBudget>0&&(
+                  <div className="day-limit-line" style={{
+                    bottom:`${(dailyBudget/maxSpent)*100}%`,
+                    position:"absolute",left:0,right:0
+                  }}/>
+                )}
+                {days.map((day,i)=>{
+                  const h = maxSpent>0 ? Math.max(2,(day.spent/maxSpent)*100) : 2;
+                  const over = dailyBudget>0 && day.spent>dailyBudget;
+                  const pct  = dailyBudget>0 ? day.spent/dailyBudget : 0;
+                  const col  = over?"#FF5C5C":pct>.8?"#FFA828":"#4DB87A";
+                  return (
+                    <div key={day.iso} className="day-bar-wrap">
+                      {day.spent>0&&(
+                        <div className="day-bar-val">{day.spent<10?day.spent.toFixed(1):Math.round(day.spent)}</div>
+                      )}
+                      <div className={`day-bar${day.isToday?" today":""}`}
+                        style={{height:`${h}%`,background:day.isToday?`linear-gradient(to top,${col},${col}aa)`:col,opacity:day.isToday?1:.6}}/>
+                      <div className={`day-bar-label${day.isToday?" today":""}`}>{day.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11,color:"var(--text-dim)"}}>
+                <span>7-day total: {fmt(days.reduce((s,d)=>s+d.spent,0))}</span>
+                <span>avg/day: {fmt(days.reduce((s,d)=>s+d.spent,0)/7)}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
     </div>
   );
 }
-
-/* ── EXPLORE Tab ──────────────────────────────────────────────────────────── */
 function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoading, fetchWeather, currFrom, setCurrFrom, currTo, setCurrTo, currAmount, setCurrAmount, currResult, convertCurrency, aiQuery, setAiQuery, aiResponse, aiLoading, getAiTip }) {
   const PHRASES = [
     {en:"Hello",           tr:"你好 / Bonjour / Hola / こんにちは"},
@@ -2783,11 +5171,16 @@ function App() {
     });
     return p;
   });
-  const [totalBudget, setTotalBudget] = useState(() => LS.get("tc_budget", 2000));
+  const [totalBudget, setTotalBudget]   = useState(() => LS.get("tc_budget", 2000));
+  const [dailyBudget, setDailyBudget]   = useState(() => LS.get("tc_daily_budget", 0));
+  const [notifPerm,   setNotifPerm]     = useState(() => typeof Notification !== "undefined" ? Notification.permission : "default");
+  const [nudge,       setNudge]         = useState(null); // {type:"warn"|"over", title, sub}
+  const nudgeTimer = useRef(null);
   const [baseCurrency, setBaseCurrency] = useState(() => LS.get("tc_basecurr", "USD"));
   const [expenses, setExpenses] = useState(() => LS.get("tc_expenses", []));
   const [people, setPeople] = useState(() => LS.get("tc_people", []));
   const [memories, setMemories] = useState(() => LS.get("tc_memories", []));
+  const [docs,     setDocs]     = useState(() => LS.get("tc_docs",     []));
 
   // Explore
   const [weatherCity, setWeatherCity] = useState("");
@@ -2839,10 +5232,69 @@ function App() {
   const saveItinerary     = i => { setItinerary(i);    LS.set("tc_itin",i); };
   const savePacking       = p => { setPacking(p);      LS.set("tc_pack",p); };
   const saveBudget        = b => { setTotalBudget(b);  LS.set("tc_budget",b); };
+  const saveDailyBudget   = b => { setDailyBudget(b);  LS.set("tc_daily_budget",b); };
   const saveBaseCurrency  = c => { setBaseCurrency(c); LS.set("tc_basecurr",c); };
   const saveExpenses      = e => { setExpenses(e);     LS.set("tc_expenses",e); };
   const savePeople        = p => { setPeople(p);       LS.set("tc_people",p); };
   const saveMemories      = m => { setMemories(m);     LS.set("tc_memories",m); };
+  const saveDocs          = d => { setDocs(d);         LS.set("tc_docs",d); };
+
+  // ── Notification helpers ──────────────────────────────────────────────────
+  const requestNotifPermission = async () => {
+    if (typeof Notification === "undefined") return;
+    const result = await Notification.requestPermission();
+    setNotifPerm(result);
+    return result;
+  };
+
+  const sendPushNotification = (title, body, tag) => {
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.ready.then(reg => {
+      reg.showNotification(title, {
+        body, tag, renotify: false,
+        icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%2307101F'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E%E2%9C%88%EF%B8%8F%3C/text%3E%3C/svg%3E",
+        data: { url: "./index.html" }
+      });
+    }).catch(()=>{});
+  };
+
+  const showNudge = (type, title, sub) => {
+    setNudge({ type, title, sub });
+    clearTimeout(nudgeTimer.current);
+    nudgeTimer.current = setTimeout(() => setNudge(null), 6000);
+  };
+
+  const checkDailyLimit = (newExpenses) => {
+    if (!dailyBudget || dailyBudget <= 0) return;
+    const todayISO = new Date().toISOString().split("T")[0];
+    const todayExps = newExpenses.filter(e => {
+      if (e.dateISO) return e.dateISO === todayISO;
+      try { return new Date(e.date).toISOString().split("T")[0] === todayISO; } catch { return false; }
+    });
+    const todaySpent = todayExps.reduce((s,e) => s + (e.amtBase ?? Number(e.amount ?? 0)), 0);
+    const pct = (todaySpent / dailyBudget) * 100;
+    const topCats = Object.entries(
+      todayExps.reduce((acc,e) => { const c=e.cat?.split(" ")[0]||""; acc[c]=(acc[c]||0)+(e.amtBase??Number(e.amount??0)); return acc; }, {})
+    ).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([c])=>c).join(" ");
+    const spentStr = `${baseCurrency} ${todaySpent.toFixed(2)}`;
+    const limitStr = `${baseCurrency} ${Number(dailyBudget).toFixed(2)}`;
+    const key80    = `tc_notif_${todayISO}_80`;
+    const key100   = `tc_notif_${todayISO}_100`;
+    if (pct >= 100 && !LS.get(key100,"")) {
+      LS.set(key100,"1");
+      const t="🚨 Daily limit reached", s=`${spentStr} spent today — hit your ${limitStr} limit${topCats?" · "+topCats:""}`;
+      sendPushNotification(t,s,"daily-100"); showNudge("over",t,s);
+    } else if (pct >= 80 && !LS.get(key80,"")) {
+      LS.set(key80,"1");
+      const t="⚠️ 80% of daily budget used", s=`${spentStr} of ${limitStr} today${topCats?" · "+topCats:""}`;
+      sendPushNotification(t,s,"daily-80"); showNudge("warn",t,s);
+    }
+  };
+
+  useEffect(() => {
+    if (dailyBudget > 0 && expenses.length > 0) checkDailyLimit(expenses);
+  }, [expenses, dailyBudget]);
 
   // ── Itinerary ──
   const addDay = () => { const n=itinerary.length+1; saveItinerary([...itinerary,{id:Date.now(),day:n,label:`Day ${n}`,activities:[]}]); };
@@ -2929,6 +5381,7 @@ function App() {
       activityId:quickExpense.act.id,activityText:quickExpense.act.text,
       dayId:quickExpense.day.id,dayLabel:quickExpense.day.label,
       date:new Date().toLocaleDateString(),
+      dateISO: new Date().toISOString().split("T")[0],
     }]);
     setQuickExpense(null);
     flash("💰 Expense logged!");
@@ -2960,6 +5413,7 @@ function App() {
     {label:"Budget", icon:"💰"},
     {label:"Explore",icon:"🌍"},
     {label:"Memories",icon:"📸"},
+    {label:"Docs",   icon:"🗄️"},
   ];
 
   // ── Deep-link trip code ──
@@ -2980,6 +5434,18 @@ function App() {
         </div>
       )}
 
+      {/* ── Nudge banner ── */}
+      {nudge&&(
+        <div className={`nudge-banner ${nudge.type}`} onClick={()=>setNudge(null)}>
+          <div className="nudge-icon">{nudge.type==="over"?"🚨":"⚠️"}</div>
+          <div className="nudge-body">
+            <div className="nudge-title">{nudge.title}</div>
+            <div className="nudge-sub">{nudge.sub}</div>
+          </div>
+          <button className="nudge-close" onClick={e=>{e.stopPropagation();setNudge(null);}}>✕</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="header">
         <div className="header-top">
@@ -2996,12 +5462,13 @@ function App() {
       {/* Content */}
       <div className="content">
         <div className="content-inner">
-          {tab===0&&<Dashboard trip={trip} itinerary={itinerary} packing={packing} expenses={expenses} baseCurrency={baseCurrency} memories={memories} weatherData={weatherData} fetchWeather={fetchWeather} navigateTo={navigateTo} toggleActivity={toggleActivity} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
+          {tab===0&&<Dashboard trip={trip} itinerary={itinerary} packing={packing} expenses={expenses} baseCurrency={baseCurrency} memories={memories} weatherData={weatherData} fetchWeather={fetchWeather} navigateTo={navigateTo} toggleActivity={toggleActivity} removeActivity={removeActivity} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
           {tab===1&&<PlanTab trip={trip} saveTrip={saveTrip} itinerary={itinerary} addDay={addDay} addActivity={addActivity} toggleActivity={toggleActivity} removeDay={removeDay} removeActivity={removeActivity} expenses={expenses} baseCurrency={baseCurrency} memories={memories} navigateTo={navigateTo} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
           {tab===2&&<PackTab packing={packing} togglePacking={togglePacking} addPackingItem={addPackingItem} packingTotal={packingTotal} packingDone={packingDone} trip={trip} itinerary={itinerary}/>}
-          {tab===3&&<BudgetTab totalBudget={totalBudget} saveBudget={saveBudget} baseCurrency={baseCurrency} saveBaseCurrency={saveBaseCurrency} expenses={expenses} saveExpenses={saveExpenses} people={people} savePeople={savePeople}/>}
+          {tab===3&&<BudgetTab totalBudget={totalBudget} saveBudget={saveBudget} baseCurrency={baseCurrency} saveBaseCurrency={saveBaseCurrency} expenses={expenses} saveExpenses={saveExpenses} people={people} savePeople={savePeople} docs={docs} saveDocs={saveDocs} dailyBudget={dailyBudget} saveDailyBudget={saveDailyBudget} notifPerm={notifPerm} requestNotifPermission={requestNotifPermission}/>}
           {tab===4&&<ExploreTab trip={trip} weatherCity={weatherCity} setWeatherCity={setWeatherCity} weatherData={weatherData} weatherLoading={weatherLoading} fetchWeather={fetchWeather} currFrom={currFrom} setCurrFrom={setCurrFrom} currTo={currTo} setCurrTo={setCurrTo} currAmount={currAmount} setCurrAmount={setCurrAmount} currResult={currResult} convertCurrency={convertCurrency} aiQuery={aiQuery} setAiQuery={setAiQuery} aiResponse={aiResponse} aiLoading={aiLoading} getAiTip={getAiTip}/>}
           {tab===5&&<MemoriesTab memories={memories} addMemory={addMemory} updateMemory={updateMemory} deleteMemory={deleteMemory} trip={trip} quickMemoryCtx={quickMemoryCtx} clearQuickMemory={()=>setQuickMemoryCtx(null)}/>}
+          {tab===6&&<DocsTab docs={docs} saveDocs={saveDocs} expenses={expenses} itinerary={itinerary} navigateTo={navigateTo}/>}
         </div>
       </div>
 
