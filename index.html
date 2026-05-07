@@ -854,6 +854,98 @@
     .cat-bg-health { background: linear-gradient(135deg,#002D2D,#004A4A); }
     .cat-bg-other  { background: linear-gradient(135deg,#1A1A2D,#2E2E4A); }
 
+    /* ─── Visa & Entry Requirements ────────────────────────────────────────── */
+
+    .visa-card {
+      background: linear-gradient(135deg, rgba(91,164,255,0.06) 0%, rgba(7,16,31,0) 100%);
+      border: 1px solid rgba(91,164,255,0.2);
+      border-radius: 18px; padding: 16px; margin-bottom: 12px;
+      position: relative; overflow: hidden;
+    }
+    .visa-card::before {
+      content:'🛂'; position:absolute; right:14px; top:10px;
+      font-size:32px; opacity:.12; pointer-events:none;
+    }
+
+    /* Status badge */
+    .visa-status-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border-radius: 12px; padding: 10px 16px; margin: 12px 0;
+      width: 100%;
+    }
+    .visa-status-badge.free {
+      background: rgba(77,184,122,0.14); border: 1px solid rgba(77,184,122,0.3);
+    }
+    .visa-status-badge.arrival {
+      background: rgba(255,168,40,0.12); border: 1px solid rgba(255,168,40,0.3);
+    }
+    .visa-status-badge.evisa {
+      background: rgba(91,164,255,0.12); border: 1px solid rgba(91,164,255,0.3);
+    }
+    .visa-status-badge.required {
+      background: rgba(255,92,92,0.10); border: 1px solid rgba(255,92,92,0.3);
+    }
+    .visa-status-icon  { font-size: 24px; flex-shrink: 0; }
+    .visa-status-label { font-family:'Playfair Display',serif; font-size:17px; font-weight:700; }
+    .visa-status-label.free     { color: #4DB87A; }
+    .visa-status-label.arrival  { color: #FFA828; }
+    .visa-status-label.evisa    { color: #5BA4FF; }
+    .visa-status-label.required { color: #FF5C5C; }
+    .visa-status-sub   { font-size:11px; color:var(--text-dim); margin-top:2px; }
+
+    /* Visa sections */
+    .visa-section { margin-bottom: 12px; }
+    .visa-section-hdr {
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+      padding: 8px 0; user-select: none;
+    }
+    .visa-section-icon  { font-size: 16px; flex-shrink:0; }
+    .visa-section-title { font-size:13px; font-weight:600; flex:1; }
+    .visa-section-arrow { font-size:11px; color:var(--text-dim); transition:transform .2s; }
+    .visa-section-arrow.open { transform: rotate(180deg); }
+    .visa-section-body {
+      padding: 0 0 8px 24px; font-size:13px;
+      color: rgba(230,217,194,.75); line-height:1.7;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .visa-section:last-of-type .visa-section-body { border-bottom:none; }
+    .visa-req-item {
+      display: flex; gap:8px; padding: 4px 0;
+    }
+    .visa-req-dot { color:var(--amber); flex-shrink:0; font-size:12px; margin-top:2px; }
+
+    /* Duration / cost row */
+    .visa-meta-row { display:flex; gap:8px; margin: 8px 0 12px; flex-wrap:wrap; }
+    .visa-meta-chip {
+      background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+      border-radius:10px; padding:8px 12px; flex:1; min-width:80px;
+    }
+    .visa-meta-chip-val { font-size:14px; font-weight:700; color:var(--amber); }
+    .visa-meta-chip-lbl { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+    /* Disclaimer */
+    .visa-disclaimer {
+      background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+      border-radius:10px; padding:10px 12px; margin-top:12px;
+      font-size:11px; color:var(--text-dim); line-height:1.6; display:flex; gap:8px;
+    }
+
+    /* Loading shimmer for visa */
+    .visa-shimmer {
+      background: linear-gradient(90deg,rgba(91,164,255,.04) 25%,rgba(91,164,255,.1) 50%,rgba(91,164,255,.04) 75%);
+      background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:10px;
+    }
+
+    /* Nationality input hint */
+    .nat-hint { font-size:11px; color:var(--text-dim); margin-top:5px; line-height:1.5; }
+
+    /* Cached badge */
+    .visa-cached-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(77,184,122,.08); border:1px solid rgba(77,184,122,.2);
+      border-radius:99px; padding:3px 9px; font-size:10px; color:#4DB87A;
+    }
+
     /* ─── Receipt OCR ──────────────────────────────────────────────────────── */
     .ocr-scan-zone {
       background: linear-gradient(135deg, rgba(255,168,40,0.06), rgba(7,16,31,0));
@@ -4646,17 +4738,112 @@ If you can't read a field clearly, make your best inference and lower confidence
   );
 }
 function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoading, fetchWeather, currFrom, setCurrFrom, currTo, setCurrTo, currAmount, setCurrAmount, currResult, convertCurrency, aiQuery, setAiQuery, aiResponse, aiLoading, getAiTip }) {
+
+  // ── Visa state ───────────────────────────────────────────────────────────
+  const [visaPassport, setVisaPassport] = useState(() => LS.get("tc_visa_passport",""));
+  const [visaDest,     setVisaDest]     = useState(trip.destination||"");
+  const [visaResult,   setVisaResult]   = useState(() => {
+    const p = LS.get("tc_visa_passport","");
+    const d = trip.destination||"";
+    if(!p||!d) return null;
+    try { return LS.get(`tc_visa_${p}_${d}`, null); } catch{ return null; }
+  });
+  const [visaLoading,  setVisaLoading]  = useState(false);
+  const [visaError,    setVisaError]    = useState("");
+  const [visaCachedAt, setVisaCachedAt] = useState("");
+  const [openSections, setOpenSections] = useState({ req:true, health:false, notes:false });
+  const toggleSection = (k) => setOpenSections(p=>({...p,[k]:!p[k]}));
+
+  // Sync destination when trip changes
+  useEffect(()=>{ if(trip.destination&&!visaDest) setVisaDest(trip.destination); },[trip.destination]);
+
+  // ── Check visa requirements via Claude ───────────────────────────────────
+  const checkVisa = async () => {
+    const passport = visaPassport.trim();
+    const dest     = visaDest.trim();
+    if(!passport||!dest) return;
+
+    // Check cache first
+    const cacheKey = `tc_visa_${passport.toLowerCase()}_${dest.toLowerCase()}`;
+    const cached   = LS.get(cacheKey, null);
+    const cachedAt = LS.get(cacheKey+"_at", "");
+    if(cached){ setVisaResult(cached); setVisaCachedAt(cachedAt); setVisaError(""); return; }
+
+    setVisaLoading(true); setVisaResult(null); setVisaError("");
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1200,
+          system: `You are a visa and travel requirements expert. Return ONLY valid JSON — no markdown, no extra text.
+
+Shape:
+{
+  "status": "visa_free | visa_on_arrival | evisa | visa_required",
+  "status_label": "Visa Free" | "Visa on Arrival" | "eVisa Available" | "Visa Required",
+  "stay_duration": "e.g. 90 days | 30 days | varies",
+  "cost": "e.g. Free | ~USD 35 | ~USD 50–80",
+  "validity": "e.g. Multiple entry, 10 years | Single entry, 3 months",
+  "how_to_apply": "concise 1–2 sentence instruction — where/how to apply",
+  "requirements": ["list of 4–8 specific document or condition requirements"],
+  "health_rules": ["list of 2–5 health/vaccination/insurance entry rules — say 'None currently required' if not applicable"],
+  "important_notes": ["1–4 noteworthy conditions: dual nationality, passport validity rule, restricted nationalities, etc."],
+  "apply_url_hint": "name of official portal or ministry, e.g. 'evisa.example.gov' or 'Embassy of X'",
+  "confidence": "high | medium | low"
+}
+
+Rules:
+- Base answer on your best knowledge. Be specific but acknowledge if uncertain.
+- If passport nationality has no formal treaty info, give a conservative 'visa_required' answer.
+- Keep requirements as short bullet-point phrases.
+- Never invent specific URLs — only describe where to apply.`,
+          messages:[{ role:"user", content:
+            `Passport nationality: ${passport}
+Destination country: ${dest}
+Provide the current visa and entry requirements.` }]
+        })
+      });
+      const data = await res.json();
+      const raw  = data.content?.[0]?.text||"{}";
+      const parsed = JSON.parse(raw.replace(/```json|```/g,"").trim());
+      if(!parsed.status) throw new Error("Invalid response");
+
+      const checkedAt = new Date().toLocaleDateString("en",{day:"numeric",month:"short",year:"numeric"});
+      LS.set(cacheKey, parsed);
+      LS.set(cacheKey+"_at", checkedAt);
+      LS.set("tc_visa_passport", passport);
+      setVisaResult(parsed);
+      setVisaCachedAt(checkedAt);
+    } catch(e) {
+      setVisaError("Could not retrieve requirements. Check your connection and try again.");
+    }
+    setVisaLoading(false);
+  };
+
+  const clearVisa = () => {
+    const cacheKey = `tc_visa_${visaPassport.trim().toLowerCase()}_${visaDest.trim().toLowerCase()}`;
+    LS.set(cacheKey, null); LS.set(cacheKey+"_at","");
+    setVisaResult(null); setVisaCachedAt("");
+  };
+
+  // Status → badge class + icon
+  const statusClass = (s) => s==="visa_free"?"free":s==="visa_on_arrival"?"arrival":s==="evisa"?"evisa":"required";
+  const statusIcon  = (s) => s==="visa_free"?"✅":s==="visa_on_arrival"?"🛬":s==="evisa"?"💻":"🏛️";
+
+  // ── Common data ─────────────────────────────────────────────────────────
   const PHRASES = [
-    {en:"Hello",           tr:"你好 / Bonjour / Hola / こんにちは"},
-    {en:"Thank you",       tr:"谢谢 / Merci / Gracias / ありがとう"},
-    {en:"Where is…?",      tr:"在哪里? / Où est? / ¿Dónde? / どこ?"},
-    {en:"How much?",       tr:"多少钱? / Combien? / ¿Cuánto? / いくら?"},
-    {en:"Help!",           tr:"救命! / Au secours! / ¡Ayuda! / 助けて!"},
-    {en:"Excuse me",       tr:"对不起 / Excusez-moi / Disculpe / すみません"},
+    {en:"Hello",              tr:"你好 / Bonjour / Hola / こんにちは"},
+    {en:"Thank you",          tr:"谢谢 / Merci / Gracias / ありがとう"},
+    {en:"Where is…?",         tr:"在哪里? / Où est? / ¿Dónde? / どこ?"},
+    {en:"How much?",          tr:"多少钱? / Combien? / ¿Cuánto? / いくら?"},
+    {en:"Help!",              tr:"救命! / Au secours! / ¡Ayuda! / 助けて!"},
+    {en:"Excuse me",          tr:"对不起 / Excusez-moi / Disculpe / すみません"},
     {en:"I don't understand", tr:"我不明白 / Je ne comprends pas"},
   ];
   const EMERGENCY = [
-    {c:"🇸🇬 Singapore",  p:"999", a:"995"},
+    {c:"🇸🇬 Singapore", p:"999", a:"995"},
     {c:"🇺🇸 USA",        p:"911", a:"911"},
     {c:"🇬🇧 UK",         p:"999", a:"999"},
     {c:"🇯🇵 Japan",      p:"110", a:"119"},
@@ -4666,8 +4853,215 @@ function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoa
     {c:"🇩🇪 Germany",    p:"110", a:"112"},
   ];
 
+  const NATIONALITIES = [
+    "Afghan","Albanian","Algerian","American","Andorran","Angolan","Argentine","Armenian","Australian",
+    "Austrian","Azerbaijani","Bahamian","Bahraini","Bangladeshi","Barbadian","Belarusian","Belgian",
+    "Belizean","Beninese","Bhutanese","Bolivian","Bosnian","Botswanan","Brazilian","British","Bruneian",
+    "Bulgarian","Burkinabe","Burmese","Burundian","Cambodian","Cameroonian","Canadian","Cape Verdean",
+    "Central African","Chadian","Chilean","Chinese","Colombian","Congolese","Costa Rican","Croatian",
+    "Cuban","Cypriot","Czech","Danish","Djiboutian","Dominican","Dutch","Ecuadorian","Egyptian",
+    "Emirati","Estonian","Ethiopian","Fijian","Finnish","French","Gabonese","Gambian","Georgian",
+    "German","Ghanaian","Greek","Grenadian","Guatemalan","Guinean","Guyanese","Haitian","Honduran",
+    "Hungarian","Icelandic","Indian","Indonesian","Iranian","Iraqi","Irish","Israeli","Italian",
+    "Ivorian","Jamaican","Japanese","Jordanian","Kazakhstani","Kenyan","Korean (South)","Kuwaiti",
+    "Kyrgyzstani","Laotian","Latvian","Lebanese","Liberian","Libyan","Liechtenstein","Lithuanian",
+    "Luxembourgish","Macedonian","Malagasy","Malawian","Malaysian","Maldivian","Malian","Maltese",
+    "Mauritanian","Mauritian","Mexican","Moldovan","Monegasque","Mongolian","Montenegrin","Moroccan",
+    "Mozambican","Namibian","Nepalese","New Zealander","Nicaraguan","Nigerian","Norwegian","Omani",
+    "Pakistani","Panamanian","Paraguayan","Peruvian","Filipino","Polish","Portuguese","Qatari",
+    "Romanian","Russian","Rwandan","Saudi","Senegalese","Serbian","Singaporean","Slovak","Slovenian",
+    "Somali","South African","Spanish","Sri Lankan","Sudanese","Swazi","Swedish","Swiss","Syrian",
+    "Taiwanese","Tajik","Tanzanian","Thai","Togolese","Trinidadian","Tunisian","Turkish","Turkmen",
+    "Ugandan","Ukrainian","Uruguayan","Uzbekistani","Venezuelan","Vietnamese","Yemeni","Zambian","Zimbabwean"
+  ];
+
   return (
     <div>
+
+      {/* ── Visa & Entry Requirements ── */}
+      <div className="visa-card">
+        <div className="flex items-center justify-between" style={{marginBottom:12}}>
+          <div className="card-title" style={{marginBottom:0,color:"#5BA4FF"}}>🛂 Visa &amp; Entry Check</div>
+          {visaResult&&(
+            <div className="visa-cached-badge" onClick={clearVisa} title="Tap to refresh">
+              ✓ Checked {visaCachedAt} · ↺
+            </div>
+          )}
+        </div>
+
+        {/* Inputs */}
+        <div className="flex flex-col gap-8">
+          <div>
+            <div className="card-title-small">Your passport / nationality</div>
+            <input className="input" list="nationalities-list"
+              placeholder="e.g. Singaporean, British, American…"
+              value={visaPassport}
+              onChange={e=>{ setVisaPassport(e.target.value); setVisaResult(null); }}/>
+            <datalist id="nationalities-list">
+              {NATIONALITIES.map(n=><option key={n} value={n}/>)}
+            </datalist>
+          </div>
+          <div>
+            <div className="card-title-small">Destination country</div>
+            <input className="input"
+              placeholder="e.g. Japan, Thailand, France…"
+              value={visaDest}
+              onChange={e=>{ setVisaDest(e.target.value); setVisaResult(null); }}/>
+          </div>
+          <button className="btn btn-full"
+            onClick={checkVisa}
+            disabled={visaLoading||!visaPassport.trim()||!visaDest.trim()}>
+            {visaLoading
+              ? <span className="dots"><span>·</span><span>·</span><span>·</span></span>
+              : "🔍 Check Requirements"}
+          </button>
+        </div>
+
+        {/* Loading shimmer */}
+        {visaLoading&&(
+          <div style={{marginTop:14,display:"flex",flexDirection:"column",gap:10}}>
+            <div className="visa-shimmer" style={{height:56}}/>
+            <div className="visa-shimmer" style={{height:80,opacity:.7}}/>
+            <div className="visa-shimmer" style={{height:50,opacity:.45}}/>
+          </div>
+        )}
+
+        {/* Error */}
+        {visaError&&!visaLoading&&(
+          <div style={{marginTop:12,padding:"10px 14px",background:"rgba(255,92,92,.07)",
+            border:"1px solid rgba(255,92,92,.2)",borderRadius:12,fontSize:13,color:"rgba(255,92,92,.8)"}}>
+            ⚠️ {visaError}
+          </div>
+        )}
+
+        {/* ── Results ── */}
+        {visaResult&&!visaLoading&&(()=>{
+          const r = visaResult;
+          const sc = statusClass(r.status);
+          return (
+            <div style={{animation:"fadeUp .3s ease"}}>
+
+              {/* Status badge */}
+              <div className={`visa-status-badge ${sc}`}>
+                <div className="visa-status-icon">{statusIcon(r.status)}</div>
+                <div style={{flex:1}}>
+                  <div className={`visa-status-label ${sc}`}>{r.status_label}</div>
+                  <div className="visa-status-sub">
+                    {visaPassport} passport → {visaDest}
+                  </div>
+                </div>
+                {r.confidence==="low"&&(
+                  <div style={{fontSize:10,color:"var(--text-dim)",background:"rgba(255,255,255,.05)",
+                    borderRadius:6,padding:"3px 7px"}}>⚠️ low confidence</div>
+                )}
+              </div>
+
+              {/* Meta chips */}
+              <div className="visa-meta-row">
+                {r.stay_duration&&(
+                  <div className="visa-meta-chip">
+                    <div className="visa-meta-chip-val">{r.stay_duration}</div>
+                    <div className="visa-meta-chip-lbl">Max stay</div>
+                  </div>
+                )}
+                {r.cost&&(
+                  <div className="visa-meta-chip">
+                    <div className="visa-meta-chip-val">{r.cost}</div>
+                    <div className="visa-meta-chip-lbl">Fee</div>
+                  </div>
+                )}
+                {r.validity&&(
+                  <div className="visa-meta-chip" style={{flex:2}}>
+                    <div className="visa-meta-chip-val" style={{fontSize:12}}>{r.validity}</div>
+                    <div className="visa-meta-chip-lbl">Validity</div>
+                  </div>
+                )}
+              </div>
+
+              {/* How to apply */}
+              {r.how_to_apply&&(
+                <div style={{fontSize:13,color:"rgba(230,217,194,.75)",marginBottom:12,
+                  padding:"10px 12px",background:"rgba(255,255,255,.03)",
+                  border:"1px solid rgba(255,255,255,.06)",borderRadius:10,lineHeight:1.6}}>
+                  <span style={{fontWeight:600,color:"var(--text)"}}>How to apply: </span>
+                  {r.how_to_apply}
+                  {r.apply_url_hint&&<div style={{marginTop:4,fontSize:11,color:"#5BA4FF"}}>→ {r.apply_url_hint}</div>}
+                </div>
+              )}
+
+              {/* Requirements */}
+              {r.requirements?.length>0&&(
+                <div className="visa-section">
+                  <div className="visa-section-hdr" onClick={()=>toggleSection("req")}>
+                    <div className="visa-section-icon">📋</div>
+                    <div className="visa-section-title">Requirements ({r.requirements.length})</div>
+                    <div className={`visa-section-arrow${openSections.req?" open":""}`}>▼</div>
+                  </div>
+                  {openSections.req&&(
+                    <div className="visa-section-body">
+                      {r.requirements.map((req,i)=>(
+                        <div key={i} className="visa-req-item">
+                          <div className="visa-req-dot">▸</div>
+                          <div>{req}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Health rules */}
+              {r.health_rules?.length>0&&(
+                <div className="visa-section">
+                  <div className="visa-section-hdr" onClick={()=>toggleSection("health")}>
+                    <div className="visa-section-icon">🏥</div>
+                    <div className="visa-section-title">Health &amp; Entry Rules</div>
+                    <div className={`visa-section-arrow${openSections.health?" open":""}`}>▼</div>
+                  </div>
+                  {openSections.health&&(
+                    <div className="visa-section-body">
+                      {r.health_rules.map((rule,i)=>(
+                        <div key={i} className="visa-req-item">
+                          <div className="visa-req-dot">▸</div>
+                          <div>{rule}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Important notes */}
+              {r.important_notes?.length>0&&(
+                <div className="visa-section">
+                  <div className="visa-section-hdr" onClick={()=>toggleSection("notes")}>
+                    <div className="visa-section-icon">⚠️</div>
+                    <div className="visa-section-title">Important Notes</div>
+                    <div className={`visa-section-arrow${openSections.notes?" open":""}`}>▼</div>
+                  </div>
+                  {openSections.notes&&(
+                    <div className="visa-section-body">
+                      {r.important_notes.map((note,i)=>(
+                        <div key={i} className="visa-req-item">
+                          <div className="visa-req-dot" style={{color:"#FFA828"}}>!</div>
+                          <div>{note}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Disclaimer */}
+              <div className="visa-disclaimer">
+                <span style={{flexShrink:0}}>⚠️</span>
+                <span>Visa rules change frequently. Always verify with the official embassy or government website before travel. This is informational only and not legal advice.</span>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Weather */}
       <div className="card">
         <div className="card-title">🌤️ Weather</div>
