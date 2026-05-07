@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "next": "latest",
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "^19",
+    "react-dom": "^19"
   }
 }
