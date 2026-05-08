@@ -620,6 +620,54 @@
     }
     .rate-note { font-size: 10px; color: var(--text-dim); margin-top: 4px; text-align: right; }
 
+    /* ─── Currency Auto-detect ──────────────────────────────────────────────── */
+    .geo-banner {
+      position: fixed; top:0; left:50%; transform:translateX(-50%);
+      width:100%; max-width:480px; z-index:5100;
+      padding: calc(var(--safe-top) + 10px) 14px 12px;
+      display:flex; align-items:center; gap:10px;
+      background: rgba(14,40,80,0.97);
+      border-bottom: 1px solid rgba(91,164,255,0.3);
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+      animation: nudgeSlideIn .38s cubic-bezier(0.34,1.46,0.64,1);
+      cursor:default;
+    }
+    .geo-flag   { font-size:26px; line-height:1; flex-shrink:0; }
+    .geo-body   { flex:1; min-width:0; }
+    .geo-title  { font-size:13px; font-weight:700; color:#fff; line-height:1.3; }
+    .geo-sub    { font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px; }
+    .geo-accept {
+      background: linear-gradient(135deg,#5BA4FF,#3B7FD4);
+      border:none; border-radius:8px; padding:7px 12px;
+      font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700;
+      color:#fff; cursor:pointer; white-space:nowrap; flex-shrink:0;
+      transition:opacity .15s;
+    }
+    .geo-accept:hover { opacity:.88; }
+    .geo-dismiss {
+      background:rgba(255,255,255,0.12); border:none; border-radius:7px;
+      color:rgba(255,255,255,0.6); font-size:14px; cursor:pointer; padding:5px 8px;
+      flex-shrink:0; line-height:1;
+    }
+    /* Toggle in BudgetTab */
+    .geo-toggle-row {
+      display:flex; align-items:center; gap:10px; padding:8px 0;
+      font-size:12px; color:var(--text-dim); cursor:pointer; user-select:none;
+    }
+    .geo-toggle-row:hover { color:var(--text); }
+    .geo-detect-btn {
+      background:rgba(91,164,255,0.1); border:1px solid rgba(91,164,255,0.25);
+      border-radius:8px; padding:5px 11px; font-size:11px; font-weight:600;
+      color:#5BA4FF; cursor:pointer; white-space:nowrap;
+      font-family:'DM Sans',sans-serif; transition:all .15s;
+    }
+    .geo-detect-btn:hover { background:rgba(91,164,255,0.18); }
+    .geo-detect-btn:disabled { opacity:.45; cursor:default; }
+    .geo-status-dot {
+      width:7px; height:7px; border-radius:50%; flex-shrink:0;
+      background:#5BA4FF; animation:blink 2s infinite;
+    }
+
     /* ─── Daily Spend Limit & Nudges ───────────────────────────────────────── */
 
     /* Slide-down nudge banner */
@@ -1721,7 +1769,38 @@ const DEFAULT_PACKING = {
   "🎒 Essentials":["Cash (local currency)","Credit / Debit cards","Snacks","Water bottle","Travel pillow","Luggage locks"],
 };
 const EXPENSE_CATS = ["🍜 Food & Drink","🚌 Transport","🏨 Accommodation","🎡 Activities","🛍️ Shopping","💊 Health","📱 Other"];
-const CURRENCIES = ["USD","SGD","EUR","GBP","JPY","AUD","CNY","CAD","THB","IDR","MYR","KRW","HKD","INR"];
+const CURRENCIES = ["USD","SGD","EUR","GBP","JPY","AUD","CNY","CAD","THB","IDR","MYR","KRW","HKD","INR","AED","NZD","CHF","SEK","NOK","DKK","TWD","PHP","VND","PKR","BDT","LKR","NPR","MXN","BRL","ZAR","TRY","ILS","QAR","SAR","KWD","BHD","OMR","JOD","EGP","NGN","KES","GHS","TZS","UGX","MAD","TND","DZD","RUB","UAH","PLN","CZK","HUF","RON","BGN","HRK","RSD","ISK","ARS","CLP","COP","PEN","UYU","VES"];
+
+// Country code (ISO 3166-1 alpha-2) → currency code (ISO 4217)
+const COUNTRY_CURRENCY = {
+  AE:"AED",AF:"AFN",AL:"ALL",AM:"AMD",AO:"AOA",AR:"ARS",AT:"EUR",AU:"AUD",
+  AZ:"AZN",BA:"BAM",BD:"BDT",BE:"EUR",BF:"XOF",BG:"BGN",BH:"BHD",BI:"BIF",
+  BJ:"XOF",BN:"BND",BO:"BOB",BR:"BRL",BT:"BTN",BW:"BWP",BY:"BYN",BZ:"BZD",
+  CA:"CAD",CD:"CDF",CF:"XAF",CG:"XAF",CH:"CHF",CI:"XOF",CL:"CLP",CM:"XAF",
+  CN:"CNY",CO:"COP",CR:"CRC",CU:"CUP",CV:"CVE",CY:"EUR",CZ:"CZK",DE:"EUR",
+  DJ:"DJF",DK:"DKK",DO:"DOP",DZ:"DZD",EC:"USD",EE:"EUR",EG:"EGP",ER:"ERN",
+  ES:"EUR",ET:"ETB",FI:"EUR",FJ:"FJD",FR:"EUR",GA:"XAF",GB:"GBP",GE:"GEL",
+  GH:"GHS",GM:"GMD",GN:"GNF",GQ:"XAF",GR:"EUR",GT:"GTQ",GW:"XOF",GY:"GYD",
+  HK:"HKD",HN:"HNL",HR:"HRK",HT:"HTG",HU:"HUF",ID:"IDR",IE:"EUR",IL:"ILS",
+  IN:"INR",IQ:"IQD",IR:"IRR",IS:"ISK",IT:"EUR",JM:"JMD",JO:"JOD",JP:"JPY",
+  KE:"KES",KG:"KGS",KH:"KHR",KR:"KRW",KW:"KWD",KZ:"KZT",LA:"LAK",LB:"LBP",
+  LI:"CHF",LK:"LKR",LR:"LRD",LS:"LSL",LT:"EUR",LU:"EUR",LV:"EUR",LY:"LYD",
+  MA:"MAD",MC:"EUR",MD:"MDL",ME:"EUR",MG:"MGA",MK:"MKD",ML:"XOF",MM:"MMK",
+  MN:"MNT",MO:"MOP",MR:"MRU",MT:"EUR",MU:"MUR",MV:"MVR",MW:"MWK",MX:"MXN",
+  MY:"MYR",MZ:"MZN",NA:"NAD",NE:"XOF",NG:"NGN",NI:"NIO",NL:"EUR",NO:"NOK",
+  NP:"NPR",NR:"AUD",NZ:"NZD",OM:"OMR",PA:"PAB",PE:"PEN",PG:"PGK",PH:"PHP",
+  PK:"PKR",PL:"PLN",PT:"EUR",PW:"USD",PY:"PYG",QA:"QAR",RO:"RON",RS:"RSD",
+  RU:"RUB",RW:"RWF",SA:"SAR",SC:"SCR",SD:"SDG",SE:"SEK",SG:"SGD",SI:"EUR",
+  SK:"EUR",SL:"SLL",SM:"EUR",SN:"XOF",SO:"SOS",SR:"SRD",SS:"SSP",ST:"STN",
+  SV:"USD",SY:"SYP",SZ:"SZL",TD:"XAF",TG:"XOF",TH:"THB",TJ:"TJS",TL:"USD",
+  TM:"TMT",TN:"TND",TO:"TOP",TR:"TRY",TT:"TTD",TW:"TWD",TZ:"TZS",UA:"UAH",
+  UG:"UGX",US:"USD",UY:"UYU",UZ:"UZS",VA:"EUR",VE:"VES",VN:"VND",VU:"VUV",
+  WS:"WST",XK:"EUR",YE:"YER",ZA:"ZAR",ZM:"ZMW",ZW:"ZWL"
+};
+
+// Generate flag emoji from ISO 3166-1 alpha-2 country code
+const countryFlag = (cc) =>
+  cc ? [...cc.toUpperCase()].map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join("") : "🌍";
 
 const WC_ICON = c => c===0?"☀️":c<=3?"⛅":c<=48?"🌫️":c<=67?"🌧️":c<=77?"❄️":c<=82?"🌦️":"⛈️";
 const WC_DESC = c => c===0?"Clear sky":c<=3?"Partly cloudy":c<=48?"Foggy":c<=67?"Rainy":c<=77?"Snowy":c<=82?"Light showers":"Thunderstorm";
@@ -3743,7 +3822,7 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
 }
 
 /* ── BUDGET Tab ───────────────────────────────────────────────────────────── */
-function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, expenses, saveExpenses, people, savePeople, docs, saveDocs, dailyBudget, saveDailyBudget, notifPerm, requestNotifPermission }) {
+function BudgetTab({ totalBudget, saveBudget, baseCurrency, saveBaseCurrency, expenses, saveExpenses, people, savePeople, docs, saveDocs, dailyBudget, saveDailyBudget, notifPerm, requestNotifPermission, geoDetectEnabled, saveGeoDetectEnabled, geoChecking, onDetectNow }) {
 
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput,   setBudgetInput]   = useState(String(totalBudget));
@@ -3999,6 +4078,24 @@ If you can't read a field clearly, make your best inference and lower confidence
         <div className="budget-bar"><div className="budget-fill" style={{width:`${pct}%`,background:barColor}}/></div>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"rgba(230,217,194,0.35)"}}>
           <span>{pct}% used</span><span>{expenses.length} expense{expenses.length!==1?"s":""}</span>
+        </div>
+        {/* Geo currency detection row */}
+        <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",gap:10}}>
+          <div className="geo-toggle-row" style={{flex:1,padding:0}} onClick={()=>saveGeoDetectEnabled(!geoDetectEnabled)}>
+            <div className={`toggle-track${geoDetectEnabled?" on":""}`}><div className="toggle-knob"/></div>
+            <span style={{flex:1}}>📍 Auto-detect currency by location</span>
+            {geoDetectEnabled&&LS.get("tc_geo_last_cc","")&&(
+              <span style={{fontSize:12}}>{countryFlag(LS.get("tc_geo_last_cc",""))}</span>
+            )}
+          </div>
+          {geoDetectEnabled&&(
+            <button className="geo-detect-btn" disabled={geoChecking}
+              onClick={()=>onDetectNow()}>
+              {geoChecking
+                ?<span className="dots"><span>·</span><span>·</span><span>·</span></span>
+                :"Detect now"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -5568,8 +5665,12 @@ function App() {
   const [totalBudget, setTotalBudget]   = useState(() => LS.get("tc_budget", 2000));
   const [dailyBudget, setDailyBudget]   = useState(() => LS.get("tc_daily_budget", 0));
   const [notifPerm,   setNotifPerm]     = useState(() => typeof Notification !== "undefined" ? Notification.permission : "default");
-  const [nudge,       setNudge]         = useState(null); // {type:"warn"|"over", title, sub}
+  const [nudge,       setNudge]         = useState(null);
+  const [geoDetectEnabled, setGeoDetectEnabled] = useState(() => LS.get("tc_geo_enabled", true));
+  const [geoPrompt,   setGeoPrompt]     = useState(null); // {country, currency, flag, cc}
+  const [geoChecking, setGeoChecking]   = useState(false);
   const nudgeTimer = useRef(null);
+  const geoTimer   = useRef(null);
   const [baseCurrency, setBaseCurrency] = useState(() => LS.get("tc_basecurr", "USD"));
   const [expenses, setExpenses] = useState(() => LS.get("tc_expenses", []));
   const [people, setPeople] = useState(() => LS.get("tc_people", []));
@@ -5634,6 +5735,53 @@ function App() {
   const saveDocs          = d => { setDocs(d);         LS.set("tc_docs",d); };
 
   // ── Notification helpers ──────────────────────────────────────────────────
+  // ── Geo currency detection ────────────────────────────────────────────────
+  const saveGeoDetectEnabled = (v) => { setGeoDetectEnabled(v); LS.set("tc_geo_enabled", v); };
+
+  const detectLocationCurrency = (manual = false) => {
+    if (!navigator.geolocation) return;
+    const today = new Date().toISOString().split("T")[0];
+    // Rate-limit: once per day unless manual
+    if (!manual && LS.get("tc_geo_checked","") === today) return;
+    setGeoChecking(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat.toFixed(4)}&lon=${lng.toFixed(4)}&format=json`);
+          const data = await res.json();
+          const cc   = data.address?.country_code?.toUpperCase();
+          if (!cc) { setGeoChecking(false); return; }
+          const detectedCurrency = COUNTRY_CURRENCY[cc];
+          LS.set("tc_geo_checked", today);
+          LS.set("tc_geo_last_cc", cc);
+          setGeoChecking(false);
+          if (!detectedCurrency || detectedCurrency === baseCurrency) return;
+          const flag    = countryFlag(cc);
+          const country = data.address?.country || cc;
+          setGeoPrompt({ country, currency: detectedCurrency, flag, cc });
+          clearTimeout(geoTimer.current);
+          geoTimer.current = setTimeout(() => setGeoPrompt(null), 14000);
+        } catch { setGeoChecking(false); }
+      },
+      () => setGeoChecking(false),
+      { timeout: 9000, maximumAge: 300000 }
+    );
+  };
+
+  const acceptGeoCurrency = () => {
+    if (!geoPrompt) return;
+    saveBaseCurrency(geoPrompt.currency);
+    clearTimeout(geoTimer.current);
+    setGeoPrompt(null);
+    flash(`✓ Switched to ${geoPrompt.currency}`);
+  };
+
+  // Auto-detect on first mount (2 s delay so app renders first)
+  useEffect(() => {
+    if (geoDetectEnabled) setTimeout(() => detectLocationCurrency(false), 2000);
+  }, []);
+
   const requestNotifPermission = async () => {
     if (typeof Notification === "undefined") return;
     const result = await Notification.requestPermission();
@@ -5840,6 +5988,19 @@ function App() {
         </div>
       )}
 
+      {/* ── Geo currency banner ── */}
+      {geoPrompt&&(
+        <div className="geo-banner">
+          <div className="geo-flag">{geoPrompt.flag}</div>
+          <div className="geo-body">
+            <div className="geo-title">You're in {geoPrompt.country}</div>
+            <div className="geo-sub">Local currency is {geoPrompt.currency} — switch?</div>
+          </div>
+          <button className="geo-accept" onClick={acceptGeoCurrency}>Use {geoPrompt.currency}</button>
+          <button className="geo-dismiss" onClick={()=>setGeoPrompt(null)}>✕</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="header">
         <div className="header-top">
@@ -5859,7 +6020,7 @@ function App() {
           {tab===0&&<Dashboard trip={trip} itinerary={itinerary} packing={packing} expenses={expenses} baseCurrency={baseCurrency} memories={memories} weatherData={weatherData} fetchWeather={fetchWeather} navigateTo={navigateTo} toggleActivity={toggleActivity} removeActivity={removeActivity} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
           {tab===1&&<PlanTab trip={trip} saveTrip={saveTrip} itinerary={itinerary} addDay={addDay} addActivity={addActivity} toggleActivity={toggleActivity} removeDay={removeDay} removeActivity={removeActivity} expenses={expenses} baseCurrency={baseCurrency} memories={memories} navigateTo={navigateTo} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
           {tab===2&&<PackTab packing={packing} togglePacking={togglePacking} addPackingItem={addPackingItem} packingTotal={packingTotal} packingDone={packingDone} trip={trip} itinerary={itinerary}/>}
-          {tab===3&&<BudgetTab totalBudget={totalBudget} saveBudget={saveBudget} baseCurrency={baseCurrency} saveBaseCurrency={saveBaseCurrency} expenses={expenses} saveExpenses={saveExpenses} people={people} savePeople={savePeople} docs={docs} saveDocs={saveDocs} dailyBudget={dailyBudget} saveDailyBudget={saveDailyBudget} notifPerm={notifPerm} requestNotifPermission={requestNotifPermission}/>}
+          {tab===3&&<BudgetTab totalBudget={totalBudget} saveBudget={saveBudget} baseCurrency={baseCurrency} saveBaseCurrency={saveBaseCurrency} expenses={expenses} saveExpenses={saveExpenses} people={people} savePeople={savePeople} docs={docs} saveDocs={saveDocs} dailyBudget={dailyBudget} saveDailyBudget={saveDailyBudget} notifPerm={notifPerm} requestNotifPermission={requestNotifPermission} geoDetectEnabled={geoDetectEnabled} saveGeoDetectEnabled={saveGeoDetectEnabled} geoChecking={geoChecking} onDetectNow={()=>detectLocationCurrency(true)}/>}
           {tab===4&&<ExploreTab trip={trip} weatherCity={weatherCity} setWeatherCity={setWeatherCity} weatherData={weatherData} weatherLoading={weatherLoading} fetchWeather={fetchWeather} currFrom={currFrom} setCurrFrom={setCurrFrom} currTo={currTo} setCurrTo={setCurrTo} currAmount={currAmount} setCurrAmount={setCurrAmount} currResult={currResult} convertCurrency={convertCurrency} aiQuery={aiQuery} setAiQuery={setAiQuery} aiResponse={aiResponse} aiLoading={aiLoading} getAiTip={getAiTip}/>}
           {tab===5&&<MemoriesTab memories={memories} addMemory={addMemory} updateMemory={updateMemory} deleteMemory={deleteMemory} trip={trip} quickMemoryCtx={quickMemoryCtx} clearQuickMemory={()=>setQuickMemoryCtx(null)}/>}
           {tab===6&&<DocsTab docs={docs} saveDocs={saveDocs} expenses={expenses} itinerary={itinerary} navigateTo={navigateTo}/>}
