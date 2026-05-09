@@ -34,13 +34,14 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Always go to network for API calls
+  const isCartoHost = url.hostname === 'basemaps.cartocdn.com'
+    || url.hostname.endsWith('.basemaps.cartocdn.com');
   const isApi = url.hostname === 'api.anthropic.com'
     || url.hostname === 'geocoding-api.open-meteo.com'
     || url.hostname === 'api.open-meteo.com'
     || url.hostname === 'api.frankfurter.app'
     || url.hostname === 'nominatim.openstreetmap.org'
-    || url.hostname === 'basemaps.cartocdn.com'
-    || url.hostname.endsWith('.basemaps.cartocdn.com');
+    || isCartoHost;
 
   if (isApi) {
     event.respondWith(
