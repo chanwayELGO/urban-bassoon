@@ -39,8 +39,7 @@ self.addEventListener('fetch', (event) => {
     || url.hostname === 'api.open-meteo.com'
     || url.hostname === 'api.frankfurter.app'
     || url.hostname === 'nominatim.openstreetmap.org'
-    || url.hostname === 'basemaps.cartocdn.com'
-    || url.hostname.endsWith('.basemaps.cartocdn.com');
+    || url.hostname.endsWith('basemaps.cartocdn.com');
 
   if (isApi) {
     event.respondWith(
