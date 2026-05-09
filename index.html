@@ -994,6 +994,81 @@
       border-radius:99px; padding:3px 9px; font-size:10px; color:#4DB87A;
     }
 
+    /* ─── Flight & Booking Links ────────────────────────────────────────────── */
+    .booking-card {
+      background: linear-gradient(135deg, rgba(78,84,200,0.07) 0%, rgba(7,16,31,0) 100%);
+      border: 1px solid rgba(120,120,255,0.2);
+      border-radius: 18px; padding: 16px; margin-bottom: 12px;
+      position: relative; overflow: hidden;
+    }
+    .booking-card::before {
+      content:'✈️'; position:absolute; right:14px; top:10px;
+      font-size:32px; opacity:.12; pointer-events:none;
+    }
+    .booking-type-tabs {
+      display:flex; gap:6px; margin-bottom:12px;
+    }
+    .booking-type-tab {
+      flex:1; padding:7px; font-size:12px; font-weight:600; border-radius:9px;
+      border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04);
+      color:rgba(230,217,194,0.5); cursor:pointer; transition:all .15s; text-align:center;
+    }
+    .booking-type-tab.on {
+      background:rgba(120,120,255,0.16); border-color:rgba(120,120,255,0.4);
+      color:#9B9BFF;
+    }
+    .airline-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(120,120,255,0.1); border:1px solid rgba(120,120,255,0.25);
+      border-radius:10px; padding:9px 13px; margin:10px 0;
+      width:100%;
+    }
+    .airline-badge-icon  { font-size:20px; flex-shrink:0; }
+    .airline-badge-name  { font-size:14px; font-weight:600; color:#9B9BFF; }
+    .airline-badge-code  { font-size:11px; color:var(--text-dim); margin-top:1px; }
+    .booking-links-grid  {
+      display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px;
+    }
+    .booking-link-btn {
+      display:flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+      border-radius:11px; padding:10px 12px; cursor:pointer; text-decoration:none;
+      transition:all .15s; -webkit-tap-highlight-color:transparent;
+    }
+    .booking-link-btn:hover, .booking-link-btn:active {
+      background:rgba(120,120,255,0.12); border-color:rgba(120,120,255,0.3);
+    }
+    .blb-icon  { font-size:18px; flex-shrink:0; line-height:1; }
+    .blb-label { font-size:12px; font-weight:600; color:var(--text); line-height:1.3; }
+    .blb-sub   { font-size:10px; color:var(--text-dim); margin-top:1px; }
+    .booking-result {
+      animation:fadeUp .25s ease; margin-top:4px;
+    }
+    .booking-platform-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(255,168,40,0.1); border:1px solid rgba(255,168,40,0.22);
+      border-radius:8px; padding:4px 10px; font-size:11px;
+      color:var(--amber); font-weight:600; margin-bottom:10px;
+    }
+    .saved-bookings { margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); }
+    .saved-bookings-hdr {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+    }
+    .saved-bookmark {
+      display:flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07);
+      border-radius:10px; padding:9px 12px; margin-bottom:6px; cursor:pointer;
+      transition:all .15s;
+    }
+    .saved-bookmark:hover { background:rgba(120,120,255,0.1); border-color:rgba(120,120,255,0.25); }
+    .saved-bm-icon  { font-size:16px; flex-shrink:0; }
+    .saved-bm-label { font-size:13px; font-weight:500; flex:1; }
+    .saved-bm-ref   { font-size:11px; color:var(--text-dim); font-family:monospace; }
+    .save-form {
+      display:flex; flex-direction:column; gap:8px;
+      margin-top:10px; animation:fadeUp .2s ease;
+    }
+
     /* ─── Receipt OCR ──────────────────────────────────────────────────────── */
     .ocr-scan-zone {
       background: linear-gradient(135deg, rgba(255,168,40,0.06), rgba(7,16,31,0));
@@ -4834,6 +4909,113 @@ If you can't read a field clearly, make your best inference and lower confidence
     </div>
   );
 }
+// ── Airline IATA database ─────────────────────────────────────────────────────
+const AIRLINES = {
+  AA:{name:"American Airlines",   web:"https://aa.com/booking/find-reservations"},
+  AC:{name:"Air Canada",          web:"https://aircanada.com/en-ca/account/manage-booking"},
+  AF:{name:"Air France",          web:"https://airfrance.com/en/common/reservation/reservation.do"},
+  AI:{name:"Air India",           web:"https://airindia.in/manage-booking.htm"},
+  AK:{name:"AirAsia",             web:"https://airasia.com/managebooking"},
+  AM:{name:"Aeroméxico",          web:"https://aeromexico.com/en-us/travel-information/manage-your-trip"},
+  AY:{name:"Finnair",             web:"https://finnair.com/en/manage"},
+  AZ:{name:"ITA Airways",         web:"https://itaairways.com/en/manage-your-booking"},
+  BA:{name:"British Airways",     web:"https://britishairways.com/travel/managebooking"},
+  BG:{name:"Biman Bangladesh",    web:"https://biman-airlines.com"},
+  BI:{name:"Royal Brunei",        web:"https://royalbrunei.com/manage-booking"},
+  BR:{name:"EVA Air",             web:"https://evaair.com/en-global/manage-booking"},
+  BX:{name:"Air Busan",           web:"https://airbusan.com/en"},
+  CA:{name:"Air China",           web:"https://airchina.com/en-US/manage_booking"},
+  CI:{name:"China Airlines",      web:"https://www.china-airlines.com/en-us/manage-booking"},
+  CX:{name:"Cathay Pacific",      web:"https://cathaypacific.com/cx/en_HK/manage-booking"},
+  CZ:{name:"China Southern",      web:"https://csair.com/en/booking/managebooking"},
+  DL:{name:"Delta Air Lines",     web:"https://delta.com/us/en/need-help/manage-booking"},
+  EK:{name:"Emirates",            web:"https://emirates.com/english/manage-booking"},
+  ET:{name:"Ethiopian Airlines",  web:"https://ethiopianairlines.com/en/manage"},
+  EY:{name:"Etihad Airways",      web:"https://etihad.com/en-us/manage"},
+  FD:{name:"Thai AirAsia",        web:"https://airasia.com/managebooking"},
+  FJ:{name:"Fiji Airways",        web:"https://fijiairways.com/manage-my-booking"},
+  FZ:{name:"flydubai",            web:"https://flydubai.com/en/plan/manage-booking"},
+  G9:{name:"Air Arabia",          web:"https://airarabia.com/en/manage-bookings"},
+  GF:{name:"Gulf Air",            web:"https://gulfair.com/en/manage-booking"},
+  HA:{name:"Hawaiian Airlines",   web:"https://hawaiianairlines.com/manage-flights"},
+  HU:{name:"Hainan Airlines",     web:"https://hainanairlines.com/en/managebooking"},
+  IB:{name:"Iberia",              web:"https://iberia.com/en/yourbookings"},
+  IR:{name:"Iran Air",            web:"https://iranair.com"},
+  IT:{name:"Tigerair Taiwan",     web:"https://tigerairtw.com/en-tw/manage-booking"},
+  JJ:{name:"LATAM Brasil",        web:"https://latamairlines.com/us/en/manage-your-trip"},
+  JL:{name:"Japan Airlines",      web:"https://jal.co.jp/en/booking/reserve"},
+  JQ:{name:"Jetstar",             web:"https://jetstar.com/au/en/manage-booking"},
+  KA:{name:"Cathay Dragon",       web:"https://cathaypacific.com"},
+  KE:{name:"Korean Air",          web:"https://koreanair.com/booking/manage-booking"},
+  KL:{name:"KLM",                 web:"https://klm.com/en-us/travel/booking/manage"},
+  KQ:{name:"Kenya Airways",       web:"https://kenya-airways.com/manage-booking"},
+  LA:{name:"LATAM Airlines",      web:"https://latamairlines.com/us/en/manage-your-trip"},
+  LH:{name:"Lufthansa",           web:"https://lufthansa.com/en/homepage/myflights"},
+  LO:{name:"LOT Polish Airlines", web:"https://lot.com/en/my-lot"},
+  LX:{name:"Swiss International", web:"https://swiss.com/en/booking/myflights"},
+  MH:{name:"Malaysia Airlines",   web:"https://malaysiaairlines.com/my/en/manage-booking"},
+  MK:{name:"Air Mauritius",       web:"https://airmauritius.com/managebooking"},
+  MS:{name:"EgyptAir",            web:"https://egyptair.com/en/eguest"},
+  MU:{name:"China Eastern",       web:"https://ceair.com/en/booking/manageOrder"},
+  NH:{name:"ANA",                 web:"https://ana.co.jp/en/us/manage-booking"},
+  NZ:{name:"Air New Zealand",     web:"https://airnewzealand.com/manage-booking"},
+  OK:{name:"Czech Airlines",      web:"https://csa.cz/en/booking-management"},
+  OS:{name:"Austrian Airlines",   web:"https://austrian.com/en/myflights"},
+  OZ:{name:"Asiana Airlines",     web:"https://flyasiana.com/C/US/EN/manage"},
+  PC:{name:"Pegasus Airlines",    web:"https://flypgs.com/en/manage-booking"},
+  PK:{name:"Pakistan International",web:"https://piac.aero"},
+  PR:{name:"Philippine Airlines", web:"https://philippineairlines.com/en/ph/home/manage-booking"},
+  PX:{name:"Air Niugini",         web:"https://airniugini.com.pg"},
+  QF:{name:"Qantas",              web:"https://qantas.com/au/en/manage-booking"},
+  QR:{name:"Qatar Airways",       web:"https://qatarairways.com/en/manage.html"},
+  RJ:{name:"Royal Jordanian",     web:"https://rj.com/en/plan/manage-booking"},
+  SA:{name:"South African Airways",web:"https://flysaa.com/manage"},
+  SK:{name:"SAS",                 web:"https://sas.se/en/travel-info/manage"},
+  SN:{name:"Brussels Airlines",   web:"https://brusselsairlines.com/en/your-trip/manage-booking"},
+  SQ:{name:"Singapore Airlines",  web:"https://singaporeair.com/en_UK/us/travel-info/manage-booking"},
+  SV:{name:"Saudia",              web:"https://saudia.com/en/manage-booking"},
+  TG:{name:"Thai Airways",        web:"https://thaiairways.com/en_TH/manage_bookings"},
+  TK:{name:"Turkish Airlines",    web:"https://turkishairlines.com/en-us/flights/manage-booking"},
+  TP:{name:"TAP Air Portugal",    web:"https://tapairportugal.com/en/manage-your-booking"},
+  TR:{name:"Scoot",               web:"https://flyscoot.com/en/manage-booking"},
+  UA:{name:"United Airlines",     web:"https://united.com/ual/en/us/reservation"},
+  UL:{name:"SriLankan Airlines",  web:"https://srilankan.com/en-us/manage-booking"},
+  UX:{name:"Air Europa",          web:"https://aireuropa.com/en/my-booking"},
+  VN:{name:"Vietnam Airlines",    web:"https://vietnamairlines.com/en/the-gioi/manage-booking"},
+  VY:{name:"Vueling",             web:"https://vueling.com/en/booking-management"},
+  WN:{name:"Southwest Airlines",  web:"https://southwest.com/air/manage-reservation"},
+  WS:{name:"WestJet",             web:"https://westjet.com/en-ca/manage-trips"},
+  XY:{name:"flynas",              web:"https://flynas.com/en/manage-booking"},
+  ZI:{name:"Aigle Azur",          web:"https://aigle-azur.com"},
+};
+
+// Booking platform detection by reference pattern
+const detectPlatform = (ref) => {
+  const r = ref.toUpperCase().trim();
+  if (/^HM[A-Z0-9]{8,10}$/.test(r))              return "airbnb";
+  if (/^\d{9,10}$/.test(r))                        return "booking";
+  if (/^[A-Z]{2}\d{6,8}$/.test(r))                return "expedia";
+  if (/^[A-Z0-9]{6}$/.test(r))                     return "pnr";
+  if (/^[A-Z0-9]{8,12}$/.test(r))                  return "hotels";
+  return "generic";
+};
+
+const platformLinks = (ref, platform) => {
+  const enc = encodeURIComponent(ref);
+  const base = [
+    { label:"Booking.com",  url:`https://secure.booking.com/myreservations.html?lang=en`,          icon:"🏨", sub:"Manage reservation" },
+    { label:"Expedia",      url:`https://expedia.com/trips`,                                        icon:"✈️", sub:"My trips" },
+    { label:"Airbnb",       url:`https://airbnb.com/trips/v1`,                                      icon:"🏠", sub:"Your trips" },
+    { label:"Hotels.com",   url:`https://hotels.com/my-trips`,                                      icon:"🛎️", sub:"Manage booking" },
+    { label:"Agoda",        url:`https://agoda.com/en-us/account/manage`,                           icon:"🌏", sub:"My bookings" },
+    { label:"Google",       url:`https://www.google.com/search?q=${enc}+hotel+booking`,             icon:"🔍", sub:"Search reference" },
+  ];
+  if (platform === "airbnb")  return [base[2], base[5], ...base.slice(0,2)];
+  if (platform === "booking") return [base[0], base[5], base[1], base[3]];
+  if (platform === "expedia") return [base[1], base[5], base[0], base[2]];
+  return base;
+};
+
 function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoading, fetchWeather, currFrom, setCurrFrom, currTo, setCurrTo, currAmount, setCurrAmount, currResult, convertCurrency, aiQuery, setAiQuery, aiResponse, aiLoading, getAiTip }) {
 
   // ── Visa state ───────────────────────────────────────────────────────────
@@ -4853,6 +5035,64 @@ function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoa
 
   // Sync destination when trip changes
   useEffect(()=>{ if(trip.destination&&!visaDest) setVisaDest(trip.destination); },[trip.destination]);
+
+  // ── Booking links state ───────────────────────────────────────────────────
+  const [bookingTab,     setBookingTab]     = useState("flight"); // "flight" | "hotel"
+  const [flightInput,    setFlightInput]    = useState("");
+  const [hotelInput,     setHotelInput]     = useState("");
+  const [bookingResult,  setBookingResult]  = useState(null);
+  const [savedBookings,  setSavedBookings]  = useState(() => LS.get("tc_bookings", []));
+  const [showSaveForm,   setShowSaveForm]   = useState(false);
+  const [saveLabel,      setSaveLabel]      = useState("");
+
+  const saveBookmarks = (b) => { setSavedBookings(b); LS.set("tc_bookings", b); };
+
+  const searchBooking = () => {
+    const raw = (bookingTab==="flight" ? flightInput : hotelInput).trim().toUpperCase();
+    if (!raw) return;
+    if (bookingTab === "flight") {
+      const m = raw.match(/^([A-Z]{2,3})(\d{1,4}[A-Z]?)$/);
+      if (m) {
+        const [, code, num] = m;
+        const airline = AIRLINES[code] || { name: code + " (Unknown airline)", web: null };
+        setBookingResult({
+          type: "flight", raw,
+          airline, code,
+          links: [
+            { label:"FlightAware",   url:`https://flightaware.com/live/flight/${raw}`,                    icon:"📡", sub:"Live tracking" },
+            { label:"Flightradar24", url:`https://www.flightradar24.com/${raw}`,                          icon:"🔴", sub:"Real-time map" },
+            { label:"Google Flights",url:`https://www.google.com/travel/flights?q=${encodeURIComponent(raw)}`, icon:"🔎", sub:"Flight info" },
+            ...(airline.web ? [{ label: airline.name, url: airline.web, icon:"✈️", sub:"Manage booking" }] : []),
+          ],
+        });
+      } else {
+        setBookingResult({ type:"flight_invalid", raw });
+      }
+    } else {
+      const platform = detectPlatform(raw);
+      setBookingResult({
+        type: "hotel", raw, platform,
+        links: platformLinks(raw, platform),
+      });
+    }
+  };
+
+  const addBookmark = () => {
+    const raw = (bookingTab==="flight" ? flightInput : hotelInput).trim().toUpperCase();
+    if (!raw || !saveLabel.trim()) return;
+    const b = [{ id:Date.now(), type:bookingTab, ref:raw, label:saveLabel.trim() }, ...savedBookings].slice(0, 20);
+    saveBookmarks(b); setShowSaveForm(false); setSaveLabel("");
+  };
+
+  const removeBookmark = (id) => saveBookmarks(savedBookings.filter(b=>b.id!==id));
+
+  const loadBookmark = (b) => {
+    setBookingTab(b.type);
+    if (b.type==="flight") setFlightInput(b.ref);
+    else setHotelInput(b.ref);
+    setBookingResult(null);
+    setTimeout(searchBooking, 50);
+  };
 
   // ── Check visa requirements via Claude ───────────────────────────────────
   const checkVisa = async () => {
@@ -5184,6 +5424,134 @@ Provide the current visa and entry requirements.` }]
         )}
         {weatherData?.error&&(
           <div style={{textAlign:"center",color:"rgba(255,92,92,0.7)",fontSize:13,marginTop:10}}>⚠️ {weatherData.error}</div>
+        )}
+      </div>
+
+      {/* ── Flight & Hotel Booking Links ── */}
+      <div className="booking-card">
+        <div className="card-title" style={{marginBottom:10,color:"#9B9BFF"}}>✈️ Booking Quick Links</div>
+
+        {/* Type tabs */}
+        <div className="booking-type-tabs">
+          <div className={`booking-type-tab${bookingTab==="flight"?" on":""}`}
+            onClick={()=>{setBookingTab("flight");setBookingResult(null);}}>✈️ Flight</div>
+          <div className={`booking-type-tab${bookingTab==="hotel"?" on":""}`}
+            onClick={()=>{setBookingTab("hotel");setBookingResult(null);}}>🏨 Hotel / Booking</div>
+        </div>
+
+        {/* Input row */}
+        <div className="flex gap-8">
+          <input className="input flex-1"
+            placeholder={bookingTab==="flight"?"Flight number e.g. SQ321, BA117…":"Booking reference e.g. BKG123456…"}
+            value={bookingTab==="flight"?flightInput:hotelInput}
+            onChange={e=>{ bookingTab==="flight"?setFlightInput(e.target.value):setHotelInput(e.target.value); setBookingResult(null); }}
+            onKeyDown={e=>e.key==="Enter"&&searchBooking()}
+          />
+          <button className="btn" onClick={searchBooking}
+            disabled={!(bookingTab==="flight"?flightInput:hotelInput).trim()}>
+            Go
+          </button>
+        </div>
+        <div className="nat-hint" style={{marginTop:5}}>
+          {bookingTab==="flight"
+            ? "Enter 2–3 letter airline code + flight number"
+            : "Enter your booking reference from the confirmation email"}
+        </div>
+
+        {/* ── Flight result ── */}
+        {bookingResult?.type==="flight"&&(
+          <div className="booking-result">
+            <div className="airline-badge">
+              <div className="airline-badge-icon">✈️</div>
+              <div>
+                <div className="airline-badge-name">{bookingResult.airline.name}</div>
+                <div className="airline-badge-code">Flight {bookingResult.raw}</div>
+              </div>
+            </div>
+            <div className="booking-links-grid">
+              {bookingResult.links.map((l,i)=>(
+                <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
+                  className="booking-link-btn">
+                  <div className="blb-icon">{l.icon}</div>
+                  <div><div className="blb-label">{l.label}</div><div className="blb-sub">{l.sub}</div></div>
+                </a>
+              ))}
+            </div>
+            <button className="btn-ghost" style={{width:"100%",marginTop:10,fontSize:12}}
+              onClick={()=>setShowSaveForm(s=>!s)}>
+              {showSaveForm?"Cancel":"📌 Save this booking"}
+            </button>
+          </div>
+        )}
+
+        {/* Invalid flight number */}
+        {bookingResult?.type==="flight_invalid"&&(
+          <div style={{marginTop:10,fontSize:13,color:"rgba(255,92,92,0.8)",padding:"8px 12px",
+            background:"rgba(255,92,92,0.07)",border:"1px solid rgba(255,92,92,0.2)",borderRadius:10}}>
+            ⚠️ "{bookingResult.raw}" doesn't look like a flight number. Try formats like SQ321, BA117, AA1234.
+          </div>
+        )}
+
+        {/* ── Hotel / booking result ── */}
+        {bookingResult?.type==="hotel"&&(
+          <div className="booking-result">
+            <div style={{marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
+              <div style={{fontSize:13,fontWeight:600}}>Ref: <span style={{fontFamily:"monospace",color:"#9B9BFF"}}>{bookingResult.raw}</span></div>
+              {bookingResult.platform!=="generic"&&(
+                <div className="booking-platform-badge">
+                  {bookingResult.platform==="airbnb"?"🏠 Airbnb":
+                   bookingResult.platform==="booking"?"🏨 Booking.com":
+                   bookingResult.platform==="expedia"?"✈️ Expedia":
+                   bookingResult.platform==="pnr"?"✈️ PNR":"🏨 Hotel"}
+                </div>
+              )}
+            </div>
+            <div className="booking-links-grid">
+              {bookingResult.links.map((l,i)=>(
+                <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
+                  className="booking-link-btn">
+                  <div className="blb-icon">{l.icon}</div>
+                  <div><div className="blb-label">{l.label}</div><div className="blb-sub">{l.sub}</div></div>
+                </a>
+              ))}
+            </div>
+            <button className="btn-ghost" style={{width:"100%",marginTop:10,fontSize:12}}
+              onClick={()=>setShowSaveForm(s=>!s)}>
+              {showSaveForm?"Cancel":"📌 Save this booking"}
+            </button>
+          </div>
+        )}
+
+        {/* Save form */}
+        {showSaveForm&&(
+          <div className="save-form">
+            <input className="input" placeholder='Label e.g. "Return flight" or "Hotel Tokyo"'
+              value={saveLabel} onChange={e=>setSaveLabel(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&addBookmark()}/>
+            <button className="btn btn-full" onClick={addBookmark}
+              disabled={!saveLabel.trim()}>Save Bookmark</button>
+          </div>
+        )}
+
+        {/* Saved bookings */}
+        {savedBookings.length>0&&(
+          <div className="saved-bookings">
+            <div className="saved-bookings-hdr">
+              <div style={{fontSize:12,color:"var(--text-dim)",fontWeight:600,textTransform:"uppercase",letterSpacing:".6px"}}>
+                📌 Saved ({savedBookings.length})
+              </div>
+            </div>
+            {savedBookings.map(b=>(
+              <div key={b.id} className="saved-bookmark">
+                <div className="saved-bm-icon">{b.type==="flight"?"✈️":"🏨"}</div>
+                <div style={{flex:1,minWidth:0}} onClick={()=>loadBookmark(b)}>
+                  <div className="saved-bm-label">{b.label}</div>
+                  <div className="saved-bm-ref">{b.ref}</div>
+                </div>
+                <button className="btn-del" style={{fontSize:13}} onClick={()=>removeBookmark(b.id)}>✕</button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
