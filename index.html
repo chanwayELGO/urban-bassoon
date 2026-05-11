@@ -1069,6 +1069,195 @@
       margin-top:10px; animation:fadeUp .2s ease;
     }
 
+    /* ─── Multi-trip Drawer ─────────────────────────────────────────────────── */
+    .trip-drawer-overlay {
+      position:fixed; inset:0; z-index:6000;
+      background:rgba(4,9,18,0.75); backdrop-filter:blur(8px);
+      animation:fadeIn .2s ease;
+    }
+    .trip-drawer-sheet {
+      position:absolute; bottom:0; left:0; right:0;
+      max-width:480px; margin:0 auto;
+      background:linear-gradient(160deg,#0D1E3A 0%,#07101F 100%);
+      border:1px solid rgba(255,168,40,0.18); border-radius:22px 22px 0 0;
+      max-height:82vh; display:flex; flex-direction:column;
+      animation:slideUp .33s cubic-bezier(0.34,1.46,0.64,1);
+      padding-bottom:var(--safe-bottom);
+    }
+    .trip-drawer-hdr {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 20px 14px; flex-shrink:0;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .trip-drawer-title {
+      font-family:'Playfair Display',serif; font-size:18px; color:var(--amber); font-weight:700;
+    }
+    .trip-drawer-body {
+      flex:1; overflow-y:auto; padding:14px 16px;
+    }
+    .trip-drawer-body::-webkit-scrollbar { display:none; }
+
+    /* New trip button */
+    .new-trip-btn {
+      display:flex; align-items:center; gap:10px;
+      border:2px dashed rgba(255,168,40,0.25); border-radius:14px; padding:14px;
+      cursor:pointer; transition:all .15s; margin-bottom:12px;
+      background:rgba(255,168,40,0.04); color:var(--amber);
+    }
+    .new-trip-btn:hover { background:rgba(255,168,40,0.1); border-color:rgba(255,168,40,0.45); }
+    .new-trip-btn-icon { font-size:22px; line-height:1; }
+    .new-trip-btn-text { font-size:14px; font-weight:600; }
+    .new-trip-btn-sub  { font-size:11px; color:rgba(255,168,40,0.6); margin-top:2px; }
+
+    /* Trip card */
+    .trip-card {
+      background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px; padding:14px 16px; margin-bottom:10px;
+      cursor:pointer; transition:all .15s; position:relative;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .trip-card:active { transform:scale(.98); }
+    .trip-card.active {
+      border-color:rgba(255,168,40,0.45);
+      background:rgba(255,168,40,0.07);
+      box-shadow:0 0 0 3px rgba(255,168,40,0.08);
+    }
+    .trip-card-hdr { display:flex; align-items:flex-start; gap:10px; }
+    .trip-card-icon { font-size:24px; line-height:1; flex-shrink:0; margin-top:1px; }
+    .trip-card-info { flex:1; min-width:0; }
+    .trip-card-name {
+      font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:#fff;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .trip-card.active .trip-card-name { color:var(--amber); }
+    .trip-card-dest { font-size:12px; color:var(--text-dim); margin-top:3px; }
+    .trip-card-dates { font-size:11px; color:rgba(230,217,194,0.4); margin-top:4px; }
+    .trip-card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+    .trip-status-badge {
+      font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+      padding:3px 8px; border-radius:6px;
+    }
+    .tsb-upcoming  { background:rgba(91,164,255,0.12); color:#5BA4FF; }
+    .tsb-active    { background:rgba(77,184,122,0.14); color:#4DB87A; }
+    .tsb-completed { background:rgba(255,255,255,0.06); color:var(--text-dim); }
+    .tsb-draft     { background:rgba(255,168,40,0.1);  color:var(--amber); }
+
+    /* Active indicator dot */
+    .trip-card-active-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:var(--amber); flex-shrink:0; margin-top:5px;
+      box-shadow:0 0 0 3px rgba(255,168,40,0.2);
+    }
+
+    /* Header drawer button */
+    .trip-switcher-btn {
+      background:rgba(255,168,40,0.08); border:1px solid rgba(255,168,40,0.18);
+      border-radius:10px; padding:5px 9px; font-size:14px; cursor:pointer;
+      color:var(--amber); transition:all .18s; flex-shrink:0; line-height:1;
+    }
+    .trip-switcher-btn:hover { background:rgba(255,168,40,0.18); }
+
+    /* ─── Local Discovery Feed ──────────────────────────────────────────────── */
+    .discovery-card {
+      border-radius: 18px; padding: 16px; margin-bottom: 12px;
+      border: 1px solid rgba(255,200,100,0.18);
+      position: relative; overflow: hidden;
+    }
+    .discovery-card.morning  { background: linear-gradient(135deg,rgba(255,168,40,0.08),rgba(7,16,31,0)); }
+    .discovery-card.afternoon{ background: linear-gradient(135deg,rgba(91,164,255,0.07),rgba(7,16,31,0)); }
+    .discovery-card.evening  { background: linear-gradient(135deg,rgba(180,100,255,0.08),rgba(7,16,31,0)); }
+    .discovery-card.night    { background: linear-gradient(135deg,rgba(50,60,120,0.12),rgba(7,16,31,0)); }
+    .discovery-card::before  {
+      content:''; position:absolute; right:-20px; top:-20px;
+      width:100px; height:100px; border-radius:50%;
+      background:radial-gradient(circle,rgba(255,200,100,0.08),transparent 70%);
+      pointer-events:none;
+    }
+
+    .discovery-hdr {
+      display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px;
+    }
+    .discovery-title-block { flex:1; min-width:0; }
+    .discovery-eyebrow {
+      font-size:10px; font-weight:700; letter-spacing:.9px; text-transform:uppercase;
+      color:var(--amber); margin-bottom:3px;
+    }
+    .discovery-heading {
+      font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:#fff;
+      line-height:1.2;
+    }
+    .discovery-sub { font-size:11px; color:var(--text-dim); margin-top:3px; }
+
+    .discovery-refresh-btn {
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+      border-radius:99px; padding:5px 11px; font-size:11px; font-weight:600;
+      color:var(--text-dim); cursor:pointer; transition:all .15s; white-space:nowrap;
+      font-family:'DM Sans',sans-serif; flex-shrink:0; margin-left:10px;
+    }
+    .discovery-refresh-btn:hover { background:rgba(255,168,40,0.1); color:var(--amber); border-color:rgba(255,168,40,0.3); }
+    .discovery-refresh-btn:disabled { opacity:.4; cursor:default; }
+
+    /* Individual suggestion items */
+    .disc-item {
+      display:flex; gap:12px; padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+    .disc-item:last-child { border-bottom:none; }
+    .disc-emoji-tile {
+      width:44px; height:44px; border-radius:12px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; line-height:1;
+    }
+    .disc-body { flex:1; min-width:0; }
+    .disc-title-row { display:flex; align-items:center; gap:7px; margin-bottom:4px; flex-wrap:wrap; }
+    .disc-name  { font-size:14px; font-weight:700; color:#fff; }
+    .disc-type-badge {
+      font-size:9px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+      padding:2px 7px; border-radius:5px;
+    }
+    .disc-why  { font-size:12px; color:rgba(230,217,194,.7); line-height:1.55; margin-bottom:5px; }
+    .disc-tip  {
+      font-size:11px; color:rgba(230,217,194,.45); line-height:1.5;
+      padding-left:10px; border-left:2px solid rgba(255,168,40,0.25);
+    }
+    .disc-maps-btn {
+      display:inline-flex; align-items:center; gap:5px;
+      margin-top:7px; font-size:11px; font-weight:600; color:#5BA4FF;
+      background:rgba(91,164,255,0.08); border:1px solid rgba(91,164,255,0.2);
+      border-radius:7px; padding:4px 10px; text-decoration:none; cursor:pointer;
+      transition:all .15s;
+    }
+    .disc-maps-btn:hover { background:rgba(91,164,255,0.15); }
+
+    /* Type-specific tile colours */
+    .disc-tile-food       { background:rgba(255,120,50,0.18); }
+    .disc-tile-attraction { background:rgba(255,168,40,0.15); }
+    .disc-tile-experience { background:rgba(120,80,255,0.18); }
+    .disc-tile-shopping   { background:rgba(255,90,180,0.15); }
+    .disc-tile-nature     { background:rgba(77,184,122,0.18); }
+    .disc-tile-nightlife  { background:rgba(50,120,255,0.18); }
+    .disc-tile-practical  { background:rgba(255,255,255,0.07); }
+
+    /* Type badge colours */
+    .disc-badge-food       { background:rgba(255,120,50,0.18); color:#FF8855; }
+    .disc-badge-attraction { background:rgba(255,168,40,0.15); color:var(--amber); }
+    .disc-badge-experience { background:rgba(120,80,255,0.18); color:#AA88FF; }
+    .disc-badge-shopping   { background:rgba(255,90,180,0.15); color:#FF88CC; }
+    .disc-badge-nature     { background:rgba(77,184,122,0.18); color:#4DB87A; }
+    .disc-badge-nightlife  { background:rgba(50,120,255,0.18); color:#5BA4FF; }
+    .disc-badge-practical  { background:rgba(255,255,255,0.07); color:var(--text-dim); }
+
+    /* Locating / loading */
+    .disc-locate-btn {
+      display:flex; align-items:center; gap:8px; padding:14px;
+      background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.1);
+      border-radius:12px; cursor:pointer; transition:all .15s;
+      font-size:13px; color:var(--text-dim); width:100%; justify-content:center;
+    }
+    .disc-locate-btn:hover { background:rgba(255,168,40,0.08); border-color:rgba(255,168,40,0.3); color:var(--amber); }
+    .disc-shimmer-item { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .disc-shimmer-item:last-child { border-bottom:none; }
+
     /* ─── Receipt OCR ──────────────────────────────────────────────────────── */
     .ocr-scan-zone {
       background: linear-gradient(135deg, rgba(255,168,40,0.06), rgba(7,16,31,0));
@@ -5016,7 +5205,7 @@ const platformLinks = (ref, platform) => {
   return base;
 };
 
-function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoading, fetchWeather, currFrom, setCurrFrom, currTo, setCurrTo, currAmount, setCurrAmount, currResult, convertCurrency, aiQuery, setAiQuery, aiResponse, aiLoading, getAiTip }) {
+function ExploreTab({ trip, itinerary, weatherCity, setWeatherCity, weatherData, weatherLoading, fetchWeather, currFrom, setCurrFrom, currTo, setCurrTo, currAmount, setCurrAmount, currResult, convertCurrency, aiQuery, setAiQuery, aiResponse, aiLoading, getAiTip }) {
 
   // ── Visa state ───────────────────────────────────────────────────────────
   const [visaPassport, setVisaPassport] = useState(() => LS.get("tc_visa_passport",""));
@@ -5046,6 +5235,133 @@ function ExploreTab({ trip, weatherCity, setWeatherCity, weatherData, weatherLoa
   const [saveLabel,      setSaveLabel]      = useState("");
 
   const saveBookmarks = (b) => { setSavedBookings(b); LS.set("tc_bookings", b); };
+
+  // ── Discovery feed state ──────────────────────────────────────────────────
+  const DISC_CACHE_MINS = 60; // regenerate at most once per hour per location
+  const [disc, setDisc] = useState({ step:"idle", items:[], location:"", coords:null, generatedAt:"" });
+  // step: idle | locating | generating | ready | error
+
+  const timeOfDayLabel = () => {
+    const h = new Date().getHours();
+    if (h < 6)  return "early morning";
+    if (h < 12) return "morning";
+    if (h < 14) return "lunchtime";
+    if (h < 17) return "afternoon";
+    if (h < 20) return "evening";
+    return "night";
+  };
+
+  const timeClass = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "morning";
+    if (h < 17) return "afternoon";
+    if (h < 21) return "evening";
+    return "night";
+  };
+
+  const tileClass  = (type) => `disc-tile-${type||"practical"}`;
+  const badgeClass = (type) => `disc-badge-${type||"practical"}`;
+
+  const mapsUrl = (query, loc) =>
+    `https://www.google.com/maps/search/${encodeURIComponent((query||"") + (loc?" "+loc:""))}`;
+
+  const fetchDiscovery = async (forceRefresh = false) => {
+    // Try cache first
+    const cacheKey = `tc_disc_${trip.destination||"unknown"}_${new Date().toISOString().slice(0,13)}`;
+    if (!forceRefresh) {
+      const cached = LS.get(cacheKey, null);
+      if (cached?.items?.length) { setDisc({ step:"ready", ...cached }); return; }
+    }
+
+    setDisc(p => ({ ...p, step:"locating", items:[] }));
+
+    // Get GPS coords
+    let coords = null, locationStr = trip.destination || "";
+    try {
+      coords = await new Promise((res, rej) =>
+        navigator.geolocation.getCurrentPosition(
+          p => res({ lat: p.coords.latitude, lng: p.coords.longitude }),
+          rej, { timeout:8000, maximumAge:300000 }
+        )
+      );
+      // Reverse geocode for neighbourhood name
+      const geo = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat.toFixed(4)}&lon=${coords.lng.toFixed(4)}&format=json`
+      ).then(r => r.json());
+      const a = geo.address || {};
+      locationStr = [a.neighbourhood||a.suburb||a.quarter, a.city||a.town||a.village, a.country]
+        .filter(Boolean).join(", ");
+    } catch {
+      // GPS denied — fall back to trip destination
+      if (!locationStr) { setDisc({ step:"error", items:[], location:"", coords:null, generatedAt:"",
+        errorMsg:"Allow location access or set a trip destination to get suggestions." }); return; }
+    }
+
+    setDisc(p => ({ ...p, step:"generating", location: locationStr, coords }));
+
+    // Build context
+    const tod      = timeOfDayLabel();
+    const dow      = new Date().toLocaleDateString("en", { weekday:"long" });
+    const weather  = weatherData && !weatherData.error
+      ? `${weatherData.icon} ${weatherData.temp}${weatherData.unit}, ${WC_DESC(weatherData.code)}`
+      : "unknown";
+    const doneActs = itinerary.flatMap(d => d.activities.filter(a => a.done).map(a => a.text));
+    const todoActs = itinerary.flatMap(d => d.activities.filter(a => !a.done).map(a => a.text));
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens: 900,
+          system:`You are a hyper-local travel guide. Based on context, suggest exactly 3 things to do RIGHT NOW. Return ONLY valid JSON — no markdown.
+
+Shape:
+{
+  "headline": "short punchy headline for what to do (max 6 words, e.g. 'Golden hour in the old quarter')",
+  "items": [
+    {
+      "name": "specific place or activity name",
+      "type": "food | attraction | experience | shopping | nature | nightlife | practical",
+      "emoji": "single best-fit emoji",
+      "why": "1 sentence on why this is perfect RIGHT NOW — cite time/weather/itinerary if relevant",
+      "tip": "1 practical insider tip — opening hours, what to order, where to sit, etc.",
+      "google_maps_query": "best search term to find this on Google Maps"
+    }
+  ]
+}
+
+Rules:
+- Be SPECIFIC — name actual places or types of places, not generic activities.
+- why must reference the context (time of day, weather, what they've already done).
+- tip must be actionable and specific to this place/activity.
+- Mix types — don't suggest 3 of the same category.
+- Return ONLY the JSON.`,
+          messages:[{ role:"user", content:
+`Location: ${locationStr}
+Time: ${tod} on ${dow}
+Weather: ${weather}
+Trip destination: ${trip.destination||"unknown"}
+Already done today: ${doneActs.length ? doneActs.join(", ") : "nothing yet"}
+Still on itinerary: ${todoActs.length ? todoActs.slice(0,5).join(", ") : "nothing planned"}
+
+Suggest 3 things to do right now.` }]
+        })
+      });
+      const data = await res.json();
+      const raw  = (data.content?.[0]?.text || "{}").replace(/```json|```/g,"").trim();
+      const parsed = JSON.parse(raw);
+      if (!parsed.items?.length) throw new Error("No items");
+      const result = { step:"ready", items:parsed.items.slice(0,3),
+        headline: parsed.headline||"Nearby right now",
+        location:locationStr, coords, generatedAt:new Date().toLocaleTimeString("en",{hour:"2-digit",minute:"2-digit"}) };
+      LS.set(cacheKey, result);
+      setDisc(result);
+    } catch {
+      setDisc({ step:"error", items:[], location:locationStr, coords, generatedAt:"",
+        errorMsg:"Could not generate suggestions. Check your connection." });
+    }
+  };
 
   const searchBooking = () => {
     const raw = (bookingTab==="flight" ? flightInput : hotelInput).trim().toUpperCase();
@@ -5555,6 +5871,114 @@ Provide the current visa and entry requirements.` }]
         )}
       </div>
 
+      {/* ── Local Discovery Feed ── */}
+      {(()=>{
+        const tc = timeClass();
+        const isLoading = disc.step==="locating"||disc.step==="generating";
+        return (
+          <div className={`discovery-card ${tc}`}>
+            <div className="discovery-hdr">
+              <div className="discovery-title-block">
+                <div className="discovery-eyebrow">
+                  {disc.step==="locating"?"Finding you…"
+                   :disc.step==="generating"?"Asking Claude…"
+                   :disc.step==="ready"?`📍 ${disc.location||"Nearby"}`
+                   :"📍 What's nearby"}
+                </div>
+                <div className="discovery-heading">
+                  {disc.step==="ready"
+                    ? disc.headline||"Nearby right now"
+                    : `${timeOfDayLabel().charAt(0).toUpperCase()+timeOfDayLabel().slice(1)} discoveries`}
+                </div>
+                {disc.step==="ready"&&disc.generatedAt&&(
+                  <div className="discovery-sub">Updated {disc.generatedAt}</div>
+                )}
+              </div>
+              <button className="discovery-refresh-btn"
+                disabled={isLoading}
+                onClick={()=>fetchDiscovery(disc.step==="ready")}>
+                {isLoading
+                  ? <span className="dots"><span>·</span><span>·</span><span>·</span></span>
+                  : disc.step==="ready" ? "↺ Refresh" : "✨ Discover"}
+              </button>
+            </div>
+
+            {/* Idle — prompt to discover */}
+            {disc.step==="idle"&&(
+              <div className="disc-locate-btn" onClick={()=>fetchDiscovery(false)}>
+                <span style={{fontSize:22}}>🔍</span>
+                <div>
+                  <div style={{fontWeight:600,color:"var(--text)"}}>Discover what's nearby</div>
+                  <div style={{fontSize:11,marginTop:2}}>Claude suggests 3 things based on your location, time &amp; itinerary</div>
+                </div>
+              </div>
+            )}
+
+            {/* Loading shimmer */}
+            {isLoading&&(
+              <div>
+                {[0,1,2].map(i=>(
+                  <div key={i} className="disc-shimmer-item">
+                    <div style={{width:44,height:44,borderRadius:12,flexShrink:0,
+                      background:"rgba(255,255,255,0.04)",animation:"shimmer 1.4s infinite",
+                      backgroundSize:"200% 100%",
+                      backgroundImage:"linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,200,100,0.07) 50%,rgba(255,255,255,0.04) 75%)"}}/>
+                    <div style={{flex:1,display:"flex",flexDirection:"column",gap:7}}>
+                      {[70,50,85].map((w,j)=>(
+                        <div key={j} style={{height:10,borderRadius:5,width:`${w}%`,
+                          background:"rgba(255,255,255,0.05)",animation:"shimmer 1.4s infinite",
+                          backgroundSize:"200% 100%",animationDelay:`${j*0.15}s`,
+                          backgroundImage:"linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,200,100,0.07) 50%,rgba(255,255,255,0.04) 75%)"}}/>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <div style={{textAlign:"center",fontSize:11,color:"var(--text-dim)",marginTop:8,paddingTop:8,
+                  borderTop:"1px solid rgba(255,255,255,0.04)"}}>
+                  {disc.step==="locating"?"Getting your location…":"Claude is curating suggestions…"}
+                </div>
+              </div>
+            )}
+
+            {/* Error */}
+            {disc.step==="error"&&(
+              <div>
+                <div style={{fontSize:13,color:"rgba(255,92,92,0.8)",padding:"10px 12px",
+                  background:"rgba(255,92,92,0.07)",border:"1px solid rgba(255,92,92,0.2)",
+                  borderRadius:10,marginBottom:10}}>
+                  ⚠️ {disc.errorMsg||"Could not get suggestions"}
+                </div>
+                <button className="btn-ghost" style={{width:"100%",fontSize:12}} onClick={()=>fetchDiscovery(true)}>
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {/* Results */}
+            {disc.step==="ready"&&disc.items.map((item,i)=>(
+              <div key={i} className="disc-item">
+                <div className={`disc-emoji-tile ${tileClass(item.type)}`}>{item.emoji||"📍"}</div>
+                <div className="disc-body">
+                  <div className="disc-title-row">
+                    <div className="disc-name">{item.name}</div>
+                    {item.type&&(
+                      <div className={`disc-type-badge ${badgeClass(item.type)}`}>{item.type}</div>
+                    )}
+                  </div>
+                  {item.why&&<div className="disc-why">{item.why}</div>}
+                  {item.tip&&<div className="disc-tip">💡 {item.tip}</div>}
+                  <a className="disc-maps-btn"
+                    href={mapsUrl(item.google_maps_query, disc.location)}
+                    target="_blank" rel="noopener noreferrer">
+                    📍 Find on Maps
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Currency Converter */}
       <div className="card">
         <div className="card-title">💱 Currency Converter</div>
@@ -6007,6 +6431,144 @@ Write the travel story.`
   );
 }
 
+// ── Standalone packing builder ─────────────────────────────────────────────
+const buildDefaultPacking = () => {
+  const p = {};
+  Object.entries(DEFAULT_PACKING).forEach(([cat,items]) => {
+    p[cat] = items.map((name,i) => ({ id:`${cat}-${i}`, name, checked:false }));
+  });
+  return p;
+};
+
+// ── All flat localStorage keys that belong to a trip ──────────────────────
+const TRIP_KEYS = [
+  { flat:"tc_trip",         def:() => ({name:"",destination:"",startDate:"",endDate:""}) },
+  { flat:"tc_itin",         def:() => [] },
+  { flat:"tc_pack",         def:() => buildDefaultPacking() },
+  { flat:"tc_budget",       def:() => 2000 },
+  { flat:"tc_daily_budget", def:() => 0 },
+  { flat:"tc_basecurr",     def:() => "USD" },
+  { flat:"tc_expenses",     def:() => [] },
+  { flat:"tc_people",       def:() => [] },
+  { flat:"tc_memories",     def:() => [] },
+  { flat:"tc_docs",         def:() => [] },
+];
+
+const snapshotTrip = (tripId) => {
+  if (!tripId) return;
+  TRIP_KEYS.forEach(({ flat }) => {
+    const val = LS.get(flat, null);
+    if (val !== null) LS.set(`tc_${tripId}_${flat}`, val);
+  });
+};
+
+const restoreTrip = (tripId) => {
+  TRIP_KEYS.forEach(({ flat, def }) => {
+    const val = LS.get(`tc_${tripId}_${flat}`, null);
+    LS.set(flat, val !== null ? val : def());
+  });
+};
+
+/* ── TRIP DRAWER ──────────────────────────────────────────────────────────── */
+function TripDrawer({ trips, activeTripId, onSwitch, onCreate, onDelete, onClose }) {
+
+  const tripStatus = (t) => {
+    if (!t.startDate) return "draft";
+    const today = new Date(); today.setHours(0,0,0,0);
+    const start = new Date(t.startDate);
+    const end   = t.endDate ? new Date(t.endDate) : null;
+    if (start > today) return "upcoming";
+    if (end && end < today) return "completed";
+    return "active";
+  };
+
+  const statusLabel = { draft:"Draft", upcoming:"Upcoming", active:"On trip!", completed:"Completed" };
+  const statusClass = { draft:"tsb-draft", upcoming:"tsb-upcoming", active:"tsb-active", completed:"tsb-completed" };
+
+  const tripIcon = (t) => {
+    const s = tripStatus(t);
+    if (s==="active")    return "🌍";
+    if (s==="upcoming")  return "✈️";
+    if (s==="completed") return "📸";
+    return "🗺️";
+  };
+
+  const formatDates = (t) => {
+    if (!t.startDate) return "No dates set";
+    if (!t.endDate)   return t.startDate;
+    const days = Math.round((new Date(t.endDate)-new Date(t.startDate))/86400000)+1;
+    return `${t.startDate} → ${t.endDate} · ${days}d`;
+  };
+
+  const [confirmDelete, setConfirmDelete] = useState(null);
+
+  const sorted = [...trips].sort((a,b) => {
+    // Active trip first, then by startDate desc
+    if (a.id===activeTripId) return -1;
+    if (b.id===activeTripId) return 1;
+    return (b.startDate||"").localeCompare(a.startDate||"");
+  });
+
+  return (
+    <div className="trip-drawer-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="trip-drawer-sheet">
+        <div className="trip-drawer-hdr">
+          <div className="trip-drawer-title">🗺️ My Trips</div>
+          <button className="btn-del" style={{fontSize:22}} onClick={onClose}>✕</button>
+        </div>
+
+        <div className="trip-drawer-body">
+          {/* New trip */}
+          <div className="new-trip-btn" onClick={onCreate}>
+            <div className="new-trip-btn-icon">＋</div>
+            <div>
+              <div className="new-trip-btn-text">New Trip</div>
+              <div className="new-trip-btn-sub">Start planning a fresh adventure</div>
+            </div>
+          </div>
+
+          {/* Trip list */}
+          {sorted.map(t => {
+            const status = tripStatus(t);
+            const isActive = t.id === activeTripId;
+            return (
+              <div key={t.id} className={`trip-card${isActive?" active":""}`}
+                onClick={()=>{ if(!isActive){ onSwitch(t.id); } else onClose(); }}>
+                <div className="trip-card-hdr">
+                  <div className="trip-card-icon">{tripIcon(t)}</div>
+                  <div className="trip-card-info">
+                    <div className="trip-card-name">{t.name||"Untitled Trip"}</div>
+                    {t.destination && <div className="trip-card-dest">📍 {t.destination}</div>}
+                    <div className="trip-card-dates">{formatDates(t)}</div>
+                  </div>
+                  {isActive && <div className="trip-card-active-dot"/>}
+                </div>
+                <div className="trip-card-footer">
+                  <div className={`trip-status-badge ${statusClass[status]}`}>
+                    {statusLabel[status]}
+                    {isActive && " · current"}
+                  </div>
+                  {!isActive && (
+                    confirmDelete===t.id
+                      ? <div style={{display:"flex",gap:6}}>
+                          <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px",color:"#FF5C5C",borderColor:"rgba(255,92,92,0.3)"}}
+                            onClick={e=>{e.stopPropagation();onDelete(t.id);setConfirmDelete(null);}}>Delete</button>
+                          <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px"}}
+                            onClick={e=>{e.stopPropagation();setConfirmDelete(null);}}>Cancel</button>
+                        </div>
+                      : <button className="btn-del" style={{fontSize:13,opacity:.4}}
+                          onClick={e=>{e.stopPropagation();setConfirmDelete(t.id);}}>🗑</button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main App ─────────────────────────────────────────────────────────────── */
 function App() {
   const [tab, setTab] = useState(0);
@@ -6014,6 +6576,11 @@ function App() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+
+  // ── Trip management ──────────────────────────────────────────────────────
+  const [trips,        setTrips]        = useState(() => LS.get("tc_trips", []));
+  const [activeTripId, setActiveTripId] = useState(() => LS.get("tc_active_trip", ""));
   const [quickExpense, setQuickExpense] = useState(null); // {act, day}
   const [quickMemoryCtx, setQuickMemoryCtx] = useState(null); // {act, day}
   const [copiedFlash, setCopiedFlash] = useState("");
@@ -6021,15 +6588,7 @@ function App() {
   // ── Persistent state ──
   const [trip, setTrip] = useState(() => LS.get("tc_trip", {name:"",destination:"",startDate:"",endDate:""}));
   const [itinerary, setItinerary] = useState(() => LS.get("tc_itin", []));
-  const [packing, setPacking] = useState(() => {
-    const saved = LS.get("tc_pack", null);
-    if (saved) return saved;
-    const p = {};
-    Object.entries(DEFAULT_PACKING).forEach(([cat,items]) => {
-      p[cat] = items.map((name,i)=>({id:`${cat}-${i}`,name,checked:false}));
-    });
-    return p;
-  });
+  const [packing, setPacking] = useState(() => LS.get("tc_pack", null) || buildDefaultPacking());
   const [totalBudget, setTotalBudget]   = useState(() => LS.get("tc_budget", 2000));
   const [dailyBudget, setDailyBudget]   = useState(() => LS.get("tc_daily_budget", 0));
   const [notifPerm,   setNotifPerm]     = useState(() => typeof Notification !== "undefined" ? Notification.permission : "default");
@@ -6101,6 +6660,123 @@ function App() {
   const savePeople        = p => { setPeople(p);       LS.set("tc_people",p); };
   const saveMemories      = m => { setMemories(m);     LS.set("tc_memories",m); };
   const saveDocs          = d => { setDocs(d);         LS.set("tc_docs",d); };
+
+  // ── Trip management functions ─────────────────────────────────────────────
+
+  // Keep trips metadata in sync when active trip's name/destination/dates change
+  useEffect(() => {
+    if (!activeTripId) return;
+    setTrips(prev => {
+      const updated = prev.map(t => t.id === activeTripId
+        ? { ...t, name: trip.name||t.name, destination: trip.destination||t.destination,
+            startDate: trip.startDate||t.startDate, endDate: trip.endDate||t.endDate }
+        : t);
+      LS.set("tc_trips", updated);
+      return updated;
+    });
+  }, [trip.name, trip.destination, trip.startDate, trip.endDate]);
+
+  // Migration: on first load, wrap existing data as the default trip
+  useEffect(() => {
+    let stored = LS.get("tc_trips", []);
+    let activeId = LS.get("tc_active_trip", "");
+    if (!stored.length) {
+      const existingTrip = LS.get("tc_trip", {name:"",destination:"",startDate:"",endDate:""});
+      const defaultId = "trip_default";
+      const defaultMeta = {
+        id: defaultId,
+        name: existingTrip.name || "My Trip",
+        destination: existingTrip.destination || "",
+        startDate: existingTrip.startDate || "",
+        endDate:   existingTrip.endDate   || "",
+        createdAt: new Date().toISOString(),
+      };
+      stored  = [defaultMeta];
+      activeId = defaultId;
+      LS.set("tc_trips", stored);
+      LS.set("tc_active_trip", activeId);
+      snapshotTrip(defaultId);   // snapshot current flat keys under this ID
+    }
+    setTrips(stored);
+    setActiveTripId(activeId);
+  }, []);
+
+  const switchTrip = (newId) => {
+    if (newId === activeTripId) { setShowDrawer(false); return; }
+    // Snapshot current state to scoped keys
+    snapshotTrip(activeTripId);
+    // Restore new trip's scoped keys into flat keys
+    restoreTrip(newId);
+    // Reload all React state from flat keys (now holding new trip's data)
+    setTrip(          LS.get("tc_trip",         {name:"",destination:"",startDate:"",endDate:""}));
+    setItinerary(     LS.get("tc_itin",          []));
+    setPacking(       LS.get("tc_pack",          null) || buildDefaultPacking());
+    setTotalBudget(   LS.get("tc_budget",        2000));
+    setDailyBudget(   LS.get("tc_daily_budget",  0));
+    setBaseCurrency(  LS.get("tc_basecurr",      "USD"));
+    setExpenses(      LS.get("tc_expenses",      []));
+    setPeople(        LS.get("tc_people",        []));
+    setMemories(      LS.get("tc_memories",      []));
+    setDocs(          LS.get("tc_docs",          []));
+    setActiveTripId(newId);
+    LS.set("tc_active_trip", newId);
+    setShowDrawer(false);
+    setTab(0);   // return to dashboard on switch
+  };
+
+  const createTrip = () => {
+    // Snapshot current trip
+    snapshotTrip(activeTripId);
+    // New trip ID and metadata
+    const newId   = `trip_${Date.now()}`;
+    const newMeta = { id:newId, name:"New Trip", destination:"", startDate:"", endDate:"", createdAt:new Date().toISOString() };
+    const updated = [...trips, newMeta];
+    // Clear all flat keys to defaults
+    const def = { name:"New Trip", destination:"", startDate:"", endDate:"" };
+    LS.set("tc_trip",  def);
+    LS.set("tc_itin",          []);
+    LS.set("tc_pack",          buildDefaultPacking());
+    LS.set("tc_budget",        2000);
+    LS.set("tc_daily_budget",  0);
+    LS.set("tc_basecurr",      "USD");
+    LS.set("tc_expenses",      []);
+    LS.set("tc_people",        []);
+    LS.set("tc_memories",      []);
+    LS.set("tc_docs",          []);
+    // Reset React state
+    setTrip(def);
+    setItinerary([]); setPacking(buildDefaultPacking());
+    setTotalBudget(2000); setDailyBudget(0); setBaseCurrency("USD");
+    setExpenses([]); setPeople([]); setMemories([]); setDocs([]);
+    // Register new trip
+    setTrips(updated);   LS.set("tc_trips", updated);
+    setActiveTripId(newId); LS.set("tc_active_trip", newId);
+    setShowDrawer(false);
+    setTab(1);   // go straight to Plan tab
+  };
+
+  const deleteTrip = (id) => {
+    const remaining = trips.filter(t => t.id !== id);
+    if (!remaining.length) { createTrip(); return; }   // keep at least one trip
+    const updated = remaining;
+    setTrips(updated); LS.set("tc_trips", updated);
+    if (id === activeTripId) {
+      // Switch to first remaining trip
+      const next = updated[0].id;
+      restoreTrip(next);
+      setTrip(       LS.get("tc_trip",        {name:"",destination:"",startDate:"",endDate:""}));
+      setItinerary(  LS.get("tc_itin",         []));
+      setPacking(    LS.get("tc_pack",         null) || buildDefaultPacking());
+      setTotalBudget(LS.get("tc_budget",       2000));
+      setDailyBudget(LS.get("tc_daily_budget", 0));
+      setBaseCurrency(LS.get("tc_basecurr",    "USD"));
+      setExpenses(   LS.get("tc_expenses",     []));
+      setPeople(     LS.get("tc_people",       []));
+      setMemories(   LS.get("tc_memories",     []));
+      setDocs(       LS.get("tc_docs",         []));
+      setActiveTripId(next); LS.set("tc_active_trip", next);
+    }
+  };
 
   // ── Notification helpers ──────────────────────────────────────────────────
   // ── Geo currency detection ────────────────────────────────────────────────
@@ -6372,6 +7048,9 @@ function App() {
       {/* Header */}
       <div className="header">
         <div className="header-top">
+          <button className="trip-switcher-btn" onClick={()=>setShowDrawer(true)} title="Switch trip">
+            ⊞
+          </button>
           <input className="trip-name-input flex-1" value={trip.name}
             onChange={e=>saveTrip({...trip,name:e.target.value})} placeholder="✈️ Name Your Trip" />
           <div style={{display:"flex",gap:7,alignItems:"center",flexShrink:0}}>
@@ -6389,7 +7068,7 @@ function App() {
           {tab===1&&<PlanTab trip={trip} saveTrip={saveTrip} itinerary={itinerary} addDay={addDay} addActivity={addActivity} toggleActivity={toggleActivity} removeDay={removeDay} removeActivity={removeActivity} expenses={expenses} baseCurrency={baseCurrency} memories={memories} navigateTo={navigateTo} onQuickExpense={(a,d)=>setQuickExpense({act:a,day:d})} onQuickMemory={onQuickMemory}/>}
           {tab===2&&<PackTab packing={packing} togglePacking={togglePacking} addPackingItem={addPackingItem} packingTotal={packingTotal} packingDone={packingDone} trip={trip} itinerary={itinerary}/>}
           {tab===3&&<BudgetTab totalBudget={totalBudget} saveBudget={saveBudget} baseCurrency={baseCurrency} saveBaseCurrency={saveBaseCurrency} expenses={expenses} saveExpenses={saveExpenses} people={people} savePeople={savePeople} docs={docs} saveDocs={saveDocs} dailyBudget={dailyBudget} saveDailyBudget={saveDailyBudget} notifPerm={notifPerm} requestNotifPermission={requestNotifPermission} geoDetectEnabled={geoDetectEnabled} saveGeoDetectEnabled={saveGeoDetectEnabled} geoChecking={geoChecking} onDetectNow={()=>detectLocationCurrency(true)}/>}
-          {tab===4&&<ExploreTab trip={trip} weatherCity={weatherCity} setWeatherCity={setWeatherCity} weatherData={weatherData} weatherLoading={weatherLoading} fetchWeather={fetchWeather} currFrom={currFrom} setCurrFrom={setCurrFrom} currTo={currTo} setCurrTo={setCurrTo} currAmount={currAmount} setCurrAmount={setCurrAmount} currResult={currResult} convertCurrency={convertCurrency} aiQuery={aiQuery} setAiQuery={setAiQuery} aiResponse={aiResponse} aiLoading={aiLoading} getAiTip={getAiTip}/>}
+          {tab===4&&<ExploreTab trip={trip} itinerary={itinerary} weatherCity={weatherCity} setWeatherCity={setWeatherCity} weatherData={weatherData} weatherLoading={weatherLoading} fetchWeather={fetchWeather} currFrom={currFrom} setCurrFrom={setCurrFrom} currTo={currTo} setCurrTo={setCurrTo} currAmount={currAmount} setCurrAmount={setCurrAmount} currResult={currResult} convertCurrency={convertCurrency} aiQuery={aiQuery} setAiQuery={setAiQuery} aiResponse={aiResponse} aiLoading={aiLoading} getAiTip={getAiTip}/>}
           {tab===5&&<MemoriesTab memories={memories} addMemory={addMemory} updateMemory={updateMemory} deleteMemory={deleteMemory} trip={trip} quickMemoryCtx={quickMemoryCtx} clearQuickMemory={()=>setQuickMemoryCtx(null)}/>}
           {tab===6&&<DocsTab docs={docs} saveDocs={saveDocs} expenses={expenses} itinerary={itinerary} navigateTo={navigateTo}/>}
         </div>
@@ -6440,6 +7119,18 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Trip Drawer ── */}
+      {showDrawer&&(
+        <TripDrawer
+          trips={trips}
+          activeTripId={activeTripId}
+          onSwitch={switchTrip}
+          onCreate={createTrip}
+          onDelete={deleteTrip}
+          onClose={()=>setShowDrawer(false)}
+        />
       )}
 
       {/* ── Share Modal ── */}
