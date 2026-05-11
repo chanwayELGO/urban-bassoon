@@ -1069,6 +1069,94 @@
       margin-top:10px; animation:fadeUp .2s ease;
     }
 
+    /* ─── Multi-trip Drawer ─────────────────────────────────────────────────── */
+    .trip-drawer-overlay {
+      position:fixed; inset:0; z-index:6000;
+      background:rgba(4,9,18,0.75); backdrop-filter:blur(8px);
+      animation:fadeIn .2s ease;
+    }
+    .trip-drawer-sheet {
+      position:absolute; bottom:0; left:0; right:0;
+      max-width:480px; margin:0 auto;
+      background:linear-gradient(160deg,#0D1E3A 0%,#07101F 100%);
+      border:1px solid rgba(255,168,40,0.18); border-radius:22px 22px 0 0;
+      max-height:82vh; display:flex; flex-direction:column;
+      animation:slideUp .33s cubic-bezier(0.34,1.46,0.64,1);
+      padding-bottom:var(--safe-bottom);
+    }
+    .trip-drawer-hdr {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 20px 14px; flex-shrink:0;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .trip-drawer-title {
+      font-family:'Playfair Display',serif; font-size:18px; color:var(--amber); font-weight:700;
+    }
+    .trip-drawer-body {
+      flex:1; overflow-y:auto; padding:14px 16px;
+    }
+    .trip-drawer-body::-webkit-scrollbar { display:none; }
+
+    /* New trip button */
+    .new-trip-btn {
+      display:flex; align-items:center; gap:10px;
+      border:2px dashed rgba(255,168,40,0.25); border-radius:14px; padding:14px;
+      cursor:pointer; transition:all .15s; margin-bottom:12px;
+      background:rgba(255,168,40,0.04); color:var(--amber);
+    }
+    .new-trip-btn:hover { background:rgba(255,168,40,0.1); border-color:rgba(255,168,40,0.45); }
+    .new-trip-btn-icon { font-size:22px; line-height:1; }
+    .new-trip-btn-text { font-size:14px; font-weight:600; }
+    .new-trip-btn-sub  { font-size:11px; color:rgba(255,168,40,0.6); margin-top:2px; }
+
+    /* Trip card */
+    .trip-card {
+      background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px; padding:14px 16px; margin-bottom:10px;
+      cursor:pointer; transition:all .15s; position:relative;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .trip-card:active { transform:scale(.98); }
+    .trip-card.active {
+      border-color:rgba(255,168,40,0.45);
+      background:rgba(255,168,40,0.07);
+      box-shadow:0 0 0 3px rgba(255,168,40,0.08);
+    }
+    .trip-card-hdr { display:flex; align-items:flex-start; gap:10px; }
+    .trip-card-icon { font-size:24px; line-height:1; flex-shrink:0; margin-top:1px; }
+    .trip-card-info { flex:1; min-width:0; }
+    .trip-card-name {
+      font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:#fff;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .trip-card.active .trip-card-name { color:var(--amber); }
+    .trip-card-dest { font-size:12px; color:var(--text-dim); margin-top:3px; }
+    .trip-card-dates { font-size:11px; color:rgba(230,217,194,0.4); margin-top:4px; }
+    .trip-card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+    .trip-status-badge {
+      font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+      padding:3px 8px; border-radius:6px;
+    }
+    .tsb-upcoming  { background:rgba(91,164,255,0.12); color:#5BA4FF; }
+    .tsb-active    { background:rgba(77,184,122,0.14); color:#4DB87A; }
+    .tsb-completed { background:rgba(255,255,255,0.06); color:var(--text-dim); }
+    .tsb-draft     { background:rgba(255,168,40,0.1);  color:var(--amber); }
+
+    /* Active indicator dot */
+    .trip-card-active-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:var(--amber); flex-shrink:0; margin-top:5px;
+      box-shadow:0 0 0 3px rgba(255,168,40,0.2);
+    }
+
+    /* Header drawer button */
+    .trip-switcher-btn {
+      background:rgba(255,168,40,0.08); border:1px solid rgba(255,168,40,0.18);
+      border-radius:10px; padding:5px 9px; font-size:14px; cursor:pointer;
+      color:var(--amber); transition:all .18s; flex-shrink:0; line-height:1;
+    }
+    .trip-switcher-btn:hover { background:rgba(255,168,40,0.18); }
+
     /* ─── Local Discovery Feed ──────────────────────────────────────────────── */
     .discovery-card {
       border-radius: 18px; padding: 16px; margin-bottom: 12px;
@@ -6343,6 +6431,144 @@ Write the travel story.`
   );
 }
 
+// ── Standalone packing builder ─────────────────────────────────────────────
+const buildDefaultPacking = () => {
+  const p = {};
+  Object.entries(DEFAULT_PACKING).forEach(([cat,items]) => {
+    p[cat] = items.map((name,i) => ({ id:`${cat}-${i}`, name, checked:false }));
+  });
+  return p;
+};
+
+// ── All flat localStorage keys that belong to a trip ──────────────────────
+const TRIP_KEYS = [
+  { flat:"tc_trip",         def:() => ({name:"",destination:"",startDate:"",endDate:""}) },
+  { flat:"tc_itin",         def:() => [] },
+  { flat:"tc_pack",         def:() => buildDefaultPacking() },
+  { flat:"tc_budget",       def:() => 2000 },
+  { flat:"tc_daily_budget", def:() => 0 },
+  { flat:"tc_basecurr",     def:() => "USD" },
+  { flat:"tc_expenses",     def:() => [] },
+  { flat:"tc_people",       def:() => [] },
+  { flat:"tc_memories",     def:() => [] },
+  { flat:"tc_docs",         def:() => [] },
+];
+
+const snapshotTrip = (tripId) => {
+  if (!tripId) return;
+  TRIP_KEYS.forEach(({ flat }) => {
+    const val = LS.get(flat, null);
+    if (val !== null) LS.set(`tc_${tripId}_${flat}`, val);
+  });
+};
+
+const restoreTrip = (tripId) => {
+  TRIP_KEYS.forEach(({ flat, def }) => {
+    const val = LS.get(`tc_${tripId}_${flat}`, null);
+    LS.set(flat, val !== null ? val : def());
+  });
+};
+
+/* ── TRIP DRAWER ──────────────────────────────────────────────────────────── */
+function TripDrawer({ trips, activeTripId, onSwitch, onCreate, onDelete, onClose }) {
+
+  const tripStatus = (t) => {
+    if (!t.startDate) return "draft";
+    const today = new Date(); today.setHours(0,0,0,0);
+    const start = new Date(t.startDate);
+    const end   = t.endDate ? new Date(t.endDate) : null;
+    if (start > today) return "upcoming";
+    if (end && end < today) return "completed";
+    return "active";
+  };
+
+  const statusLabel = { draft:"Draft", upcoming:"Upcoming", active:"On trip!", completed:"Completed" };
+  const statusClass = { draft:"tsb-draft", upcoming:"tsb-upcoming", active:"tsb-active", completed:"tsb-completed" };
+
+  const tripIcon = (t) => {
+    const s = tripStatus(t);
+    if (s==="active")    return "🌍";
+    if (s==="upcoming")  return "✈️";
+    if (s==="completed") return "📸";
+    return "🗺️";
+  };
+
+  const formatDates = (t) => {
+    if (!t.startDate) return "No dates set";
+    if (!t.endDate)   return t.startDate;
+    const days = Math.round((new Date(t.endDate)-new Date(t.startDate))/86400000)+1;
+    return `${t.startDate} → ${t.endDate} · ${days}d`;
+  };
+
+  const [confirmDelete, setConfirmDelete] = useState(null);
+
+  const sorted = [...trips].sort((a,b) => {
+    // Active trip first, then by startDate desc
+    if (a.id===activeTripId) return -1;
+    if (b.id===activeTripId) return 1;
+    return (b.startDate||"").localeCompare(a.startDate||"");
+  });
+
+  return (
+    <div className="trip-drawer-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="trip-drawer-sheet">
+        <div className="trip-drawer-hdr">
+          <div className="trip-drawer-title">🗺️ My Trips</div>
+          <button className="btn-del" style={{fontSize:22}} onClick={onClose}>✕</button>
+        </div>
+
+        <div className="trip-drawer-body">
+          {/* New trip */}
+          <div className="new-trip-btn" onClick={onCreate}>
+            <div className="new-trip-btn-icon">＋</div>
+            <div>
+              <div className="new-trip-btn-text">New Trip</div>
+              <div className="new-trip-btn-sub">Start planning a fresh adventure</div>
+            </div>
+          </div>
+
+          {/* Trip list */}
+          {sorted.map(t => {
+            const status = tripStatus(t);
+            const isActive = t.id === activeTripId;
+            return (
+              <div key={t.id} className={`trip-card${isActive?" active":""}`}
+                onClick={()=>{ if(!isActive){ onSwitch(t.id); } else onClose(); }}>
+                <div className="trip-card-hdr">
+                  <div className="trip-card-icon">{tripIcon(t)}</div>
+                  <div className="trip-card-info">
+                    <div className="trip-card-name">{t.name||"Untitled Trip"}</div>
+                    {t.destination && <div className="trip-card-dest">📍 {t.destination}</div>}
+                    <div className="trip-card-dates">{formatDates(t)}</div>
+                  </div>
+                  {isActive && <div className="trip-card-active-dot"/>}
+                </div>
+                <div className="trip-card-footer">
+                  <div className={`trip-status-badge ${statusClass[status]}`}>
+                    {statusLabel[status]}
+                    {isActive && " · current"}
+                  </div>
+                  {!isActive && (
+                    confirmDelete===t.id
+                      ? <div style={{display:"flex",gap:6}}>
+                          <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px",color:"#FF5C5C",borderColor:"rgba(255,92,92,0.3)"}}
+                            onClick={e=>{e.stopPropagation();onDelete(t.id);setConfirmDelete(null);}}>Delete</button>
+                          <button className="btn-ghost" style={{fontSize:11,padding:"3px 9px"}}
+                            onClick={e=>{e.stopPropagation();setConfirmDelete(null);}}>Cancel</button>
+                        </div>
+                      : <button className="btn-del" style={{fontSize:13,opacity:.4}}
+                          onClick={e=>{e.stopPropagation();setConfirmDelete(t.id);}}>🗑</button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main App ─────────────────────────────────────────────────────────────── */
 function App() {
   const [tab, setTab] = useState(0);
@@ -6350,6 +6576,11 @@ function App() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+
+  // ── Trip management ──────────────────────────────────────────────────────
+  const [trips,        setTrips]        = useState(() => LS.get("tc_trips", []));
+  const [activeTripId, setActiveTripId] = useState(() => LS.get("tc_active_trip", ""));
   const [quickExpense, setQuickExpense] = useState(null); // {act, day}
   const [quickMemoryCtx, setQuickMemoryCtx] = useState(null); // {act, day}
   const [copiedFlash, setCopiedFlash] = useState("");
@@ -6357,15 +6588,7 @@ function App() {
   // ── Persistent state ──
   const [trip, setTrip] = useState(() => LS.get("tc_trip", {name:"",destination:"",startDate:"",endDate:""}));
   const [itinerary, setItinerary] = useState(() => LS.get("tc_itin", []));
-  const [packing, setPacking] = useState(() => {
-    const saved = LS.get("tc_pack", null);
-    if (saved) return saved;
-    const p = {};
-    Object.entries(DEFAULT_PACKING).forEach(([cat,items]) => {
-      p[cat] = items.map((name,i)=>({id:`${cat}-${i}`,name,checked:false}));
-    });
-    return p;
-  });
+  const [packing, setPacking] = useState(() => LS.get("tc_pack", null) || buildDefaultPacking());
   const [totalBudget, setTotalBudget]   = useState(() => LS.get("tc_budget", 2000));
   const [dailyBudget, setDailyBudget]   = useState(() => LS.get("tc_daily_budget", 0));
   const [notifPerm,   setNotifPerm]     = useState(() => typeof Notification !== "undefined" ? Notification.permission : "default");
@@ -6437,6 +6660,123 @@ function App() {
   const savePeople        = p => { setPeople(p);       LS.set("tc_people",p); };
   const saveMemories      = m => { setMemories(m);     LS.set("tc_memories",m); };
   const saveDocs          = d => { setDocs(d);         LS.set("tc_docs",d); };
+
+  // ── Trip management functions ─────────────────────────────────────────────
+
+  // Keep trips metadata in sync when active trip's name/destination/dates change
+  useEffect(() => {
+    if (!activeTripId) return;
+    setTrips(prev => {
+      const updated = prev.map(t => t.id === activeTripId
+        ? { ...t, name: trip.name||t.name, destination: trip.destination||t.destination,
+            startDate: trip.startDate||t.startDate, endDate: trip.endDate||t.endDate }
+        : t);
+      LS.set("tc_trips", updated);
+      return updated;
+    });
+  }, [trip.name, trip.destination, trip.startDate, trip.endDate]);
+
+  // Migration: on first load, wrap existing data as the default trip
+  useEffect(() => {
+    let stored = LS.get("tc_trips", []);
+    let activeId = LS.get("tc_active_trip", "");
+    if (!stored.length) {
+      const existingTrip = LS.get("tc_trip", {name:"",destination:"",startDate:"",endDate:""});
+      const defaultId = "trip_default";
+      const defaultMeta = {
+        id: defaultId,
+        name: existingTrip.name || "My Trip",
+        destination: existingTrip.destination || "",
+        startDate: existingTrip.startDate || "",
+        endDate:   existingTrip.endDate   || "",
+        createdAt: new Date().toISOString(),
+      };
+      stored  = [defaultMeta];
+      activeId = defaultId;
+      LS.set("tc_trips", stored);
+      LS.set("tc_active_trip", activeId);
+      snapshotTrip(defaultId);   // snapshot current flat keys under this ID
+    }
+    setTrips(stored);
+    setActiveTripId(activeId);
+  }, []);
+
+  const switchTrip = (newId) => {
+    if (newId === activeTripId) { setShowDrawer(false); return; }
+    // Snapshot current state to scoped keys
+    snapshotTrip(activeTripId);
+    // Restore new trip's scoped keys into flat keys
+    restoreTrip(newId);
+    // Reload all React state from flat keys (now holding new trip's data)
+    setTrip(          LS.get("tc_trip",         {name:"",destination:"",startDate:"",endDate:""}));
+    setItinerary(     LS.get("tc_itin",          []));
+    setPacking(       LS.get("tc_pack",          null) || buildDefaultPacking());
+    setTotalBudget(   LS.get("tc_budget",        2000));
+    setDailyBudget(   LS.get("tc_daily_budget",  0));
+    setBaseCurrency(  LS.get("tc_basecurr",      "USD"));
+    setExpenses(      LS.get("tc_expenses",      []));
+    setPeople(        LS.get("tc_people",        []));
+    setMemories(      LS.get("tc_memories",      []));
+    setDocs(          LS.get("tc_docs",          []));
+    setActiveTripId(newId);
+    LS.set("tc_active_trip", newId);
+    setShowDrawer(false);
+    setTab(0);   // return to dashboard on switch
+  };
+
+  const createTrip = () => {
+    // Snapshot current trip
+    snapshotTrip(activeTripId);
+    // New trip ID and metadata
+    const newId   = `trip_${Date.now()}`;
+    const newMeta = { id:newId, name:"New Trip", destination:"", startDate:"", endDate:"", createdAt:new Date().toISOString() };
+    const updated = [...trips, newMeta];
+    // Clear all flat keys to defaults
+    const def = { name:"New Trip", destination:"", startDate:"", endDate:"" };
+    LS.set("tc_trip",  def);
+    LS.set("tc_itin",          []);
+    LS.set("tc_pack",          buildDefaultPacking());
+    LS.set("tc_budget",        2000);
+    LS.set("tc_daily_budget",  0);
+    LS.set("tc_basecurr",      "USD");
+    LS.set("tc_expenses",      []);
+    LS.set("tc_people",        []);
+    LS.set("tc_memories",      []);
+    LS.set("tc_docs",          []);
+    // Reset React state
+    setTrip(def);
+    setItinerary([]); setPacking(buildDefaultPacking());
+    setTotalBudget(2000); setDailyBudget(0); setBaseCurrency("USD");
+    setExpenses([]); setPeople([]); setMemories([]); setDocs([]);
+    // Register new trip
+    setTrips(updated);   LS.set("tc_trips", updated);
+    setActiveTripId(newId); LS.set("tc_active_trip", newId);
+    setShowDrawer(false);
+    setTab(1);   // go straight to Plan tab
+  };
+
+  const deleteTrip = (id) => {
+    const remaining = trips.filter(t => t.id !== id);
+    if (!remaining.length) { createTrip(); return; }   // keep at least one trip
+    const updated = remaining;
+    setTrips(updated); LS.set("tc_trips", updated);
+    if (id === activeTripId) {
+      // Switch to first remaining trip
+      const next = updated[0].id;
+      restoreTrip(next);
+      setTrip(       LS.get("tc_trip",        {name:"",destination:"",startDate:"",endDate:""}));
+      setItinerary(  LS.get("tc_itin",         []));
+      setPacking(    LS.get("tc_pack",         null) || buildDefaultPacking());
+      setTotalBudget(LS.get("tc_budget",       2000));
+      setDailyBudget(LS.get("tc_daily_budget", 0));
+      setBaseCurrency(LS.get("tc_basecurr",    "USD"));
+      setExpenses(   LS.get("tc_expenses",     []));
+      setPeople(     LS.get("tc_people",       []));
+      setMemories(   LS.get("tc_memories",     []));
+      setDocs(       LS.get("tc_docs",         []));
+      setActiveTripId(next); LS.set("tc_active_trip", next);
+    }
+  };
 
   // ── Notification helpers ──────────────────────────────────────────────────
   // ── Geo currency detection ────────────────────────────────────────────────
@@ -6708,6 +7048,9 @@ function App() {
       {/* Header */}
       <div className="header">
         <div className="header-top">
+          <button className="trip-switcher-btn" onClick={()=>setShowDrawer(true)} title="Switch trip">
+            ⊞
+          </button>
           <input className="trip-name-input flex-1" value={trip.name}
             onChange={e=>saveTrip({...trip,name:e.target.value})} placeholder="✈️ Name Your Trip" />
           <div style={{display:"flex",gap:7,alignItems:"center",flexShrink:0}}>
@@ -6776,6 +7119,18 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Trip Drawer ── */}
+      {showDrawer&&(
+        <TripDrawer
+          trips={trips}
+          activeTripId={activeTripId}
+          onSwitch={switchTrip}
+          onCreate={createTrip}
+          onDelete={deleteTrip}
+          onClose={()=>setShowDrawer(false)}
+        />
       )}
 
       {/* ── Share Modal ── */}
