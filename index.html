@@ -1929,6 +1929,45 @@
     }
     .photo-upload-label { font-size: 12px; color: var(--text-dim); }
 
+    /* ── Photo → AI Caption ─────────────────────────────────────────────── */
+    .photo-caption-card {
+      border-radius: 14px; overflow: hidden;
+      border: 1px solid rgba(77,184,122,0.28);
+      background: rgba(77,184,122,0.05);
+      animation: fadeUp .3s ease; margin-top: 6px;
+    }
+    .photo-caption-analyzing {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; font-size: 12px; color: var(--text-dim);
+      position: relative;
+    }
+    .photo-caption-scan {
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #4DB87A, transparent);
+      animation: scanLine 1.3s ease-in-out infinite;
+    }
+    .photo-caption-body { padding: 12px 14px 4px; }
+    .photo-caption-hdr {
+      display: flex; align-items: center; gap: 7px; margin-bottom: 10px;
+    }
+    .photo-caption-lbl {
+      font-size: 11px; font-weight: 700; letter-spacing: .7px;
+      text-transform: uppercase; color: #4DB87A; flex: 1;
+    }
+    .photo-caption-mood { font-size: 26px; line-height: 1; }
+    .photo-caption-field { margin-bottom: 8px; }
+    .photo-caption-field-key {
+      font-size: 10px; color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: .6px; margin-bottom: 2px; font-weight: 600;
+    }
+    .photo-caption-field-val {
+      font-size: 13px; color: var(--text); line-height: 1.6;
+    }
+    .photo-caption-actions { display: flex; gap: 8px; padding: 8px 14px 12px; }
+    .photo-caption-err {
+      padding: 9px 14px; font-size: 11px; color: rgba(255,92,92,.7);
+    }
+
     /* ─── Map Popup (Leaflet custom) ───────────────────────────────────────── */
     .leaflet-popup-content-wrapper {
       background: rgba(7,16,31,0.97) !important;
@@ -6062,8 +6101,58 @@ function MemoriesTab({ memories, addMemory, updateMemory, deleteMemory, trip, qu
   const MOODS = ["😍","😄","😊","🥹","🤩","😎","😌","🥰","😮","😴","🥶","🌧️"];
 
   // AI states
-  const [genLoading, setGenLoading]       = useState(false);   // generate-in-form
-  const [genSuggestion, setGenSuggestion] = useState(null);    // {notes, mood, title}
+  const [genLoading, setGenLoading]       = useState(false);
+  const [genSuggestion, setGenSuggestion] = useState(null);
+  const [photoCaption, setPhotoCaption]   = useState({ loading:false, result:null, error:"" });
+
+  // ── Analyse photo with Claude vision ──────────────────────────────────────
+  const analyzePhoto = async (base64jpeg) => {
+    setPhotoCaption({ loading:true, result:null, error:"" });
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 500,
+          system: `You are a travel memory writer. Analyse the photo and return ONLY valid JSON — no markdown.
+Shape:
+{
+  "title": "evocative place or moment title, max 7 words — specific and poetic",
+  "mood":  "single emoji capturing the atmosphere or emotion",
+  "notes": "vivid 2–3 sentence first-person present-tense journal entry. Start mid-scene without 'I' or 'The photo'. Be sensory: describe light, smell, sound, feeling. If you can identify the location, weave it in naturally."
+}
+Rules: title should feel like a chapter heading, not a description. mood must match the visual atmosphere. notes should make the reader feel present.`,
+          messages: [{
+            role: "user",
+            content: [
+              { type:"image", source:{ type:"base64", media_type:"image/jpeg", data: base64jpeg.split(",")[1] } },
+              { type:"text",  text:"Analyse this travel photo and return the caption JSON." }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      const raw  = (data.content?.[0]?.text || "{}").replace(/```json|```/g,"").trim();
+      const parsed = JSON.parse(raw);
+      if (!parsed.title) throw new Error("empty");
+      setPhotoCaption({ loading:false, result:parsed, error:"" });
+    } catch {
+      setPhotoCaption({ loading:false, result:null, error:"Couldn't read the photo. You can still caption it manually." });
+    }
+  };
+
+  const acceptCaption = () => {
+    if (!photoCaption.result) return;
+    const r = photoCaption.result;
+    setForm(f => ({
+      ...f,
+      title: r.title || f.title,
+      mood:  MOODS.includes(r.mood) ? r.mood : f.mood,
+      notes: r.notes || f.notes,
+    }));
+    setPhotoCaption({ loading:false, result:null, error:"" });
+  };
   const [enhancing, setEnhancing]         = useState({});      // {[id]: {loading, result}}
   const [story, setStory]                 = useState({loading:false, text:""});
   const [showStory, setShowStory]         = useState(false);
@@ -6213,6 +6302,7 @@ Write the travel story.`
   // ── Photo handler ──────────────────────────────────────────────────────────
   const handlePhotoChange = (e) => {
     const file = e.target.files[0]; if(!file) return;
+    setPhotoCaption({ loading:false, result:null, error:"" }); // clear old caption
     const reader = new FileReader();
     reader.onload = (ev) => {
       const img = new Image();
@@ -6221,7 +6311,9 @@ Write the travel story.`
         const ratio = Math.min(600/img.width,600/img.height,1);
         canvas.width=img.width*ratio; canvas.height=img.height*ratio;
         canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
-        setForm(f=>({...f,photo:canvas.toDataURL("image/jpeg",0.75)}));
+        const b64 = canvas.toDataURL("image/jpeg",0.75);
+        setForm(f=>({...f,photo:b64}));
+        analyzePhoto(b64); // 🔍 auto-analyse with Claude vision
       };
       img.src = ev.target.result;
     };
@@ -6234,6 +6326,7 @@ Write the travel story.`
     if(pendingMarkerRef.current){pendingMarkerRef.current.remove();pendingMarkerRef.current=null;}
     setPinForm(null);
     setGenSuggestion(null);
+    setPhotoCaption({ loading:false, result:null, error:"" });
     setForm({title:"",date:new Date().toISOString().split("T")[0],mood:"😍",notes:"",photo:null,locationName:""});
   };
 
@@ -6383,9 +6476,79 @@ Write the travel story.`
 
               <div className="photo-upload-area">
                 <input type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} />
-                {form.photo ? <img className="photo-preview" src={form.photo} alt="Preview" />
-                  : <div className="photo-upload-label">📷 Tap to attach a photo</div>}
+                {form.photo
+                  ? <div style={{position:"relative"}}>
+                      <img className="photo-preview" src={form.photo} alt="Preview" />
+                      {/* Scanning overlay while analysing */}
+                      {photoCaption.loading && (
+                        <div style={{position:"absolute",inset:0,background:"rgba(7,16,31,0.55)",
+                          borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",
+                          flexDirection:"column",gap:8}}>
+                          <div style={{width:"60%",height:2,background:"linear-gradient(90deg,transparent,#4DB87A,transparent)",
+                            animation:"scanLine 1.3s ease-in-out infinite"}}/>
+                          <div style={{fontSize:11,color:"#4DB87A",fontWeight:600}}>Analysing photo…</div>
+                        </div>
+                      )}
+                    </div>
+                  : <div className="photo-upload-label">📷 Tap to attach a photo — Claude will caption it</div>}
               </div>
+
+              {/* ── AI Caption Result ── */}
+              {(photoCaption.loading || photoCaption.result || photoCaption.error) && (
+                <div className="photo-caption-card">
+                  {/* Loading */}
+                  {photoCaption.loading && (
+                    <div className="photo-caption-analyzing">
+                      <div className="photo-caption-scan"/>
+                      <span className="dots"><span>·</span><span>·</span><span>·</span></span>
+                      <span>Claude is reading your photo…</span>
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  {!photoCaption.loading && photoCaption.error && (
+                    <div className="photo-caption-err">⚠️ {photoCaption.error}</div>
+                  )}
+
+                  {/* Result */}
+                  {!photoCaption.loading && photoCaption.result && (() => {
+                    const r = photoCaption.result;
+                    return (
+                      <>
+                        <div className="photo-caption-body">
+                          <div className="photo-caption-hdr">
+                            <span style={{fontSize:14}}>✨</span>
+                            <div className="photo-caption-lbl">AI Caption Suggestion</div>
+                            {r.mood && <div className="photo-caption-mood">{r.mood}</div>}
+                          </div>
+                          {r.title && (
+                            <div className="photo-caption-field">
+                              <div className="photo-caption-field-key">Title</div>
+                              <div className="photo-caption-field-val" style={{fontWeight:600}}>{r.title}</div>
+                            </div>
+                          )}
+                          {r.notes && (
+                            <div className="photo-caption-field">
+                              <div className="photo-caption-field-key">Description</div>
+                              <div className="photo-caption-field-val">{r.notes}</div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="photo-caption-actions">
+                          <button className="btn flex-1" onClick={acceptCaption}
+                            style={{fontSize:12,padding:"8px 12px"}}>
+                            Use this ✓
+                          </button>
+                          <button className="btn-ghost" style={{fontSize:12,padding:"7px 12px"}}
+                            onClick={()=>setPhotoCaption({loading:false,result:null,error:""})}>
+                            Discard
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-8 mt-12">
