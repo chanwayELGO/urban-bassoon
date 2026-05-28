@@ -1069,6 +1069,47 @@
       margin-top:10px; animation:fadeUp .2s ease;
     }
 
+    /* ─── Real-time Group Sync ──────────────────────────────────────────────── */
+    .sync-indicator {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.09);
+      border-radius:99px; padding:4px 9px; font-size:11px; font-weight:600;
+      cursor:pointer; transition:all .15s; flex-shrink:0;
+    }
+    .sync-indicator:hover { background:rgba(255,255,255,0.1); }
+    .sync-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .sync-dot.idle     { background:rgba(255,255,255,0.2); }
+    .sync-dot.synced   { background:#4DB87A; box-shadow:0 0 0 2px rgba(77,184,122,.2); }
+    .sync-dot.pushing,
+    .sync-dot.pulling  { background:var(--amber); animation:syncPulse 1s infinite; }
+    .sync-dot.error    { background:#FF5C5C; }
+    .sync-dot.disabled { background:rgba(255,255,255,0.12); }
+    @keyframes syncPulse {
+      0%,100%{ opacity:1; transform:scale(1); }
+      50%    { opacity:.4; transform:scale(.8); }
+    }
+    .sync-banner {
+      position:fixed; top:0; left:50%; transform:translateX(-50%);
+      width:100%; max-width:480px; z-index:5200;
+      padding:calc(var(--safe-top)+8px) 16px 10px;
+      display:flex; align-items:center; gap:10px;
+      background:rgba(14,52,40,0.97); border-bottom:1px solid rgba(77,184,122,.3);
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+      animation:nudgeSlideIn .35s cubic-bezier(0.34,1.46,0.64,1);
+    }
+    .sync-banner-icon  { font-size:18px; flex-shrink:0; }
+    .sync-banner-body  { flex:1; }
+    .sync-banner-title { font-size:12px; font-weight:700; color:#4DB87A; }
+    .sync-banner-sub   { font-size:10px; color:rgba(77,184,122,.65); margin-top:1px; }
+    .sync-banner-close { background:rgba(77,184,122,.15); border:none; border-radius:99px;
+      color:#4DB87A; font-size:13px; cursor:pointer; padding:3px 7px; flex-shrink:0; }
+    .sync-section { margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,.06); }
+    .sync-status-row {
+      display:flex; align-items:center; gap:8px; margin-bottom:8px;
+      font-size:12px; color:var(--text-dim);
+    }
+    .sync-last-at { font-size:10px; color:var(--text-dim); margin-top:2px; }
+
     /* ─── Multi-trip Drawer ─────────────────────────────────────────────────── */
     .trip-drawer-overlay {
       position:fixed; inset:0; z-index:6000;
@@ -3777,7 +3818,7 @@ Rules:
 /* ── SHARE MODAL ──────────────────────────────────────────────────────────── */
 const JSONBLOB = "https://jsonblob.com/api/jsonBlob";
 
-function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseCurrency, totalBudget, memories, saveTrip, saveItinerary, savePacking, saveExpenses, savePeople, saveBudget, saveBaseCurrency, initialCode="" }) {
+function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseCurrency, totalBudget, memories, saveTrip, saveItinerary, savePacking, saveExpenses, savePeople, saveBudget, saveBaseCurrency, initialCode="", onSyncEnable, syncEnabled, syncStatus, syncLastAt, onPushNow, onPullNow }) {
   const [activeTab, setActiveTab] = useState(initialCode ? "join" : "share");
   const [includes, setIncludes]   = useState({ itinerary:true, packing:true, budget:true, memories:false });
   const [shareState, setShareState] = useState({ step:"idle", code:"", error:"" }); // idle | creating | ready | updating | error
@@ -3820,6 +3861,7 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
       if (!blobId) throw new Error("No blob ID returned");
       LS.set("tc_share_blobid", blobId);
       setShareState({ step:"ready", code:blobId, blobId, error:"" });
+      if(onSyncEnable) onSyncEnable(blobId);
     } catch(e) {
       setShareState({ step:"error", code:"", error:"Could not create link — " + e.message });
     }
@@ -3899,6 +3941,7 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
     if (joinIncludes.packing   && d.packing)   savePacking(d.packing);
     if (joinIncludes.budget    && d.expenses)   saveExpenses(d.expenses);
     setJoinState(p=>({...p, step:"done"}));
+    if(onSyncEnable && joinState.blobId) onSyncEnable(joinState.blobId);
   };
 
   // ── Share helpers ─────────────────────────────────────────────────────────
@@ -4029,6 +4072,28 @@ function ShareModal({ onClose, trip, itinerary, packing, expenses, people, baseC
                     <div style={{display:"flex",alignItems:"center",gap:8,marginTop:14,fontSize:12,color:"var(--text-dim)"}}>
                       <span className="collab-dot"/>
                       <span>Link is live · Stored securely on JSONBlob</span>
+                    </div>
+
+                    {/* Live sync panel */}
+                    <div className="sync-section">
+                      <div className="sync-status-row">
+                        <div className={`sync-dot ${syncEnabled?(syncStatus==="error"?"error":"synced"):"disabled"}`}/>
+                        <span style={{fontWeight:600,color:syncEnabled?"#4DB87A":"var(--text-dim)"}}>
+                          {syncEnabled?"Auto-sync active":"Auto-sync off"}
+                        </span>
+                      </div>
+                      {syncLastAt&&<div className="sync-last-at">Last sync: {new Date(syncLastAt).toLocaleTimeString("en",{hour:"2-digit",minute:"2-digit"})}</div>}
+                      <div className="flex gap-8 mt-8">
+                        <button className="btn-ghost flex-1" style={{fontSize:11}} onClick={onPushNow} disabled={!syncEnabled}>
+                          {syncStatus==="pushing"?<span className="dots"><span>·</span><span>·</span><span>·</span></span>:"⬆ Push now"}
+                        </button>
+                        <button className="btn-ghost flex-1" style={{fontSize:11}} onClick={onPullNow} disabled={!syncEnabled}>
+                          {syncStatus==="pulling"?<span className="dots"><span>·</span><span>·</span><span>·</span></span>:"⬇ Pull latest"}
+                        </button>
+                      </div>
+                      <div style={{fontSize:10,color:"var(--text-dim)",marginTop:6,lineHeight:1.6}}>
+                        Changes sync every 30s. Team sees itinerary, expenses &amp; packing updates in real time.
+                      </div>
                     </div>
                   </div>
                 )}
@@ -6732,6 +6797,37 @@ function TripDrawer({ trips, activeTripId, onSwitch, onCreate, onDelete, onClose
   );
 }
 
+// ── Sync merge helpers (append-only — never deletes local data) ───────────────
+const mergeById = (local, remote) => {
+  const ids = new Set((local||[]).map(x=>x.id));
+  return [...(local||[]), ...(remote||[]).filter(x=>!ids.has(x.id))];
+};
+const mergePeople = (local, remote) => {
+  const names = new Set((local||[]).map(p=>p.name));
+  return [...(local||[]), ...(remote||[]).filter(p=>!names.has(p.name))];
+};
+const mergeItinerary = (local, remote) => {
+  const dayMap = new Map((local||[]).map(d=>[d.id,d]));
+  (remote||[]).forEach(rd => {
+    if(!dayMap.has(rd.id)){ dayMap.set(rd.id,rd); return; }
+    const ld = dayMap.get(rd.id);
+    const actIds = new Set(ld.activities.map(a=>a.id));
+    const newActs = (rd.activities||[]).filter(a=>!actIds.has(a.id));
+    if(newActs.length) dayMap.set(rd.id,{...ld,activities:[...ld.activities,...newActs]});
+  });
+  return [...dayMap.values()].sort((a,b)=>a.day-b.day);
+};
+const mergePacking = (local, remote) => {
+  const merged = {...(local||{})};
+  Object.entries(remote||{}).forEach(([cat,items])=>{
+    if(!merged[cat]){ merged[cat]=items; return; }
+    const ids = new Set(merged[cat].map(i=>i.id));
+    const newItems = (items||[]).filter(i=>!ids.has(i.id));
+    if(newItems.length) merged[cat]=[...merged[cat],...newItems];
+  });
+  return merged;
+};
+
 /* ── Main App ─────────────────────────────────────────────────────────────── */
 function App() {
   const [tab, setTab] = useState(0);
@@ -6740,6 +6836,16 @@ function App() {
   const [showInstall, setShowInstall] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
+
+  // ── Sync state ────────────────────────────────────────────────────────────
+  const [syncEnabled,   setSyncEnabled]  = useState(()=>LS.get("tc_sync_enabled",false));
+  const [syncStatus,    setSyncStatus]   = useState("idle");
+  const [syncVersion,   setSyncVersion]  = useState(()=>LS.get("tc_sync_version",0));
+  const [syncLastAt,    setSyncLastAt]   = useState(()=>LS.get("tc_sync_last_at",""));
+  const [syncBanner,    setSyncBanner]   = useState(null);
+  const syncInProgress   = useRef(false);
+  const syncPushTimer    = useRef(null);
+  const syncPullInterval = useRef(null);
 
   // ── Trip management ──────────────────────────────────────────────────────
   const [trips,        setTrips]        = useState(() => LS.get("tc_trips", []));
@@ -6813,16 +6919,129 @@ function App() {
   };
 
   // ── Persist helpers ──
-  const saveTrip          = t => { setTrip(t);         LS.set("tc_trip",t); };
-  const saveItinerary     = i => { setItinerary(i);    LS.set("tc_itin",i); };
-  const savePacking       = p => { setPacking(p);      LS.set("tc_pack",p); };
+  const saveTrip          = t => { setTrip(t);         LS.set("tc_trip",t);      schedulePush(); };
+  const saveItinerary     = i => { setItinerary(i);    LS.set("tc_itin",i);      schedulePush(); };
+  const savePacking       = p => { setPacking(p);      LS.set("tc_pack",p);      schedulePush(); };
   const saveBudget        = b => { setTotalBudget(b);  LS.set("tc_budget",b); };
   const saveDailyBudget   = b => { setDailyBudget(b);  LS.set("tc_daily_budget",b); };
   const saveBaseCurrency  = c => { setBaseCurrency(c); LS.set("tc_basecurr",c); };
-  const saveExpenses      = e => { setExpenses(e);     LS.set("tc_expenses",e); };
-  const savePeople        = p => { setPeople(p);       LS.set("tc_people",p); };
-  const saveMemories      = m => { setMemories(m);     LS.set("tc_memories",m); };
+  const saveExpenses      = e => { setExpenses(e);     LS.set("tc_expenses",e);  schedulePush(); };
+  const savePeople        = p => { setPeople(p);       LS.set("tc_people",p);    schedulePush(); };
+  const saveMemories      = m => { setMemories(m);     LS.set("tc_memories",m);  schedulePush(); };
   const saveDocs          = d => { setDocs(d);         LS.set("tc_docs",d); };
+
+  // ── Sync engine ───────────────────────────────────────────────────────────
+  const saveSyncEnabled = v => { setSyncEnabled(v); LS.set("tc_sync_enabled",v); };
+
+  const buildSyncPayload = v => ({
+    v, syncType:"realtime", pushedAt:new Date().toISOString(),
+    pushedBy: trip.name||"Traveller",
+    trip, itinerary, packing,
+    expenses: expenses.map(e=>({...e,attachments:[]})),
+    people, baseCurrency, totalBudget,
+    memories: memories.map(m=>({...m,photo:null})),
+  });
+
+  const showSyncBanner = (by, counts) => {
+    const parts=[];
+    if(counts.exp)  parts.push(`${counts.exp} expense${counts.exp>1?"s":""}`);
+    if(counts.itin) parts.push(`${counts.itin} activit${counts.itin>1?"ies":"y"}`);
+    if(counts.mem)  parts.push(`${counts.mem} memor${counts.mem>1?"ies":"y"}`);
+    if(counts.pack) parts.push(`${counts.pack} packing item${counts.pack>1?"s":""}`);
+    if(!parts.length) return;
+    setSyncBanner({ title:`✓ Synced from ${by||"team"}`, sub:parts.join(", ")+" added" });
+    setTimeout(()=>setSyncBanner(null),5000);
+  };
+
+  const mergeFromRemote = data => {
+    syncInProgress.current = true;
+    const counts = {exp:0,itin:0,mem:0,pack:0};
+    const newItin = mergeItinerary(itinerary, data.itinerary||[]);
+    const itinAdded = newItin.flatMap(d=>d.activities).length - itinerary.flatMap(d=>d.activities).length;
+    if(itinAdded>0){ saveItinerary(newItin); counts.itin=itinAdded; }
+    const newExp = mergeById(expenses, data.expenses||[]);
+    if(newExp.length>expenses.length){ saveExpenses(newExp); counts.exp=newExp.length-expenses.length; }
+    const newMem = mergeById(memories, data.memories||[]);
+    if(newMem.length>memories.length){ saveMemories(newMem); counts.mem=newMem.length-memories.length; }
+    const newPack = mergePacking(packing, data.packing||{});
+    const packAdded = Object.values(newPack).flat().length - Object.values(packing).flat().length;
+    if(packAdded>0){ savePacking(newPack); counts.pack=packAdded; }
+    const newPeople = mergePeople(people, data.people||[]);
+    if(newPeople.length>people.length) savePeople(newPeople);
+    setSyncVersion(data.v);  LS.set("tc_sync_version",data.v);
+    setSyncLastAt(data.pushedAt||"");  LS.set("tc_sync_last_at",data.pushedAt||"");
+    showSyncBanner(data.pushedBy, counts);
+    setTimeout(()=>{ syncInProgress.current=false; },300);
+  };
+
+  const pushSync = async () => {
+    const blobId = LS.get("tc_share_blobid","");
+    if(!blobId||!syncEnabled) return;
+    setSyncStatus("pushing");
+    try {
+      const newV = syncVersion+1;
+      const res = await fetch(`${JSONBLOB}/${blobId}`,{
+        method:"PUT",
+        headers:{"Content-Type":"application/json","Accept":"application/json"},
+        body:JSON.stringify(buildSyncPayload(newV)),
+      });
+      if(!res.ok) throw new Error(res.status);
+      const now = new Date().toISOString();
+      setSyncVersion(newV); LS.set("tc_sync_version",newV);
+      setSyncLastAt(now);   LS.set("tc_sync_last_at",now);
+      setSyncStatus("synced"); setTimeout(()=>setSyncStatus("idle"),3000);
+    } catch { setSyncStatus("error"); setTimeout(()=>setSyncStatus("idle"),5000); }
+  };
+
+  const pullSync = async () => {
+    const blobId = LS.get("tc_share_blobid","");
+    if(!blobId||!syncEnabled) return;
+    setSyncStatus("pulling");
+    try {
+      const res = await fetch(`${JSONBLOB}/${blobId}`,{headers:{"Accept":"application/json"}});
+      if(!res.ok) throw new Error();
+      const data = await res.json();
+      if(!data.v||data.v<=syncVersion){
+        setSyncStatus("synced"); setTimeout(()=>setSyncStatus("idle"),2000); return;
+      }
+      mergeFromRemote(data);
+      setSyncStatus("synced"); setTimeout(()=>setSyncStatus("idle"),3000);
+    } catch { setSyncStatus("error"); setTimeout(()=>setSyncStatus("idle"),5000); }
+  };
+
+  const schedulePush = () => {
+    if(!syncEnabled||!LS.get("tc_share_blobid","")) return;
+    if(syncInProgress.current) return;
+    clearTimeout(syncPushTimer.current);
+    syncPushTimer.current = setTimeout(pushSync,3000);
+  };
+
+  const enableSync = blobId => {
+    LS.set("tc_share_blobid",blobId);
+    saveSyncEnabled(true);
+  };
+
+  const syncLabel = () => {
+    const blobId = LS.get("tc_share_blobid","");
+    if(!blobId||!syncEnabled) return {dot:"disabled",text:"Sync off"};
+    if(syncStatus==="pushing") return {dot:"pushing",text:"Pushing…"};
+    if(syncStatus==="pulling") return {dot:"pulling",text:"Pulling…"};
+    if(syncStatus==="synced")  return {dot:"synced", text:"Synced"};
+    if(syncStatus==="error")   return {dot:"error",  text:"Error"};
+    if(syncLastAt) return {dot:"synced",text:new Date(syncLastAt).toLocaleTimeString("en",{hour:"2-digit",minute:"2-digit"})};
+    return {dot:"idle",text:"Ready"};
+  };
+
+  // Start/stop 30s polling when syncEnabled changes
+  useEffect(()=>{
+    clearInterval(syncPullInterval.current);
+    if(!syncEnabled) return;
+    const blobId = LS.get("tc_share_blobid","");
+    if(!blobId) return;
+    pullSync(); // immediate pull on enable
+    syncPullInterval.current = setInterval(pullSync,30000);
+    return ()=>clearInterval(syncPullInterval.current);
+  },[syncEnabled]);
 
   // ── Trip management functions ─────────────────────────────────────────────
 
@@ -7218,6 +7437,15 @@ function App() {
             onChange={e=>saveTrip({...trip,name:e.target.value})} placeholder="✈️ Name Your Trip" />
           <div style={{display:"flex",gap:7,alignItems:"center",flexShrink:0}}>
             <div className="progress-pill">🧳 {packingDone}/{packingTotal}</div>
+            {(syncEnabled||LS.get("tc_share_blobid",""))&&(()=>{
+              const sl=syncLabel();
+              return(
+                <div className="sync-indicator" onClick={pullSync} title="Tap to pull latest">
+                  <div className={`sync-dot ${sl.dot}`}/>
+                  <span style={{color:sl.dot==="synced"?"#4DB87A":sl.dot==="error"?"#FF5C5C":"var(--text-dim)"}}>{sl.text}</span>
+                </div>
+              );
+            })()}
             <button className="header-share-btn" onClick={()=>setShowShare(true)} title="Share & Invite">📤</button>
           </div>
         </div>
@@ -7296,6 +7524,18 @@ function App() {
         />
       )}
 
+      {/* ── Sync banner ── */}
+      {syncBanner&&(
+        <div className="sync-banner">
+          <div className="sync-banner-icon">🔄</div>
+          <div className="sync-banner-body">
+            <div className="sync-banner-title">{syncBanner.title}</div>
+            <div className="sync-banner-sub">{syncBanner.sub}</div>
+          </div>
+          <button className="sync-banner-close" onClick={()=>setSyncBanner(null)}>✕</button>
+        </div>
+      )}
+
       {/* ── Share Modal ── */}
       {showShare&&(
         <ShareModal
@@ -7307,6 +7547,12 @@ function App() {
           saveExpenses={saveExpenses} savePeople={savePeople}
           saveBudget={saveBudget} saveBaseCurrency={saveBaseCurrency}
           initialCode={initialShareCode}
+          onSyncEnable={enableSync}
+          syncEnabled={syncEnabled}
+          syncStatus={syncStatus}
+          syncLastAt={syncLastAt}
+          onPushNow={pushSync}
+          onPullNow={pullSync}
         />
       )}
 
