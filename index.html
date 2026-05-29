@@ -1780,6 +1780,100 @@
       border-radius:10px;
     }
 
+    /* ─── Packing Templates Library ────────────────────────────────────────── */
+    .templates-card {
+      background: linear-gradient(135deg,rgba(120,80,255,0.07),rgba(7,16,31,0));
+      border: 1px solid rgba(120,80,255,0.2); border-radius:18px;
+      padding:16px; margin-bottom:12px; position:relative; overflow:hidden;
+    }
+    .templates-card::before {
+      content:'📚'; position:absolute; right:14px; top:10px;
+      font-size:30px; opacity:.12; pointer-events:none;
+    }
+    .template-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px;
+    }
+    .template-tile {
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+      border-radius:13px; padding:11px 8px; text-align:center; cursor:pointer;
+      transition:all .15s; -webkit-tap-highlight-color:transparent; position:relative;
+    }
+    .template-tile:active { transform:scale(.95); }
+    .template-tile:hover  { background:rgba(120,80,255,0.1); border-color:rgba(120,80,255,0.3); }
+    .template-tile.imported { border-color:rgba(77,184,122,0.35); background:rgba(77,184,122,0.06); }
+    .template-tile-emoji  { font-size:26px; line-height:1; margin-bottom:5px; }
+    .template-tile-name   { font-size:11px; font-weight:600; color:var(--text); line-height:1.3; }
+    .template-tile-count  { font-size:9px; color:var(--text-dim); margin-top:2px; }
+    .template-tile-check  {
+      position:absolute; top:5px; right:5px;
+      width:14px; height:14px; border-radius:50%;
+      background:#4DB87A; display:flex; align-items:center; justify-content:center;
+      font-size:8px; color:#07101F; font-weight:900;
+    }
+
+    /* Template preview sheet */
+    .template-sheet-overlay {
+      position:fixed; inset:0; z-index:3000;
+      background:rgba(7,16,31,0.82); backdrop-filter:blur(10px);
+      display:flex; align-items:flex-end;
+      animation:fadeIn .2s ease;
+    }
+    .template-sheet {
+      background:linear-gradient(160deg,#0C1B34 0%,#07101F 100%);
+      border:1px solid rgba(120,80,255,0.2); border-radius:22px 22px 0 0;
+      width:100%; max-width:480px; margin:0 auto;
+      max-height:84vh; display:flex; flex-direction:column;
+      animation:slideUp .32s cubic-bezier(0.34,1.46,0.64,1);
+      padding-bottom:var(--safe-bottom);
+    }
+    .template-sheet-hdr {
+      display:flex; align-items:flex-start; gap:12px;
+      padding:18px 20px 14px; flex-shrink:0;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .template-sheet-emoji { font-size:36px; line-height:1; flex-shrink:0; }
+    .template-sheet-info  { flex:1; min-width:0; }
+    .template-sheet-name  {
+      font-family:'Playfair Display',serif; font-size:17px; font-weight:700; color:#fff;
+    }
+    .template-sheet-desc  { font-size:12px; color:var(--text-dim); margin-top:3px; line-height:1.5; }
+    .template-sheet-body  { flex:1; overflow-y:auto; padding:14px 20px; }
+    .template-sheet-body::-webkit-scrollbar { display:none; }
+
+    .template-cat-block   { margin-bottom:14px; }
+    .template-cat-label   {
+      font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+      color:rgba(120,80,255,0.8); margin-bottom:6px;
+    }
+    .template-item-chip {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+      border-radius:8px; padding:4px 9px; font-size:12px; margin:3px 3px 3px 0;
+      transition:background .15s;
+    }
+    .template-item-chip.already { background:rgba(77,184,122,0.08); border-color:rgba(77,184,122,0.2); color:rgba(77,184,122,0.6); }
+
+    /* Import mode toggle */
+    .import-mode-row {
+      display:flex; gap:6px; margin-bottom:12px; flex-shrink:0;
+      padding:0 20px;
+    }
+    .import-mode-btn {
+      flex:1; padding:9px; border-radius:10px; border:1px solid rgba(255,255,255,0.1);
+      font-size:12px; font-weight:600; cursor:pointer; text-align:center;
+      background:rgba(255,255,255,0.04); color:var(--text-dim); transition:all .15s;
+      font-family:'DM Sans',sans-serif;
+    }
+    .import-mode-btn.on { background:rgba(120,80,255,0.18); border-color:rgba(120,80,255,0.4); color:#AA88FF; }
+    .template-sheet-footer { padding:12px 20px 4px; flex-shrink:0; }
+
+    /* Template stats row */
+    .template-stats { display:flex; gap:10px; margin-top:8px; flex-wrap:wrap; }
+    .template-stat-chip {
+      background:rgba(120,80,255,0.1); border:1px solid rgba(120,80,255,0.2);
+      border-radius:8px; padding:3px 10px; font-size:11px; color:#AA88FF; font-weight:600;
+    }
+
     /* ─── Smart Pack ───────────────────────────────────────────────────────── */
     .smart-pack-card {
       background: linear-gradient(135deg, rgba(255,168,40,0.07) 0%, rgba(7,16,31,0) 100%);
@@ -3357,6 +3451,62 @@ Analyse this and return the JSON re-check report.`
   const verdictColor = v => v==="ready"?"#4DB87A":v==="minor gaps"?"#FFA828":"#FF5C5C";
   const verdictIcon  = v => v==="ready"?"✅":v==="minor gaps"?"⚠️":"🚨";
 
+  // ── Templates library state ───────────────────────────────────────────────
+  const [showTemplates,    setShowTemplates]    = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);   // template id
+  const [importMode,       setImportMode]       = useState("merge"); // "merge" | "replace"
+  const [importedIds,      setImportedIds]      = useState(()=>LS.get("tc_imported_templates",[]));
+  const [importFlash,      setImportFlash]      = useState("");
+
+  const saveImportedIds = ids => { setImportedIds(ids); LS.set("tc_imported_templates",ids); };
+
+  // Count how many items from a template are already in the packing list
+  const countAlready = (tpl) => {
+    const allItems = Object.values(packing).flat().map(i=>i.name.toLowerCase());
+    return Object.values(tpl.items).flat().filter(name=>allItems.includes(name.toLowerCase())).length;
+  };
+
+  const totalItems = tpl => Object.values(tpl.items).flat().length;
+
+  const importTemplate = (tpl, mode) => {
+    const existing = Object.values(packing).flat().map(i=>i.name.toLowerCase());
+    const cats = Object.keys(packing);
+
+    if(mode==="replace"){
+      const fresh = {};
+      Object.entries(DEFAULT_PACKING).forEach(([cat,items])=>{
+        fresh[cat] = items.map((name,i)=>({id:`${cat}-${i}`,name,checked:false}));
+      });
+      // Add template items on top
+      Object.entries(tpl.items).forEach(([cat,items])=>{
+        const matched = cats.find(c=>c===cat) || cats.find(c=>c.includes(cat.split(" ").slice(1,2)[0]||"")) || cats[0];
+        if(!fresh[matched]) fresh[matched]=[];
+        items.forEach((name,i)=>{
+          fresh[matched].push({id:`tpl_${tpl.id}_${i}_${Date.now()}`,name,checked:false});
+        });
+      });
+      addPackingItem && savePacking && savePacking(fresh);
+    } else {
+      // Merge: add items not already present
+      const newPack = JSON.parse(JSON.stringify(packing));
+      Object.entries(tpl.items).forEach(([cat,items])=>{
+        const matched = cats.find(c=>c===cat) || cats.find(c=>c.includes(cat.split(" ").slice(1,2)[0]||"")) || cats[0];
+        if(!newPack[matched]) newPack[matched]=[];
+        items.forEach((name,i)=>{
+          if(!newPack[matched].some(x=>x.name.toLowerCase()===name.toLowerCase())){
+            newPack[matched].push({id:`tpl_${tpl.id}_${i}_${Date.now()+i}`,name,checked:false});
+          }
+        });
+      });
+      savePacking(newPack);
+    }
+
+    saveImportedIds([...new Set([...importedIds, tpl.id])]);
+    setSelectedTemplate(null);
+    setImportFlash(tpl.name);
+    setTimeout(()=>setImportFlash(""),2500);
+  };
+
   // Smart Pack state
   const [occasions, setOccasions] = useState([]);
   const [extraNotes, setExtraNotes] = useState("");
@@ -3669,6 +3819,124 @@ Rules:
           </div>
         )}
       </div>
+
+      {/* ── Templates Library Card ── */}
+      {importFlash&&(
+        <div style={{background:"rgba(77,184,122,0.1)",border:"1px solid rgba(77,184,122,0.25)",borderRadius:12,padding:"9px 14px",marginBottom:10,fontSize:13,color:"#4DB87A",display:"flex",alignItems:"center",gap:8,animation:"fadeUp .25s ease"}}>
+          ✓ <strong>{importFlash}</strong> template imported to your packing list
+        </div>
+      )}
+
+      <div className="templates-card">
+        <div className="flex items-center justify-between" style={{marginBottom:4}}>
+          <div className="card-title" style={{marginBottom:0,fontSize:14,color:"#AA88FF"}}>📚 Trip Templates</div>
+          <button className="btn-ghost" style={{fontSize:11,padding:"4px 10px",borderColor:"rgba(120,80,255,0.3)",color:"#AA88FF"}}
+            onClick={()=>setShowTemplates(s=>!s)}>
+            {showTemplates?"Hide":"Browse"}
+          </button>
+        </div>
+        <div style={{fontSize:12,color:"var(--text-dim)"}}>
+          {importedIds.length>0
+            ? `${importedIds.length} template${importedIds.length>1?"s":""} imported · tap to add more`
+            : "One-tap packing lists for dive trips, ski, business travel and more"}
+        </div>
+
+        {showTemplates&&(
+          <div className="template-grid">
+            {PACKING_TEMPLATES.map(tpl=>{
+              const already = countAlready(tpl);
+              const total   = totalItems(tpl);
+              const imported = importedIds.includes(tpl.id);
+              return(
+                <div key={tpl.id} className={`template-tile${imported?" imported":""}`}
+                  onClick={()=>setSelectedTemplate(tpl.id)}>
+                  {imported&&<div className="template-tile-check">✓</div>}
+                  <div className="template-tile-emoji">{tpl.emoji}</div>
+                  <div className="template-tile-name">{tpl.name}</div>
+                  <div className="template-tile-count">{total} items</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Template Preview Sheet ── */}
+      {selectedTemplate&&(()=>{
+        const tpl = PACKING_TEMPLATES.find(t=>t.id===selectedTemplate);
+        if(!tpl) return null;
+        const allItems = Object.values(packing).flat().map(i=>i.name.toLowerCase());
+        const newCount = Object.values(tpl.items).flat().filter(n=>!allItems.includes(n.toLowerCase())).length;
+        const alreadyCount = totalItems(tpl) - newCount;
+
+        return(
+          <div className="template-sheet-overlay" onClick={e=>e.target===e.currentTarget&&setSelectedTemplate(null)}>
+            <div className="template-sheet">
+              {/* Header */}
+              <div className="template-sheet-hdr">
+                <div className="template-sheet-emoji">{tpl.emoji}</div>
+                <div className="template-sheet-info">
+                  <div className="template-sheet-name">{tpl.name}</div>
+                  <div className="template-sheet-desc">{tpl.desc}</div>
+                  <div className="template-stats">
+                    <div className="template-stat-chip">{totalItems(tpl)} items</div>
+                    {newCount>0&&<div className="template-stat-chip" style={{background:"rgba(77,184,122,0.1)",borderColor:"rgba(77,184,122,0.25)",color:"#4DB87A"}}>+{newCount} new</div>}
+                    {alreadyCount>0&&<div className="template-stat-chip" style={{background:"rgba(255,255,255,0.05)",color:"var(--text-dim)"}}>{alreadyCount} already packed</div>}
+                  </div>
+                </div>
+                <button className="btn-del" style={{fontSize:20}} onClick={()=>setSelectedTemplate(null)}>✕</button>
+              </div>
+
+              {/* Item preview */}
+              <div className="template-sheet-body">
+                {Object.entries(tpl.items).map(([cat,items])=>(
+                  <div key={cat} className="template-cat-block">
+                    <div className="template-cat-label">{cat}</div>
+                    <div>
+                      {items.map((name,i)=>{
+                        const has = allItems.includes(name.toLowerCase());
+                        return(
+                          <span key={i} className={`template-item-chip${has?" already":""}`}>
+                            {has&&<span style={{fontSize:10}}>✓</span>}{name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Import mode toggle */}
+              <div className="import-mode-row">
+                <button className={`import-mode-btn${importMode==="merge"?" on":""}`}
+                  onClick={()=>setImportMode("merge")}>
+                  ➕ Merge with list
+                </button>
+                <button className={`import-mode-btn${importMode==="replace"?" on":""}`}
+                  onClick={()=>setImportMode("replace")}>
+                  🔄 Replace list
+                </button>
+              </div>
+              <div style={{paddingLeft:20,paddingRight:20,fontSize:11,color:"var(--text-dim)",marginBottom:8}}>
+                {importMode==="merge"
+                  ? `Adds ${newCount} new items to your existing list. Items you already have are skipped.`
+                  : "Clears your current list and builds fresh from this template. Cannot be undone."}
+              </div>
+
+              {/* Import button */}
+              <div className="template-sheet-footer">
+                <button className="btn btn-full"
+                  onClick={()=>importTemplate(tpl,importMode)}
+                  style={{background:importMode==="replace"?"linear-gradient(135deg,#FF5C5C,#C93030)":undefined}}>
+                  {importMode==="merge"
+                    ? `Add ${newCount} item${newCount!==1?"s":""} to my list`
+                    : `Replace list with ${tpl.name}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Smart Pack Card ── */}
       <div className="smart-pack-card">
@@ -6658,6 +6926,122 @@ Write the travel story.`
     </div>
   );
 }
+
+// ── Packing templates library ─────────────────────────────────────────────────
+const PACKING_TEMPLATES = [
+  {
+    id:"beach", emoji:"🏖️", name:"Beach Vacation", desc:"Sun, sand and sea essentials",
+    items:{
+      "📄 Documents":["Travel insurance","Hotel confirmation","Passport"],
+      "👕 Clothing":["Swimsuit (x2)","Beach cover-up","Flip flops","Sandals","Shorts (x3)","Light sundress / shirt","Sun hat","Sunglasses"],
+      "🧴 Toiletries":["High-SPF sunscreen","After-sun lotion","Lip balm with SPF","Insect repellent","Reef-safe sunscreen"],
+      "🎒 Essentials":["Beach bag","Dry bag","Snorkel set","Waterproof phone pouch","Reusable water bottle","Beach towel"],
+      "🔌 Electronics":["Waterproof camera","Portable charger"],
+      "💊 Health":["Antihistamines","Blister plasters","Oral rehydration sachets"],
+    }
+  },
+  {
+    id:"ski", emoji:"⛷️", name:"Ski Holiday", desc:"On-piste and après-ski gear",
+    items:{
+      "📄 Documents":["Travel insurance (winter sports)","Ski pass booking","Hotel confirmation","Medical card"],
+      "👕 Clothing":["Thermal base layer top (x2)","Thermal base layer bottoms (x2)","Ski jacket","Ski trousers","Fleece mid-layer","Wool socks (x4)","Ski gloves","Balaclava","Neck gaiter","Warm après-ski outfit","Casual evening wear"],
+      "🧴 Toiletries":["High-SPF lip balm","SPF 50 face sunscreen","Moisturiser (cold weather)","Hand cream"],
+      "🎒 Essentials":["Ski helmet","Ski goggles","Boot bag","Lock for skis","Hand warmers","Backpack for piste"],
+      "🔌 Electronics":["GoPro + chest mount","Spare batteries (cold drains fast)","Portable charger","Earphones"],
+      "💊 Health":["Ibuprofen / muscle rub","Blister plasters","Altitude sickness tablets (if high resort)"],
+    }
+  },
+  {
+    id:"business", emoji:"💼", name:"Business Travel", desc:"Sharp, efficient and carry-on only",
+    items:{
+      "📄 Documents":["Passport / ID","Business cards","Meeting agenda printouts","Expense receipts folder","Travel insurance","Visa (if required)"],
+      "👕 Clothing":["Business suit / blazer","Dress shirts / blouses (x3)","Formal trousers / skirt","Smart shoes","Belt","Casual change of clothes","Workout gear","Ties / accessories"],
+      "🧴 Toiletries":["Travel-size toiletries bag","Cologne / perfume","Shoe polish wipes","Lint roller"],
+      "🎒 Essentials":["Laptop bag / briefcase","Padlock for luggage","Travel adapter (universal)","Notebook + pen","Business card holder"],
+      "🔌 Electronics":["Laptop + charger","Phone + charger","Power bank","Presentation clicker","HDMI adapter","Noise-cancelling headphones","International SIM / eSIM"],
+      "💊 Health":["Melatonin (jet lag)","Paracetamol","Eye drops","Hand sanitiser"],
+    }
+  },
+  {
+    id:"hiking", emoji:"🥾", name:"Hiking Trip", desc:"Day hikes to multi-day treks",
+    items:{
+      "📄 Documents":["National park permit","Trail maps (printed)","Emergency contacts","Travel insurance","ID"],
+      "👕 Clothing":["Moisture-wicking hiking shirt (x3)","Hiking trousers","Convertible zip-off trousers","Thermal layer","Waterproof jacket","Hiking socks (x4)","Merino wool underwear","Gaiters","Buff / neck gaiter","Sun hat","Warm beanie"],
+      "🧴 Toiletries":["Biodegradable soap","SPF 50 sunscreen","Insect repellent","Trowel (backcountry)","Toilet paper (sealed bag)"],
+      "🎒 Essentials":["Hiking boots (broken in)","Trekking poles","Headtorch + spare batteries","Compass","Whistle","Survival blanket","Water filter / purification tabs","Blister kit","First aid kit","Carabiner clips","Dry bags"],
+      "🔌 Electronics":["GPS device / downloaded offline maps","Satellite communicator","Solar power bank","Camera"],
+      "💊 Health":["Blister plasters","Ibuprofen","DEET insect repellent","Altitude tablets","Antihistamines","Moleskin patches"],
+      "🍎 Food & Drink":["High-energy trail snacks","Electrolyte tablets","Water bottles (x2 — 1L each)","Portable water filter"],
+    }
+  },
+  {
+    id:"camping", emoji:"⛺", name:"Camping", desc:"Car camping and festival essentials",
+    items:{
+      "📄 Documents":["Campsite booking confirmation","National park pass","Emergency contacts"],
+      "👕 Clothing":["Warm layers","Waterproof jacket","Quick-dry trousers","Camp shoes / sandals","Thermal socks (x4)","Beanie","Gloves"],
+      "🧴 Toiletries":["Biodegradable soap + shampoo","Dry shampoo","Wet wipes","Toothbrush + toothpaste","SPF sunscreen","Insect repellent"],
+      "🎒 Essentials":["Tent + groundsheet","Sleeping bag (rated for temp)","Sleeping mat / inflatable pad","Camp chair / stool","Headtorch + spare batteries","Lighter + matches","Multi-tool / pocket knife","Rope + clothes line","Dustbin bags","Duct tape"],
+      "🔌 Electronics":["Solar lantern","Power bank (large)","Bluetooth speaker","Car charger"],
+      "💊 Health":["Full first aid kit","After-bite cream","Antihistamines","Blister plasters"],
+      "🍎 Food & Drink":["Camp stove + fuel canister","Cookset (pot + pan + utensils)","Plates + cups + cutlery","Can opener","Cooler box + ice packs","Reusable water bottles","Coffee / tea supplies","Non-perishable staples"],
+    }
+  },
+  {
+    id:"dive", emoji:"🤿", name:"Dive Trip", desc:"Scuba & snorkelling adventure",
+    items:{
+      "📄 Documents":["PADI / dive certification card","Dive log book","Travel + dive insurance","Medical fitness declaration","Passport"],
+      "👕 Clothing":["Rash guard (x2)","Boardshorts / bikini (x3)","Quick-dry towel","Wetsuit (if not renting)","Light evening wear","Sandals / flip flops"],
+      "🧴 Toiletries":["Reef-safe sunscreen","After-sun lotion","Ear drops (swimmer's ear)","Anti-fog solution for mask"],
+      "🎒 Essentials":["Dive mask (personal fit)","Snorkel","Fins","Surface marker buoy (SMB)","Dive knife / shears","Dive light","Underwater slate","Mesh bag","Waterproof dry bag","Dive computer"],
+      "🔌 Electronics":["Underwater camera / GoPro","Waterproof housing","Spare SD cards","Charging cables"],
+      "💊 Health":["Motion sickness tablets","Decongestants","Antihistamines","Sunburn relief","Diarrhoea tablets (travel gut issues)"],
+    }
+  },
+  {
+    id:"backpacking", emoji:"🎒", name:"Backpacking", desc:"Long-haul budget travel, light and flexible",
+    items:{
+      "📄 Documents":["Passport (+ 2 photocopies)","Visa(s)","Travel insurance","Yellow fever certificate (if needed)","Hostel bookings","Emergency contacts"],
+      "👕 Clothing":["T-shirts (x3 — quick dry)","Merino wool long-sleeve","Lightweight trousers (x2)","Shorts","Underwear (x5 — merino)","Socks (x4)","Light packable rain jacket","Packable down jacket","Flip flops","Comfortable walking shoes"],
+      "🧴 Toiletries":["Solid shampoo bar","Travel toothbrush","Wet wipes","Microfibre towel","Menstrual products / travel toiletries","Laundry sheets"],
+      "🎒 Essentials":["Backpack (40–50L)","Daypack (20L foldable)","Padlocks (x2)","Cable lock","Packing cubes","Sleeping bag liner","Money belt / hidden wallet","Travel neck pillow","Earplugs","Eye mask"],
+      "🔌 Electronics":["Universal travel adapter","Power bank (20000mAh)","SIM unlock phone / international eSIM","Laptop or tablet + charger","Earphones"],
+      "💊 Health":["Full first aid kit","Diarrhoea tablets","Rehydration sachets","Antimalarials (if needed)","Altitude tablets","Insect repellent","Water purification tablets"],
+    }
+  },
+  {
+    id:"safari", emoji:"🦁", name:"Safari", desc:"Wildlife and bush adventure",
+    items:{
+      "📄 Documents":["Passport","Visa","Safari booking confirmation","Travel + medical insurance","Yellow fever certificate","Emergency contacts"],
+      "👕 Clothing":["Neutral / khaki shirts (x4 — no white)","Long-sleeve shirts (sun + insects)","Lightweight trousers (x2)","Shorts","Warm fleece (cold mornings)","Windproof jacket","Sturdy walking shoes","Sandals","Wide-brim sun hat","Buff / scarf"],
+      "🧴 Toiletries":["High-DEET insect repellent","SPF 50 sunscreen","Unscented toiletries (wildlife)","Aloe vera gel","Hand sanitiser"],
+      "🎒 Essentials":["Binoculars (8x42 recommended)","Headtorch","Dust-proof bag for camera","Field guidebook","Reusable water bottle","Dry bag for valuables"],
+      "🔌 Electronics":["Camera with telephoto lens (200mm+)","Extra memory cards","Dust-proof camera bag","Power bank","Spare batteries","Laptop for photo backup"],
+      "💊 Health":["Antimalarials","DEET repellent","Antihistamines","Antibiotic prescription (bush emergency)","Imodium / rehydration","Water purification tablets"],
+    }
+  },
+  {
+    id:"cruise", emoji:"🚢", name:"Cruise", desc:"Ocean liner comfort and port days",
+    items:{
+      "📄 Documents":["Passport","Cruise booking confirmation + luggage tags","Travel insurance","Loyalty card / sea pass","Visa for ports","Credit card (no foreign fees)"],
+      "👕 Clothing":["Smart casual eveningwear (x3)","Formal night outfit","Daywear for ports (x4)","Swimsuit (x2)","Cover-up / sarong","Comfortable walking shoes for ports","Formal shoes","Sandals","Light cardigan (ship AC is strong)","Sun hat"],
+      "🧴 Toiletries":["Sunscreen","Seasickness bands / patches","Travel shampoo + conditioner","Magnets (cabin organisation hack)","Power strip (no surge protection required)"],
+      "🎒 Essentials":["Small day bag for port excursions","Lanyard for sea pass card","Refillable water bottle","Tote bag for shopping","Snorkel (for beach stops)","Tide chart / port maps"],
+      "🔌 Electronics":["Power bank","Camera + underwater case","Laptop or tablet","Adapter (ship sockets vary)","Earphones"],
+      "💊 Health":["Seasickness tablets","Antihistamines","Hand sanitiser","Aftersun","Blister plasters (port walking)"],
+    }
+  },
+  {
+    id:"wedding", emoji:"💍", name:"Wedding / Formal Event", desc:"Destination weddings and black-tie travel",
+    items:{
+      "📄 Documents":["Passport","Wedding invitation / dress code","Hotel confirmation","Travel insurance","Guest gift"],
+      "👕 Clothing":["Main formal outfit (suit / dress)","Backup smart outfit","Ceremony shoes","Dancing shoes / flats","Accessories (jewellery, tie, cufflinks)","Stain remover pen","Garment bag","Sewing kit (emergency repairs)","Light cover-up for travel","Casual change of clothes"],
+      "🧴 Toiletries":["Full grooming kit","Perfume / cologne","Makeup bag","Hair tools","Nail kit","Whitening strips","Dry shampoo","Stain remover wipes"],
+      "🎒 Essentials":["Gift / gift card","Card","Confetti (check if allowed)","Small clutch / evening bag","Steamer / wrinkle spray for outfit"],
+      "🔌 Electronics":["Camera / phone charged","Portable charger","Travel adapter","Bluetooth earphones"],
+      "💊 Health":["Paracetamol / ibuprofen","Antacids (rich food)","Plasters (new shoes)","Eye drops","Antihistamines"],
+    }
+  },
+];
 
 // ── Standalone packing builder ─────────────────────────────────────────────
 const buildDefaultPacking = () => {
