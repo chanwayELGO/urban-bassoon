@@ -1069,6 +1069,93 @@
       margin-top:10px; animation:fadeUp .2s ease;
     }
 
+    /* ─── Group Chat ────────────────────────────────────────────────────────── */
+    .chat-fab {
+      position:fixed; bottom:calc(var(--safe-bottom) + 68px); right:16px;
+      width:52px; height:52px; border-radius:50%; z-index:2000;
+      background:linear-gradient(135deg,#FFA828,#E07C00);
+      box-shadow:0 4px 18px rgba(255,168,40,0.45);
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; cursor:pointer;
+      transition:transform .18s, box-shadow .18s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .chat-fab:active { transform:scale(.9); }
+    .chat-fab-badge {
+      position:absolute; top:-3px; right:-3px;
+      background:#FF5C5C; color:#fff; border-radius:99px;
+      min-width:18px; height:18px; font-size:10px; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      padding:0 4px; border:2px solid #07101F;
+    }
+    .chat-overlay {
+      position:fixed; inset:0; z-index:4500;
+      display:flex; flex-direction:column; background:#07101F;
+      animation:fadeIn .2s ease;
+    }
+    .chat-header {
+      display:flex; align-items:center; gap:12px;
+      padding:calc(14px + var(--safe-top)) 16px 12px;
+      background:rgba(7,16,31,0.97); border-bottom:1px solid rgba(255,255,255,0.07);
+      flex-shrink:0;
+    }
+    .chat-header-icon  { font-size:22px; flex-shrink:0; }
+    .chat-header-info  { flex:1; min-width:0; }
+    .chat-header-title { font-family:'Playfair Display',serif; font-size:16px; color:var(--amber); font-weight:700; }
+    .chat-header-sub   { font-size:11px; color:var(--text-dim); margin-top:2px; }
+    .chat-messages {
+      flex:1; overflow-y:auto; padding:14px 16px;
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .chat-messages::-webkit-scrollbar { display:none; }
+    .chat-date-sep {
+      text-align:center; font-size:11px; color:var(--text-dim);
+      margin:10px 0 6px; position:relative;
+    }
+    .chat-date-sep::before,.chat-date-sep::after {
+      content:''; position:absolute; top:50%; width:28%; height:1px;
+      background:rgba(255,255,255,0.07);
+    }
+    .chat-date-sep::before { left:0; } .chat-date-sep::after { right:0; }
+    .chat-msg-wrap { display:flex; flex-direction:column; margin-bottom:4px; }
+    .chat-msg-wrap.self  { align-items:flex-end; }
+    .chat-msg-wrap.other { align-items:flex-start; }
+    .chat-msg-author { font-size:11px; font-weight:700; color:#5BA4FF; margin-bottom:3px; padding:0 4px; }
+    .chat-bubble {
+      max-width:78%; border-radius:18px; padding:10px 14px;
+      font-size:13px; line-height:1.5; word-break:break-word;
+    }
+    .chat-bubble.self  { background:linear-gradient(135deg,#FFA828,#E07C00); color:#07101F; border-bottom-right-radius:5px; }
+    .chat-bubble.other { background:rgba(255,255,255,0.07); color:var(--text); border-bottom-left-radius:5px; }
+    .chat-bubble.system{ background:transparent; color:var(--text-dim); font-size:11px; font-style:italic; padding:4px 8px; text-align:center; max-width:100%; }
+    .chat-msg-time { font-size:10px; color:rgba(230,217,194,0.3); margin-top:3px; padding:0 4px; }
+    .chat-input-area {
+      display:flex; align-items:flex-end; gap:8px;
+      padding:10px 12px calc(10px + var(--safe-bottom));
+      background:rgba(7,16,31,0.97); border-top:1px solid rgba(255,255,255,0.07); flex-shrink:0;
+    }
+    .chat-input {
+      flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+      border-radius:22px; padding:10px 16px; font-size:13px; color:var(--text);
+      font-family:'DM Sans',sans-serif; resize:none; outline:none; max-height:100px; overflow-y:auto; line-height:1.45;
+    }
+    .chat-input:focus { border-color:rgba(255,168,40,0.35); }
+    .chat-send-btn {
+      width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
+      background:linear-gradient(135deg,#FFA828,#E07C00); color:#07101F;
+      font-size:16px; display:flex; align-items:center; justify-content:center;
+      transition:opacity .15s; flex-shrink:0;
+    }
+    .chat-send-btn:disabled { opacity:.35; cursor:default; }
+    .chat-setup-card {
+      background:rgba(255,168,40,0.07); border:1px solid rgba(255,168,40,0.2);
+      border-radius:14px; padding:14px;
+    }
+    .chat-sync-prompt {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; padding:32px 24px; text-align:center; gap:12px;
+    }
+
     /* ─── Real-time Group Sync ──────────────────────────────────────────────── */
     .sync-indicator {
       display:inline-flex; align-items:center; gap:5px;
@@ -7771,6 +7858,17 @@ function App() {
   const [syncVersion,   setSyncVersion]  = useState(()=>LS.get("tc_sync_version",0));
   const [syncLastAt,    setSyncLastAt]   = useState(()=>LS.get("tc_sync_last_at",""));
   const [syncBanner,    setSyncBanner]   = useState(null);
+
+  // ── Chat state ────────────────────────────────────────────────────────────
+  const [chatOpen,     setChatOpen]     = useState(false);
+  const [chatMessages, setChatMessages] = useState(()=>LS.get("tc_chat_msgs",[]));
+  const [chatAuthor,   setChatAuthor]   = useState(()=>LS.get("tc_chat_author",""));
+  const [chatInput,    setChatInput]    = useState("");
+  const [chatUnread,   setChatUnread]   = useState(0);
+  const [chatSetupName,setChatSetupName]= useState("");
+  const chatPollRef   = useRef(null);
+  const chatBottomRef = useRef(null);
+  const chatLastCount = useRef(0);
   const syncInProgress   = useRef(false);
   const syncPushTimer    = useRef(null);
   const syncPullInterval = useRef(null);
@@ -7858,6 +7956,80 @@ function App() {
   const saveMemories      = m => { setMemories(m);     LS.set("tc_memories",m);  schedulePush(); };
   const saveDocs          = d => { setDocs(d);         LS.set("tc_docs",d); };
 
+  // ── Chat engine ───────────────────────────────────────────────────────────
+  const saveChatAuthor = name => { setChatAuthor(name); LS.set("tc_chat_author",name); };
+  const saveChatMsgs   = msgs => { setChatMessages(msgs); LS.set("tc_chat_msgs",msgs); };
+
+  const relTime = ts => {
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins = Math.floor(diff/60000);
+    if(mins<1)  return "just now";
+    if(mins<60) return `${mins}m ago`;
+    const hrs = Math.floor(mins/60);
+    if(hrs<24)  return `${hrs}h ago`;
+    return new Date(ts).toLocaleDateString("en",{month:"short",day:"numeric"});
+  };
+
+  const dateLabel = ts => new Date(ts).toLocaleDateString("en",{weekday:"long",month:"long",day:"numeric"});
+  const sameDay   = (a,b) => new Date(a).toDateString()===new Date(b).toDateString();
+
+  const sendChatMsg = async () => {
+    const text = chatInput.trim();
+    if(!text||text.length>500) return;
+    const author = chatAuthor||"Me";
+    const msg = { id:`msg_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, author, text, ts:new Date().toISOString() };
+    const updated = [...chatMessages, msg].slice(-200); // keep last 200
+    saveChatMsgs(updated);
+    setChatInput("");
+    // Immediate push for chat responsiveness
+    const blobId = LS.get("tc_share_blobid","");
+    if(blobId&&syncEnabled){
+      try {
+        const newV = syncVersion+1;
+        await fetch(`${JSONBLOB}/${blobId}`,{
+          method:"PUT", headers:{"Content-Type":"application/json","Accept":"application/json"},
+          body:JSON.stringify({...buildSyncPayload(newV), chat:updated}),
+        });
+        setSyncVersion(newV); LS.set("tc_sync_version",newV);
+      } catch {}
+    }
+  };
+
+  const pollChat = async () => {
+    const blobId = LS.get("tc_share_blobid","");
+    if(!blobId||!syncEnabled) return;
+    try {
+      const res  = await fetch(`${JSONBLOB}/${blobId}`,{headers:{"Accept":"application/json"}});
+      if(!res.ok) return;
+      const data = await res.json();
+      if(!data.chat?.length) return;
+      const remote  = data.chat;
+      const ids     = new Set(chatMessages.map(m=>m.id));
+      const newMsgs = remote.filter(m=>!ids.has(m.id));
+      if(!newMsgs.length) return;
+      const merged = [...chatMessages,...newMsgs].slice(-200)
+        .sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+      saveChatMsgs(merged);
+      if(!chatOpen) setChatUnread(u=>u+newMsgs.length);
+    } catch {}
+  };
+
+  // Start/stop chat polling based on open state
+  useEffect(()=>{
+    clearInterval(chatPollRef.current);
+    const interval = chatOpen ? 8000 : 60000;
+    chatPollRef.current = setInterval(pollChat, interval);
+    return ()=>clearInterval(chatPollRef.current);
+  },[chatOpen, syncEnabled]);
+
+  // Scroll to bottom when messages change and panel is open
+  useEffect(()=>{
+    if(chatOpen&&chatBottomRef.current) chatBottomRef.current.scrollIntoView({behavior:"smooth"});
+  },[chatMessages, chatOpen]);
+
+  // Clear unread when opening
+  useEffect(()=>{ if(chatOpen) setChatUnread(0); },[chatOpen]);
+
   // ── Sync engine ───────────────────────────────────────────────────────────
   const saveSyncEnabled = v => { setSyncEnabled(v); LS.set("tc_sync_enabled",v); };
 
@@ -7868,6 +8040,7 @@ function App() {
     expenses: expenses.map(e=>({...e,attachments:[]})),
     people, baseCurrency, totalBudget,
     memories: memories.map(m=>({...m,photo:null})),
+    chat: chatMessages,
   });
 
   const showSyncBanner = (by, counts) => {
@@ -7896,6 +8069,16 @@ function App() {
     if(packAdded>0){ savePacking(newPack); counts.pack=packAdded; }
     const newPeople = mergePeople(people, data.people||[]);
     if(newPeople.length>people.length) savePeople(newPeople);
+    // Merge chat messages
+    if(data.chat?.length){
+      const ids = new Set(chatMessages.map(m=>m.id));
+      const newMsgs = data.chat.filter(m=>!ids.has(m.id));
+      if(newMsgs.length){
+        const merged = [...chatMessages,...newMsgs].slice(-200).sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+        saveChatMsgs(merged);
+        if(!chatOpen) setChatUnread(u=>u+newMsgs.length);
+      }
+    }
     setSyncVersion(data.v);  LS.set("tc_sync_version",data.v);
     setSyncLastAt(data.pushedAt||"");  LS.set("tc_sync_last_at",data.pushedAt||"");
     showSyncBanner(data.pushedBy, counts);
@@ -8461,6 +8644,112 @@ function App() {
           onDelete={deleteTrip}
           onClose={()=>setShowDrawer(false)}
         />
+      )}
+
+      {/* ── Chat FAB ── */}
+      {(syncEnabled||LS.get("tc_share_blobid",""))&&(
+        <div className="chat-fab" onClick={()=>setChatOpen(true)}>
+          💬
+          {chatUnread>0&&<div className="chat-fab-badge">{chatUnread>9?"9+":chatUnread}</div>}
+        </div>
+      )}
+
+      {/* ── Chat Panel ── */}
+      {chatOpen&&(
+        <div className="chat-overlay">
+          {/* Header */}
+          <div className="chat-header">
+            <div className="chat-header-icon">💬</div>
+            <div className="chat-header-info">
+              <div className="chat-header-title">Group Chat</div>
+              <div className="chat-header-sub">
+                {trip.name||"Your trip"}{people.length?` · ${people.length+1} members`:""}
+                {syncEnabled&&<span style={{color:"#4DB87A",marginLeft:6}}>● live</span>}
+              </div>
+            </div>
+            <button className="btn-del" style={{fontSize:22}} onClick={()=>setChatOpen(false)}>✕</button>
+          </div>
+
+          {/* Author name setup */}
+          {!chatAuthor&&(
+            <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)",flexShrink:0}}>
+              <div className="chat-setup-card">
+                <div style={{fontSize:13,fontWeight:600,marginBottom:8}}>👤 Set your display name</div>
+                <div style={{fontSize:12,color:"var(--text-dim)",marginBottom:10}}>So your team knows who's talking</div>
+                <div className="flex gap-8">
+                  <input className="input flex-1" placeholder="Your name e.g. Sarah"
+                    value={chatSetupName} onChange={e=>setChatSetupName(e.target.value)}
+                    onKeyDown={e=>e.key==="Enter"&&chatSetupName.trim()&&saveChatAuthor(chatSetupName.trim())}/>
+                  <button className="btn" onClick={()=>chatSetupName.trim()&&saveChatAuthor(chatSetupName.trim())}>
+                    Set
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* No sync connected */}
+          {!syncEnabled&&!LS.get("tc_share_blobid","")&&(
+            <div className="chat-sync-prompt">
+              <div style={{fontSize:40}}>🔗</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:16,color:"var(--amber)"}}>Connect your team</div>
+              <div style={{fontSize:13,color:"var(--text-dim)",lineHeight:1.6}}>Share your trip to enable the group chat. Open the Share modal (📤) to create a trip link.</div>
+              <button className="btn" onClick={()=>{ setChatOpen(false); setShowShare(true); }}>Open Share →</button>
+            </div>
+          )}
+
+          {/* Messages */}
+          {(syncEnabled||chatMessages.length>0)&&(
+            <div className="chat-messages" id="chat-msgs">
+              {chatMessages.length===0&&(
+                <div style={{textAlign:"center",padding:"40px 20px",color:"var(--text-dim)"}}>
+                  <div style={{fontSize:36,marginBottom:12}}>👋</div>
+                  <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>Say hello to your travel crew</div>
+                  <div style={{fontSize:12}}>Messages sync every 8 seconds</div>
+                </div>
+              )}
+              {chatMessages.map((msg,i)=>{
+                const isSelf  = msg.author===(chatAuthor||"Me");
+                const showSep = i===0||!sameDay(chatMessages[i-1].ts,msg.ts);
+                const showAuthor = !isSelf&&(i===0||chatMessages[i-1].author!==msg.author||showSep);
+                return(
+                  <React.Fragment key={msg.id}>
+                    {showSep&&<div className="chat-date-sep">{dateLabel(msg.ts)}</div>}
+                    <div className={`chat-msg-wrap ${isSelf?"self":"other"}`}>
+                      {showAuthor&&<div className="chat-msg-author">{msg.author}</div>}
+                      <div className={`chat-bubble ${isSelf?"self":msg.author==="system"?"system":"other"}`}>
+                        {msg.text}
+                      </div>
+                      <div className="chat-msg-time">{relTime(msg.ts)}</div>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
+              <div ref={chatBottomRef}/>
+            </div>
+          )}
+
+          {/* Input */}
+          {(syncEnabled||chatMessages.length>0)&&(
+            <div className="chat-input-area">
+              <textarea
+                className="chat-input"
+                placeholder={chatAuthor?`Message as ${chatAuthor}…`:"Set your name above…"}
+                value={chatInput}
+                disabled={!chatAuthor}
+                rows={1}
+                onChange={e=>setChatInput(e.target.value)}
+                onKeyDown={e=>{
+                  if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendChatMsg(); }
+                }}
+              />
+              <button className="chat-send-btn" disabled={!chatInput.trim()||!chatAuthor}
+                onClick={sendChatMsg}>
+                ➤
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* ── Sync banner ── */}
