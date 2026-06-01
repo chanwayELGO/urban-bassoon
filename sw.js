@@ -39,8 +39,7 @@ self.addEventListener('fetch', (event) => {
     || url.hostname === 'api.open-meteo.com'
     || url.hostname === 'api.frankfurter.app'
     || url.hostname === 'nominatim.openstreetmap.org'
-    || url.hostname === 'basemaps.cartocdn.com'
-    || url.hostname.endsWith('.basemaps.cartocdn.com');
+    || url.hostname.endsWith('basemaps.cartocdn.com');
 
   if (isApi) {
     event.respondWith(
@@ -71,7 +70,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    clients.matchAll({ type:'window', includeUncontrolled:true }).then(list => {
       for (const c of list) { if (c.url.includes('index.html') && 'focus' in c) return c.focus(); }
       return clients.openWindow('./index.html');
     })
