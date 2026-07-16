@@ -2,12 +2,16 @@
   "name": "Travel Companion",
   "short_name": "TravelPal",
   "description": "Your all-in-one travel companion — plan, pack, budget, explore.",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#07101F",
   "theme_color": "#FFA828",
-  "categories": ["travel", "lifestyle", "utilities"],
+  "categories": [
+    "travel",
+    "lifestyle",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%2307101F'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E✈️%3C/text%3E%3C/svg%3E",
@@ -24,8 +28,20 @@
   ],
   "screenshots": [],
   "shortcuts": [
-    { "name": "Plan Trip", "url": "./index.html#plan", "description": "Open trip planner" },
-    { "name": "Packing List", "url": "./index.html#pack", "description": "Open packing checklist" },
-    { "name": "Budget", "url": "./index.html#budget", "description": "Track expenses" }
+    {
+      "name": "Plan Trip",
+      "url": "/#plan",
+      "description": "Open trip planner"
+    },
+    {
+      "name": "Packing List",
+      "url": "/#pack",
+      "description": "Open packing checklist"
+    },
+    {
+      "name": "Budget",
+      "url": "/#budget",
+      "description": "Track expenses"
+    }
   ]
 }
