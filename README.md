@@ -2,6 +2,8 @@
 
 A mobile-first travel companion PWA — plan trips, pack, budget, explore, capture memories, and sync with your travel crew.
 
+**Coding agents:** read [AGENTS.md](./AGENTS.md) first. `src/` is the source of truth.
+
 ## Features
 
 - **Dashboard** — trip overview, weather, departure brief, quick actions
@@ -21,6 +23,7 @@ A mobile-first travel companion PWA — plan trips, pack, budget, explore, captu
 | Styling | Mobile-first CSS (`max-width: 480px` shell) |
 | Maps | Leaflet |
 | Storage | `localStorage` (`tc_*` keys) |
+| Lint / format | Biome |
 | PWA | `vite-plugin-pwa` + service worker |
 | AI | Gemini Flash (primary) + Cloudflare Workers AI (fallback) |
 | Hosting | Cloudflare Pages (recommended) or GitHub Pages |
@@ -58,34 +61,38 @@ In another terminal, `npm run dev` proxies `/api/*` to wrangler (see `vite.confi
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Vite dev server with HMR |
-| `npm run build` | Generate App from legacy source, split components, production build |
+| `npm run build` | Production Vite build (`dist/`) |
 | `npm run preview` | Preview production build locally |
+| `npm run check` | Biome lint + format check |
+| `npm run lint` | Same as `check` |
+| `npm run lint:fix` | Auto-fix lint/format issues |
+| `npm run format` | Format with Biome |
 | `npm run pages:dev` | Serve `dist` with Cloudflare Pages Functions |
+| `npm run generate:app` | Opt-in: regenerate App from legacy (overwrites) |
+| `npm run generate:split` | Opt-in: re-split monolith into modules (overwrites) |
 
 ## Project Structure
 
 ```
 urban-bassoon/
+├── AGENTS.md               # Canonical instructions for coding agents
 ├── index.html              # Vite entry
-├── index.legacy.html       # Original monolith (reference)
+├── index.legacy.html       # Original monolith (archive only)
 ├── public/
-│   ├── manifest.json       # PWA manifest
-│   └── sw.js               # Legacy SW (superseded by vite-plugin-pwa in prod)
-├── src/
-│   ├── main.tsx            # React bootstrap
-│   ├── App.tsx             # Root app shell (generated)
-│   ├── styles/globals.css  # Mobile-first styles
-│   ├── lib/                # storage, AI client, calendar, sync, etc.
-│   ├── components/
-│   │   ├── tabs/           # Dashboard, Plan, Pack, Budget, Explore, Memories, Docs
-│   │   └── shared/         # Modals, drawers, swipeable rows
-│   └── legacy/app-body.jsx # Source for code generation
+│   └── manifest.json       # PWA manifest
+├── src/                    # Source of truth — edit here
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── styles/globals.css
+│   ├── lib/
+│   ├── components/tabs/
+│   ├── components/shared/
+│   └── legacy/             # Archive — do not edit for normal work
 ├── functions/
 │   └── api/ai.ts           # Cloudflare Pages Function — LLM proxy
-├── scripts/
-│   ├── build-app.mjs       # Legacy → App.tsx transformer
-│   └── split-components.mjs
-└── wrangler.toml           # Cloudflare Pages + Workers AI config
+├── scripts/                # Opt-in codegen only
+├── biome.json
+└── wrangler.toml
 ```
 
 ## Deployment

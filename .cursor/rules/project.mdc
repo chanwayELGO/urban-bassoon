@@ -1,0 +1,13 @@
+---
+description: Follow AGENTS.md; durable src/ edits; run npm check before done
+alwaysApply: true
+---
+
+# Project
+
+Follow [AGENTS.md](../../AGENTS.md).
+
+- Edit `src/` and `functions/` only (not `src/legacy/` unless regenerating).
+- Preserve `tc_*` localStorage keys.
+- AI via `callAi` / `/api/ai` only.
+- Before done: `npm run check` then `npm run build`.

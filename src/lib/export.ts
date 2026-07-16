@@ -1,90 +1,133 @@
-import { LS } from './storage';
-import { countryFlag } from './constants';
-export const generateExportHTML = ({ trip, itinerary, expenses, memories, packing, baseCurrency, people }) => {
-  const fmt = (n) => `${baseCurrency} ${Number(n||0).toFixed(2)}`;
-  const totalSpent = expenses.reduce((s,e)=>s+(e.amtBase??Number(e.amount??0)),0);
-  const doneActs   = itinerary.flatMap(d=>d.activities).filter(a=>a.done).length;
-  const allActs    = itinerary.flatMap(d=>d.activities).length;
-  const packDone   = Object.values(packing).flat().filter(i=>i.checked).length;
-  const packTotal  = Object.values(packing).flat().length;
+export const generateExportHTML = ({
+  trip,
+  itinerary,
+  expenses,
+  memories,
+  packing,
+  baseCurrency,
+  people,
+}) => {
+  const fmt = (n) => `${baseCurrency} ${Number(n || 0).toFixed(2)}`
+  const totalSpent = expenses.reduce((s, e) => s + (e.amtBase ?? Number(e.amount ?? 0)), 0)
+  const doneActs = itinerary.flatMap((d) => d.activities).filter((a) => a.done).length
+  const allActs = itinerary.flatMap((d) => d.activities).length
+  const packDone = Object.values(packing)
+    .flat()
+    .filter((i) => i.checked).length
+  const packTotal = Object.values(packing).flat().length
 
-  const catTotals = {};
-  expenses.forEach(e=>{
-    const c = e.cat||"Other"; catTotals[c]=(catTotals[c]||0)+(e.amtBase??Number(e.amount??0));
-  });
-  const topCats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  const catTotals = {}
+  expenses.forEach((e) => {
+    const c = e.cat || "Other"
+    catTotals[c] = (catTotals[c] || 0) + (e.amtBase ?? Number(e.amount ?? 0))
+  })
+  const topCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1])
 
-  const escHtml = s => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const escHtml = (s) =>
+    String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
 
-  const itinHTML = itinerary.map(day=>`
+  const itinHTML = itinerary
+    .map(
+      (day) => `
     <div class="day-block">
       <div class="day-label">${escHtml(day.label)}</div>
-      ${day.activities.length===0
-        ? '<div class="act-empty">No activities planned</div>'
-        : day.activities.map(a=>`
+      ${
+        day.activities.length === 0
+          ? '<div class="act-empty">No activities planned</div>'
+          : day.activities
+              .map(
+                (a) => `
         <div class="act-row">
-          <span class="act-check">${a.done?'✓':'○'}</span>
-          <span class="act-text${a.done?' done':''}">${escHtml(a.text)}</span>
-        </div>`).join("")}
-    </div>`).join("");
+          <span class="act-check">${a.done ? "✓" : "○"}</span>
+          <span class="act-text${a.done ? " done" : ""}">${escHtml(a.text)}</span>
+        </div>`,
+              )
+              .join("")
+      }
+    </div>`,
+    )
+    .join("")
 
-  const expHTML = expenses.length===0
-    ? '<p class="empty-note">No expenses recorded.</p>'
-    : `<table class="exp-table">
+  const expHTML =
+    expenses.length === 0
+      ? '<p class="empty-note">No expenses recorded.</p>'
+      : `<table class="exp-table">
         <thead><tr><th>Category</th><th>Description</th><th>Date</th><th class="amt">Amount</th></tr></thead>
         <tbody>
-        ${[...expenses].reverse().map(e=>`
+        ${[...expenses]
+          .reverse()
+          .map(
+            (e) => `
           <tr>
-            <td>${escHtml(e.cat?.split(" ")[0]||"")} ${escHtml(e.cat?.split(" ").slice(1).join(" ")||"")}</td>
+            <td>${escHtml(e.cat?.split(" ")[0] || "")} ${escHtml(e.cat?.split(" ").slice(1).join(" ") || "")}</td>
             <td>${escHtml(e.desc)}</td>
-            <td>${escHtml(e.date||"")}</td>
-            <td class="amt">${fmt(e.amtBase??e.amount)}</td>
-          </tr>`).join("")}
+            <td>${escHtml(e.date || "")}</td>
+            <td class="amt">${fmt(e.amtBase ?? e.amount)}</td>
+          </tr>`,
+          )
+          .join("")}
         <tr class="total-row"><td colspan="3"><strong>Total</strong></td><td class="amt"><strong>${fmt(totalSpent)}</strong></td></tr>
         </tbody>
-      </table>`;
+      </table>`
 
-  const catBarHTML = topCats.slice(0,6).map(([cat,total])=>{
-    const pct = totalSpent>0 ? Math.round((total/totalSpent)*100) : 0;
-    return `<div class="cat-bar-row">
+  const catBarHTML = topCats
+    .slice(0, 6)
+    .map(([cat, total]) => {
+      const pct = totalSpent > 0 ? Math.round((total / totalSpent) * 100) : 0
+      return `<div class="cat-bar-row">
       <div class="cat-bar-label">${escHtml(cat)}</div>
       <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
       <div class="cat-bar-amt">${fmt(total)}</div>
-    </div>`;
-  }).join("");
+    </div>`
+    })
+    .join("")
 
-  const memHTML = memories.length===0
-    ? '<p class="empty-note">No memories recorded yet.</p>'
-    : memories.map(m=>`
+  const memHTML =
+    memories.length === 0
+      ? '<p class="empty-note">No memories recorded yet.</p>'
+      : memories
+          .map(
+            (m) => `
       <div class="mem-card">
-        ${m.photo?`<img src="${m.photo}" class="mem-photo" alt="${escHtml(m.title)}" />`:""}
+        ${m.photo ? `<img src="${m.photo}" class="mem-photo" alt="${escHtml(m.title)}" />` : ""}
         <div class="mem-body">
-          <div class="mem-title">${escHtml(m.mood||"")} ${escHtml(m.title)}</div>
-          ${m.locationName?`<div class="mem-loc">📍 ${escHtml(m.locationName)}</div>`:""}
-          ${m.date?`<div class="mem-date">${escHtml(m.date)}</div>`:""}
-          ${m.notes?`<div class="mem-notes">${escHtml(m.notes)}</div>`:""}
+          <div class="mem-title">${escHtml(m.mood || "")} ${escHtml(m.title)}</div>
+          ${m.locationName ? `<div class="mem-loc">📍 ${escHtml(m.locationName)}</div>` : ""}
+          ${m.date ? `<div class="mem-date">${escHtml(m.date)}</div>` : ""}
+          ${m.notes ? `<div class="mem-notes">${escHtml(m.notes)}</div>` : ""}
         </div>
-      </div>`).join("");
+      </div>`,
+          )
+          .join("")
 
-  const packHTML = Object.entries(packing).map(([cat,items])=>`
+  const packHTML = Object.entries(packing)
+    .map(
+      ([cat, items]) => `
     <div class="pack-cat">
       <div class="pack-cat-label">${escHtml(cat)}</div>
       <div class="pack-items">
-        ${items.map(i=>`<span class="pack-item${i.checked?" checked":""}">${i.checked?"✓ ":"○ "}${escHtml(i.name)}</span>`).join("")}
+        ${items.map((i) => `<span class="pack-item${i.checked ? " checked" : ""}">${i.checked ? "✓ " : "○ "}${escHtml(i.name)}</span>`).join("")}
       </div>
-    </div>`).join("");
+    </div>`,
+    )
+    .join("")
 
-  const duration = trip.startDate&&trip.endDate
-    ? Math.round((new Date(trip.endDate)-new Date(trip.startDate))/86400000)+1+" days"
-    : trip.startDate||"";
-  const travellers = people.length ? people.map(p=>escHtml(p.name)).join(", ") : "Solo";
+  const duration =
+    trip.startDate && trip.endDate
+      ? Math.round((new Date(trip.endDate) - new Date(trip.startDate)) / 86400000) + 1 + " days"
+      : trip.startDate || ""
+  const travellers = people.length ? people.map((p) => escHtml(p.name)).join(", ") : "Solo"
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escHtml(trip.name||"My Trip")} — TravelPal Export</title>
+<title>${escHtml(trip.name || "My Trip")} — TravelPal Export</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Georgia,'Times New Roman',serif;color:#1a1a2e;background:#fff;font-size:14px;line-height:1.6}
@@ -180,8 +223,8 @@ export const generateExportHTML = ({ trip, itinerary, expenses, memories, packin
   <!-- Hero -->
   <div class="hero">
     <div class="hero-eyebrow">TravelPal · Trip Export</div>
-    <div class="hero-title">${escHtml(trip.name||"My Trip")}</div>
-    <div class="hero-dest">${trip.destination?`📍 ${escHtml(trip.destination)}`:""}</div>
+    <div class="hero-title">${escHtml(trip.name || "My Trip")}</div>
+    <div class="hero-dest">${trip.destination ? `📍 ${escHtml(trip.destination)}` : ""}</div>
     <div class="hero-stats">
       <div class="hero-stat"><span class="hero-stat-val">${fmt(totalSpent)}</span><span class="hero-stat-lbl">Spent</span></div>
       <div class="hero-stat"><span class="hero-stat-val">${doneActs}/${allActs}</span><span class="hero-stat-lbl">Activities</span></div>
@@ -189,16 +232,16 @@ export const generateExportHTML = ({ trip, itinerary, expenses, memories, packin
       <div class="hero-stat"><span class="hero-stat-val">${packDone}/${packTotal}</span><span class="hero-stat-lbl">Packed</span></div>
     </div>
     <div class="meta-row">
-      ${trip.startDate?`<span>📅 ${escHtml(trip.startDate)}${trip.endDate?" → "+escHtml(trip.endDate):""}</span>`:""}
-      ${duration?`<span>⏱ ${escHtml(duration)}</span>`:""}
-      ${people.length?`<span>👥 ${escHtml(travellers)}</span>`:""}
+      ${trip.startDate ? `<span>📅 ${escHtml(trip.startDate)}${trip.endDate ? " → " + escHtml(trip.endDate) : ""}</span>` : ""}
+      ${duration ? `<span>⏱ ${escHtml(duration)}</span>` : ""}
+      ${people.length ? `<span>👥 ${escHtml(travellers)}</span>` : ""}
     </div>
   </div>
 
   <!-- Itinerary -->
   <div class="section">
     <div class="section-hdr"><span class="section-icon">📅</span><span class="section-title">Itinerary</span></div>
-    ${itinerary.length===0?'<p class="empty-note">No itinerary planned.</p>':itinHTML}
+    ${itinerary.length === 0 ? '<p class="empty-note">No itinerary planned.</p>' : itinHTML}
   </div>
 
   <!-- Budget -->
@@ -207,9 +250,9 @@ export const generateExportHTML = ({ trip, itinerary, expenses, memories, packin
     <div class="budget-summary">
       <div class="budget-chip"><span class="budget-chip-val">${fmt(totalSpent)}</span><span class="budget-chip-lbl">Total Spent</span></div>
       <div class="budget-chip"><span class="budget-chip-val">${expenses.length}</span><span class="budget-chip-lbl">Transactions</span></div>
-      ${people.length?`<div class="budget-chip"><span class="budget-chip-val">${people.length+1}</span><span class="budget-chip-lbl">Travellers</span></div>`:""}
+      ${people.length ? `<div class="budget-chip"><span class="budget-chip-val">${people.length + 1}</span><span class="budget-chip-lbl">Travellers</span></div>` : ""}
     </div>
-    ${topCats.length>0?`<div style="margin-bottom:20px">${catBarHTML}</div>`:""}
+    ${topCats.length > 0 ? `<div style="margin-bottom:20px">${catBarHTML}</div>` : ""}
     ${expHTML}
   </div>
 
@@ -228,11 +271,10 @@ export const generateExportHTML = ({ trip, itinerary, expenses, memories, packin
   <!-- Footer -->
   <div class="footer">
     <span>Generated by TravelPal</span>
-    <span>Exported ${new Date().toLocaleDateString("en",{day:"numeric",month:"long",year:"numeric"})}</span>
+    <span>Exported ${new Date().toLocaleDateString("en", { day: "numeric", month: "long", year: "numeric" })}</span>
   </div>
 
 </div>
 </body>
-</html>`;
-};
-
+</html>`
+}

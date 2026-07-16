@@ -7,11 +7,7 @@
   "orientation": "portrait",
   "background_color": "#07101F",
   "theme_color": "#FFA828",
-  "categories": [
-    "travel",
-    "lifestyle",
-    "utilities"
-  ],
+  "categories": ["travel", "lifestyle", "utilities"],
   "icons": [
     {
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%2307101F'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E✈️%3C/text%3E%3C/svg%3E",

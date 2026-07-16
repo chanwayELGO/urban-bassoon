@@ -35,7 +35,3 @@ next-env.d.ts
 
 # wrangler
 .wrangler
-
-# generated app (rebuilt from legacy on each build)
-/src/App.tsx
-/src/lib/constants.ts

@@ -1,0 +1,14 @@
+---
+description: Cloudflare Pages AI proxy conventions
+globs: functions/**/*.ts
+alwaysApply: false
+---
+
+# AI proxy (`functions/`)
+
+See [AGENTS.md](../../AGENTS.md).
+
+- Keep the local `PagesFunction` type (do not import Workers types that clash with DOM `Response`).
+- Route by `task`: vision → Gemini Flash; text → Flash-Lite; on failure → Workers AI.
+- Enforce per-IP rate limits and `maxTokens` caps server-side.
+- Never expose `GEMINI_API_KEY` to the client.
