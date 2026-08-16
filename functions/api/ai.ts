@@ -132,7 +132,13 @@ async function callGemini(
   const data = (await res.json()) as {
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
   }
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ""
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ""
+  // HTTP 200 with no text (safety blocks, empty candidates) is still a Gemini failure.
+  // Throw so the caller can fall back to Workers AI instead of returning 502.
+  if (!text.trim()) {
+    throw new Error("Gemini returned empty text")
+  }
+  return text
 }
 
 async function callWorkersAI(
