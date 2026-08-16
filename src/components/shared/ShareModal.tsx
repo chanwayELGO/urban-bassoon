@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import { LS } from "../../lib/storage"
+
+const JSONBLOB = "https://jsonblob.com/api/jsonBlob"
 export function ShareModal({
   onClose,
   trip,
@@ -24,6 +26,8 @@ export function ShareModal({
   syncLastAt,
   onPushNow,
   onPullNow,
+  onJoinTrip,
+  currentTripEmpty = true,
 }) {
   const [activeTab, setActiveTab] = useState(initialCode ? "join" : "share")
   const [includes, setIncludes] = useState({
@@ -32,7 +36,7 @@ export function ShareModal({
     budget: true,
     memories: false,
   })
-  const [shareState, setShareState] = useState({ step: "idle", code: "", error: "" }) // idle | creating | ready | updating | error
+  const [shareState, setShareState] = useState({ step: "idle", code: "", blobId: "", error: "" }) // idle | creating | ready | updating | error
   const [joinCode, setJoinCode] = useState(initialCode)
   const [joinState, setJoinState] = useState({ step: "idle", preview: null, error: "", blobId: "" }) // idle | fetching | preview | importing | done | error
   const [joinName, setJoinName] = useState("")
@@ -55,17 +59,19 @@ export function ShareModal({
       people,
       baseCurrency,
       totalBudget,
+      ...(includes.itinerary && { itinerary }),
+      ...(includes.packing && { packing }),
+      ...(includes.budget && { expenses }),
+      ...(includes.memories && {
+        memories: memories.map((m) => ({ ...m, photo: null })),
+      }),
     }
-    if (includes.itinerary) payload.itinerary = itinerary
-    if (includes.packing) payload.packing = packing
-    if (includes.budget) payload.expenses = expenses
-    if (includes.memories) payload.memories = memories.map((m) => ({ ...m, photo: null })) // strip photos
     return payload
   }
 
   // ── Create link ──────────────────────────────────────────────────────────
   const createLink = async () => {
-    setShareState({ step: "creating", code: "", error: "" })
+    setShareState({ step: "creating", code: "", blobId: "", error: "" })
     try {
       const res = await fetch(JSONBLOB, {
         method: "POST",
@@ -81,7 +87,12 @@ export function ShareModal({
       setShareState({ step: "ready", code: blobId, blobId, error: "" })
       if (onSyncEnable) onSyncEnable(blobId)
     } catch (e) {
-      setShareState({ step: "error", code: "", error: "Could not create link — " + e.message })
+      setShareState({
+        step: "error",
+        code: "",
+        blobId: "",
+        error: "Could not create link — " + e.message,
+      })
     }
   }
 
@@ -121,7 +132,7 @@ export function ShareModal({
   }, [])
 
   // ── Fetch preview ────────────────────────────────────────────────────────
-  const fetchPreview = async (rawCode) => {
+  const fetchPreview = async (rawCode = "") => {
     let input = (rawCode || joinCode).trim()
     if (!input) return
     // If user pasted a full URL, extract the ?trip= param or the last path segment
@@ -156,24 +167,30 @@ export function ShareModal({
     const d = joinState.preview
     if (!d) return
     setJoinState((p) => ({ ...p, step: "importing" }))
-    // Always import trip basics
-    if (d.trip) saveTrip(d.trip)
-    if (d.baseCurrency) saveBaseCurrency(d.baseCurrency)
-    if (d.totalBudget) saveBudget(d.totalBudget)
-    // Merge people: add joining user, skip duplicates
-    const existingNames = new Set(people.map((p) => p.name))
-    const incoming = (d.people || []).filter((p) => !existingNames.has(p.name))
-    const myEntry =
-      joinName.trim() && !existingNames.has(joinName.trim())
-        ? [{ id: Date.now() + 1, name: joinName.trim() }]
-        : []
-    savePeople([...people, ...incoming, ...myEntry])
-    // Optional sections
-    if (joinIncludes.itinerary && d.itinerary) saveItinerary(d.itinerary)
-    if (joinIncludes.packing && d.packing) savePacking(d.packing)
-    if (joinIncludes.budget && d.expenses) saveExpenses(d.expenses)
+    if (onJoinTrip) {
+      onJoinTrip({
+        payload: d,
+        joinName: joinName.trim(),
+        joinIncludes,
+        blobId: joinState.blobId,
+      })
+    } else {
+      if (d.trip) saveTrip(d.trip)
+      if (d.baseCurrency) saveBaseCurrency(d.baseCurrency)
+      if (d.totalBudget) saveBudget(d.totalBudget)
+      const existingNames = new Set(people.map((p) => p.name))
+      const incoming = (d.people || []).filter((p) => !existingNames.has(p.name))
+      const myEntry =
+        joinName.trim() && !existingNames.has(joinName.trim())
+          ? [{ id: Date.now() + 1, name: joinName.trim() }]
+          : []
+      savePeople([...people, ...incoming, ...myEntry])
+      if (joinIncludes.itinerary && d.itinerary) saveItinerary(d.itinerary)
+      if (joinIncludes.packing && d.packing) savePacking(d.packing)
+      if (joinIncludes.budget && d.expenses) saveExpenses(d.expenses)
+      if (onSyncEnable && joinState.blobId) onSyncEnable(joinState.blobId)
+    }
     setJoinState((p) => ({ ...p, step: "done" }))
-    if (onSyncEnable && joinState.blobId) onSyncEnable(joinState.blobId)
   }
 
   // ── Share helpers ─────────────────────────────────────────────────────────
@@ -612,7 +629,9 @@ export function ShareModal({
                           <div
                             style={{ fontSize: 11, color: "var(--text-dim)", margin: "6px 0 12px" }}
                           >
-                            ✓ Trip details &amp; travellers always imported
+                            {currentTripEmpty
+                              ? "Trip details and travellers always imported"
+                              : "Saved as a new trip — your current trip stays untouched"}
                           </div>
 
                           <button

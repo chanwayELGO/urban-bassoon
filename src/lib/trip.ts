@@ -20,7 +20,20 @@ export const TRIP_KEYS = [
   { flat: "tc_people", def: () => [] },
   { flat: "tc_memories", def: () => [] },
   { flat: "tc_docs", def: () => [] },
+  { flat: "tc_share_blobid", def: () => "" },
+  { flat: "tc_sync_enabled", def: () => false },
+  { flat: "tc_sync_version", def: () => 0 },
+  { flat: "tc_sync_last_at", def: () => "" },
+  { flat: "tc_chat_msgs", def: () => [] },
+  { flat: "tc_activation_dismissed", def: () => false },
 ]
+
+export const isTripEmpty = (trip, itinerary, expenses) =>
+  !trip?.destination && !itinerary?.length && !expenses?.length
+
+export const writeTripDefaults = () => {
+  TRIP_KEYS.forEach(({ flat, def }) => LS.set(flat, def()))
+}
 
 export const snapshotTrip = (tripId) => {
   if (!tripId) return

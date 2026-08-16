@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import "leaflet/dist/leaflet.css"
 import { ShareModal } from "./components/shared/ShareModal"
 import { TripDrawer } from "./components/shared/TripDrawer"
@@ -11,17 +11,27 @@ import { PackTab } from "./components/tabs/PackTab"
 import { PlanTab } from "./components/tabs/PlanTab"
 import { callAi } from "./lib/ai"
 import { COUNTRY_CURRENCY, CURRENCIES, EXPENSE_CATS, WC_ICON, countryFlag } from "./lib/constants"
+import { generateExportHTML } from "./lib/export"
 import { LS } from "./lib/storage"
 import { mergeById, mergeItinerary, mergePacking, mergePeople } from "./lib/sync"
-import { buildDefaultPacking, restoreTrip, snapshotTrip } from "./lib/trip"
+import {
+  buildDefaultPacking,
+  isTripEmpty,
+  restoreTrip,
+  snapshotTrip,
+  writeTripDefaults,
+} from "./lib/trip"
 
 const JSONBLOB = "https://jsonblob.com/api/jsonBlob"
+
+const HASH_TABS = { home: 0, plan: 1, pack: 2, budget: 3, explore: 4, memories: 5, docs: 6 }
 
 export default function App() {
   const [tab, setTab] = useState(0)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [installPrompt, setInstallPrompt] = useState(null)
   const [showInstall, setShowInstall] = useState(false)
+  const [installDismissed, setInstallDismissed] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
 
@@ -110,15 +120,30 @@ export default function App() {
     }
   }, [])
 
-  // ── PWA install ──
+  // ── PWA install (defer until a destination exists) ──
   useEffect(() => {
     const h = (e) => {
       e.preventDefault()
       setInstallPrompt(e)
-      setShowInstall(true)
     }
     window.addEventListener("beforeinstallprompt", h)
     return () => window.removeEventListener("beforeinstallprompt", h)
+  }, [])
+
+  useEffect(() => {
+    if (installPrompt && trip.destination && !installDismissed) setShowInstall(true)
+    else if (!trip.destination) setShowInstall(false)
+  }, [installPrompt, trip.destination, installDismissed])
+
+  // ── Hash tab shortcuts (/#plan, /#pack, /#budget) ──
+  useEffect(() => {
+    const applyHash = () => {
+      const h = (window.location.hash || "").replace(/^#\/?/, "").toLowerCase()
+      if (h in HASH_TABS) setTab(HASH_TABS[h])
+    }
+    applyHash()
+    window.addEventListener("hashchange", applyHash)
+    return () => window.removeEventListener("hashchange", applyHash)
   }, [])
 
   // ── Deep-link on load (e.g. ?trip=blobId) ──
@@ -136,6 +161,7 @@ export default function App() {
     await installPrompt.userChoice
     setShowInstall(false)
     setInstallPrompt(null)
+    setInstallDismissed(true)
   }
 
   // ── Persist helpers ──
@@ -253,7 +279,7 @@ export default function App() {
       if (!newMsgs.length) return
       const merged = [...chatMessages, ...newMsgs]
         .slice(-200)
-        .sort((a, b) => new Date(a.ts) - new Date(b.ts))
+        .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime())
       saveChatMsgs(merged)
       if (!chatOpen) setChatUnread((u) => u + newMsgs.length)
     } catch {}
@@ -316,7 +342,8 @@ export default function App() {
     const counts = { exp: 0, itin: 0, mem: 0, pack: 0 }
     const newItin = mergeItinerary(itinerary, data.itinerary || [])
     const itinAdded =
-      newItin.flatMap((d) => d.activities).length - itinerary.flatMap((d) => d.activities).length
+      newItin.flatMap((d: { activities?: any[] }) => d.activities || []).length -
+      itinerary.flatMap((d: { activities?: any[] }) => d.activities || []).length
     if (itinAdded > 0) {
       saveItinerary(newItin)
       counts.itin = itinAdded
@@ -346,7 +373,7 @@ export default function App() {
       if (newMsgs.length) {
         const merged = [...chatMessages, ...newMsgs]
           .slice(-200)
-          .sort((a, b) => new Date(a.ts) - new Date(b.ts))
+          .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime())
         saveChatMsgs(merged)
         if (!chatOpen) setChatUnread((u) => u + newMsgs.length)
       }
@@ -372,7 +399,7 @@ export default function App() {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(buildSyncPayload(newV)),
       })
-      if (!res.ok) throw new Error(res.status)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const now = new Date().toISOString()
       setSyncVersion(newV)
       LS.set("tc_sync_version", newV)
@@ -444,7 +471,7 @@ export default function App() {
     pullSync() // immediate pull on enable
     syncPullInterval.current = setInterval(pullSync, 30000)
     return () => clearInterval(syncPullInterval.current)
-  }, [syncEnabled])
+  }, [syncEnabled, activeTripId])
 
   // ── Trip management functions ─────────────────────────────────────────────
 
@@ -498,16 +525,7 @@ export default function App() {
     setActiveTripId(activeId)
   }, [])
 
-  const switchTrip = (newId) => {
-    if (newId === activeTripId) {
-      setShowDrawer(false)
-      return
-    }
-    // Snapshot current state to scoped keys
-    snapshotTrip(activeTripId)
-    // Restore new trip's scoped keys into flat keys
-    restoreTrip(newId)
-    // Reload all React state from flat keys (now holding new trip's data)
+  const applyTripFlats = () => {
     setTrip(LS.get("tc_trip", { name: "", destination: "", startDate: "", endDate: "" }))
     setItinerary(LS.get("tc_itin", []))
     setPacking(LS.get("tc_pack", null) || buildDefaultPacking())
@@ -518,6 +536,60 @@ export default function App() {
     setPeople(LS.get("tc_people", []))
     setMemories(LS.get("tc_memories", []))
     setDocs(LS.get("tc_docs", []))
+    setSyncEnabled(LS.get("tc_sync_enabled", false))
+    setSyncVersion(LS.get("tc_sync_version", 0))
+    setSyncLastAt(LS.get("tc_sync_last_at", ""))
+    setChatMessages(LS.get("tc_chat_msgs", []))
+    setSyncStatus("idle")
+  }
+
+  const applyJoinPayload = (payload, joinName, joinIncludes) => {
+    if (payload.trip) saveTrip(payload.trip)
+    if (payload.baseCurrency) saveBaseCurrency(payload.baseCurrency)
+    if (payload.totalBudget) saveBudget(payload.totalBudget)
+    const incoming = payload.people || []
+    const names = new Set(incoming.map((p) => p.name))
+    const myEntry = joinName && !names.has(joinName) ? [{ id: Date.now() + 1, name: joinName }] : []
+    savePeople([...incoming, ...myEntry])
+    if (joinIncludes.itinerary && payload.itinerary) saveItinerary(payload.itinerary)
+    if (joinIncludes.packing && payload.packing) savePacking(payload.packing)
+    if (joinIncludes.budget && payload.expenses) saveExpenses(payload.expenses)
+  }
+
+  const importJoinedTrip = ({ payload, joinName, joinIncludes, blobId }) => {
+    if (!isTripEmpty(trip, itinerary, expenses)) {
+      snapshotTrip(activeTripId)
+      const t = payload.trip || {}
+      const newId = `trip_${Date.now()}`
+      const newMeta = {
+        id: newId,
+        name: t.name || "Joined Trip",
+        destination: t.destination || "",
+        startDate: t.startDate || "",
+        endDate: t.endDate || "",
+        createdAt: new Date().toISOString(),
+      }
+      const updated = [...trips, newMeta]
+      setTrips(updated)
+      LS.set("tc_trips", updated)
+      writeTripDefaults()
+      applyTripFlats()
+      setActiveTripId(newId)
+      LS.set("tc_active_trip", newId)
+    }
+    applyJoinPayload(payload, joinName, joinIncludes)
+    if (blobId) enableSync(blobId)
+  }
+
+  const switchTrip = (newId) => {
+    if (newId === activeTripId) {
+      setShowDrawer(false)
+      return
+    }
+    // Snapshot current state to scoped keys
+    snapshotTrip(activeTripId)
+    restoreTrip(newId)
+    applyTripFlats()
     setActiveTripId(newId)
     LS.set("tc_active_trip", newId)
     setShowDrawer(false)
@@ -525,9 +597,7 @@ export default function App() {
   }
 
   const createTrip = () => {
-    // Snapshot current trip
     snapshotTrip(activeTripId)
-    // New trip ID and metadata
     const newId = `trip_${Date.now()}`
     const newMeta = {
       id: newId,
@@ -538,36 +608,15 @@ export default function App() {
       createdAt: new Date().toISOString(),
     }
     const updated = [...trips, newMeta]
-    // Clear all flat keys to defaults
-    const def = { name: "New Trip", destination: "", startDate: "", endDate: "" }
-    LS.set("tc_trip", def)
-    LS.set("tc_itin", [])
-    LS.set("tc_pack", buildDefaultPacking())
-    LS.set("tc_budget", 2000)
-    LS.set("tc_daily_budget", 0)
-    LS.set("tc_basecurr", "USD")
-    LS.set("tc_expenses", [])
-    LS.set("tc_people", [])
-    LS.set("tc_memories", [])
-    LS.set("tc_docs", [])
-    // Reset React state
-    setTrip(def)
-    setItinerary([])
-    setPacking(buildDefaultPacking())
-    setTotalBudget(2000)
-    setDailyBudget(0)
-    setBaseCurrency("USD")
-    setExpenses([])
-    setPeople([])
-    setMemories([])
-    setDocs([])
-    // Register new trip
+    writeTripDefaults()
+    LS.set("tc_trip", { name: "New Trip", destination: "", startDate: "", endDate: "" })
+    applyTripFlats()
     setTrips(updated)
     LS.set("tc_trips", updated)
     setActiveTripId(newId)
     LS.set("tc_active_trip", newId)
     setShowDrawer(false)
-    setTab(1) // go straight to Plan tab
+    setTab(1)
   }
 
   const deleteTrip = (id) => {
@@ -580,19 +629,9 @@ export default function App() {
     setTrips(updated)
     LS.set("tc_trips", updated)
     if (id === activeTripId) {
-      // Switch to first remaining trip
       const next = updated[0].id
       restoreTrip(next)
-      setTrip(LS.get("tc_trip", { name: "", destination: "", startDate: "", endDate: "" }))
-      setItinerary(LS.get("tc_itin", []))
-      setPacking(LS.get("tc_pack", null) || buildDefaultPacking())
-      setTotalBudget(LS.get("tc_budget", 2000))
-      setDailyBudget(LS.get("tc_daily_budget", 0))
-      setBaseCurrency(LS.get("tc_basecurr", "USD"))
-      setExpenses(LS.get("tc_expenses", []))
-      setPeople(LS.get("tc_people", []))
-      setMemories(LS.get("tc_memories", []))
-      setDocs(LS.get("tc_docs", []))
+      applyTripFlats()
       setActiveTripId(next)
       LS.set("tc_active_trip", next)
     }
@@ -690,7 +729,6 @@ export default function App() {
         reg.showNotification(title, {
           body,
           tag,
-          renotify: false,
           icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%2307101F'/%3E%3Ctext y='130' x='96' text-anchor='middle' font-size='110'%3E%E2%9C%88%EF%B8%8F%3C/text%3E%3C/svg%3E",
           data: { url: "./index.html" },
         })
@@ -718,13 +756,16 @@ export default function App() {
     const todaySpent = todayExps.reduce((s, e) => s + (e.amtBase ?? Number(e.amount ?? 0)), 0)
     const pct = (todaySpent / dailyBudget) * 100
     const topCats = Object.entries(
-      todayExps.reduce((acc, e) => {
-        const c = e.cat?.split(" ")[0] || ""
-        acc[c] = (acc[c] || 0) + (e.amtBase ?? Number(e.amount ?? 0))
-        return acc
-      }, {}),
+      todayExps.reduce(
+        (acc, e) => {
+          const c = e.cat?.split(" ")[0] || ""
+          acc[c] = (acc[c] || 0) + (e.amtBase ?? Number(e.amount ?? 0))
+          return acc
+        },
+        {} as Record<string, number>,
+      ),
     )
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, b) => Number(b[1]) - Number(a[1]))
       .slice(0, 3)
       .map(([c]) => c)
       .join(" ")
@@ -968,10 +1009,9 @@ export default function App() {
   }
 
   // ── Derived ──
-  const packingTotal = Object.values(packing).flat().length
-  const packingDone = Object.values(packing)
-    .flat()
-    .filter((i) => i.checked).length
+  const packingItems = Object.values(packing).flat() as Array<{ checked?: boolean }>
+  const packingTotal = packingItems.length
+  const packingDone = packingItems.filter((i) => i.checked).length
   const subtitle =
     [trip.destination, trip.startDate && trip.endDate && `${trip.startDate} → ${trip.endDate}`]
       .filter(Boolean)
@@ -1003,11 +1043,17 @@ export default function App() {
       {showInstall && (
         <div className="install-banner">
           <span>✈️</span>
-          <div className="ib-text">Install TravelPal for offline access</div>
+          <div className="ib-text">Install for offline packing and departure briefs</div>
           <button className="ib-btn" onClick={handleInstall}>
             Install
           </button>
-          <button className="ib-close" onClick={() => setShowInstall(false)}>
+          <button
+            className="ib-close"
+            onClick={() => {
+              setShowInstall(false)
+              setInstallDismissed(true)
+            }}
+          >
             ✕
           </button>
         </div>
@@ -1108,6 +1154,7 @@ export default function App() {
         <div className="content-inner">
           {tab === 0 && (
             <Dashboard
+              key={activeTripId}
               trip={trip}
               itinerary={itinerary}
               packing={packing}
@@ -1121,6 +1168,8 @@ export default function App() {
               removeActivity={removeActivity}
               onQuickExpense={(a, d) => setQuickExpense({ act: a, day: d })}
               onQuickMemory={onQuickMemory}
+              saveTrip={saveTrip}
+              hasInvite={syncEnabled || Boolean(LS.get("tc_share_blobid", ""))}
             />
           )}
           {tab === 1 && (
@@ -1531,6 +1580,8 @@ export default function App() {
           syncLastAt={syncLastAt}
           onPushNow={pushSync}
           onPullNow={pullSync}
+          onJoinTrip={importJoinedTrip}
+          currentTripEmpty={isTripEmpty(trip, itinerary, expenses)}
         />
       )}
 

@@ -5304,3 +5304,92 @@ button,
   color: var(--amber);
   font-weight: 600;
 }
+
+/* ─── First-run setup & activation ─────────────────────────────────────── */
+.setup-card {
+  background: linear-gradient(135deg, #0c1b34, #0e0820);
+  border: 1px solid rgba(255, 168, 40, 0.18);
+  border-radius: 18px;
+  padding: 18px 16px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.setup-eyebrow {
+  font-size: 11px;
+  color: rgba(255, 168, 40, 0.55);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.setup-title {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  color: var(--amber);
+  line-height: 1.2;
+}
+.setup-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+.activation-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 14px 8px;
+  margin-bottom: 12px;
+}
+.activation-hdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.activation-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.activation-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.activation-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  padding: 9px 2px;
+  cursor: pointer;
+  border-top: 1px solid var(--border);
+}
+.activation-row.done {
+  color: var(--text-dim);
+}
+.activation-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.activation-check.on {
+  background: rgba(77, 184, 122, 0.2);
+  border-color: #4db87a;
+  color: #4db87a;
+}

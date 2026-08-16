@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { callAi } from "../../lib/ai"
 import { WC_DESC, WC_ICON } from "../../lib/constants"
 import { LS } from "../../lib/storage"
+import { SwipeableActivity } from "../shared/SwipeableActivity"
 export function Dashboard({
   trip,
   itinerary,
@@ -16,18 +17,22 @@ export function Dashboard({
   removeActivity,
   onQuickExpense,
   onQuickMemory,
+  saveTrip,
+  hasInvite,
 }) {
   const today = new Date()
 
   // ── Timing ────────────────────────────────────────────────────────────────
-  const daysUntil = trip.startDate ? Math.ceil((new Date(trip.startDate) - today) / 86400000) : null
+  const daysUntil = trip.startDate
+    ? Math.ceil((new Date(trip.startDate).getTime() - today.getTime()) / 86400000)
+    : null
   const isDepartureDay = daysUntil === 0
   const isDayBefore = daysUntil === 1
   const isOnTrip =
     daysUntil !== null && daysUntil <= 0 && (!trip.endDate || new Date(trip.endDate) >= today)
   const tripOver = trip.endDate && new Date(trip.endDate) < today
   const currentDayIdx = trip.startDate
-    ? Math.floor((today - new Date(trip.startDate)) / 86400000)
+    ? Math.floor((today.getTime() - new Date(trip.startDate).getTime()) / 86400000)
     : -1
   const todayDay =
     currentDayIdx >= 0 && currentDayIdx < itinerary.length ? itinerary[currentDayIdx] : null
@@ -36,10 +41,12 @@ export function Dashboard({
   const briefSeenKey = `tc_brief_seen_${trip.startDate}_${todayISO}`
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  const packingTotal = Object.values(packing).flat().length
-  const packingDone = Object.values(packing)
-    .flat()
-    .filter((i) => i.checked).length
+  const packingItems = Object.values(packing).flat() as Array<{
+    name?: string
+    checked?: boolean
+  }>
+  const packingTotal = packingItems.length
+  const packingDone = packingItems.filter((i) => i.checked).length
   const packingPct = packingTotal ? Math.round((packingDone / packingTotal) * 100) : 0
   const spent = expenses.reduce((s, e) => s + (e.amtBase ?? Number(e.amount ?? 0)), 0)
   const totalBudget = LS.get("tc_budget", 2000)
@@ -48,12 +55,22 @@ export function Dashboard({
   const doneActs = allActs.filter((a) => a.done).length
 
   // ── Brief state ───────────────────────────────────────────────────────────
+  const [setup, setSetup] = useState({
+    destination: trip.destination || "",
+    startDate: trip.startDate || "",
+    endDate: trip.endDate || "",
+    name: trip.name || "",
+  })
+  const [activationDismissed, setActivationDismissed] = useState(() =>
+    LS.get("tc_activation_dismissed", false),
+  )
+
   const [brief, setBrief] = useState(() => {
     try {
       const c = LS.get(briefCacheKey, null)
-      return c ? { step: "ready", data: c } : { step: "idle", data: null }
+      return c ? { step: "ready", data: c, error: "" } : { step: "idle", data: null, error: "" }
     } catch {
-      return { step: "idle", data: null }
+      return { step: "idle", data: null, error: "" }
     }
   })
   const [showModal, setShowModal] = useState(false)
@@ -79,7 +96,7 @@ export function Dashboard({
   // ── Generate brief ────────────────────────────────────────────────────────
   const generateBrief = async () => {
     if (!trip.destination || brief.step === "loading") return
-    setBrief({ step: "loading", data: null })
+    setBrief({ step: "loading", data: null, error: "" })
 
     try {
       // 1. Geocode + fetch forecast (re-use pattern from recheck)
@@ -155,12 +172,13 @@ export function Dashboard({
 
       // 3. Build activities context
       const day1Acts = itinerary[0]?.activities.map((a) => a.text).join(", ") || "none planned yet"
-      const unpackedCritical = Object.values(packing)
-        .flat()
+      const unpackedCritical = packingItems
         .filter(
           (i) =>
             !i.checked &&
-            ["Passport", "Travel insurance", "Flight tickets"].some((k) => i.name.includes(k)),
+            ["Passport", "Travel insurance", "Flight tickets"].some((k) =>
+              (i.name || "").includes(k),
+            ),
         )
         .map((i) => i.name)
 
@@ -204,7 +222,7 @@ Rules:
                   role: "user",
                   content: `Destination: ${trip.destination}
 Departure: ${trip.startDate}${trip.endDate ? " → " + trip.endDate : ""}
-Trip duration: ${trip.startDate && trip.endDate ? Math.round((new Date(trip.endDate) - new Date(trip.startDate)) / 86400000) + 1 : "unknown"} days
+Trip duration: ${trip.startDate && trip.endDate ? Math.round((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / 86400000) + 1 : "unknown"} days
 Traveller's base currency: ${baseCurrency}${rateText ? " (" + rateText + ")" : ""}
 Today's weather at destination: ${todayWeather ? `${todayWeather.icon} ${todayWeather.temp}${todayWeather.unit}, humidity ${todayWeather.humidity || "?"}%` : "unavailable"}
 4-day forecast: ${forecastDesc}
@@ -225,7 +243,7 @@ Generate the departure day brief.`,
       if (!parsed.greeting) throw new Error("Empty response")
 
       LS.set(briefCacheKey, parsed)
-      setBrief({ step: "ready", data: parsed })
+      setBrief({ step: "ready", data: parsed, error: "" })
       setShowModal(true)
     } catch (e) {
       setBrief({ step: "error", data: null, error: e.message })
@@ -236,6 +254,40 @@ Generate the departure day brief.`,
     setShowModal(false)
     LS.set(briefSeenKey, "1")
   }
+
+  const submitSetup = () => {
+    const destination = setup.destination.trim()
+    if (!destination) return
+    const name = (setup.name.trim() || trip.name || destination).trim()
+    saveTrip({
+      ...trip,
+      destination,
+      startDate: setup.startDate,
+      endDate: setup.endDate,
+      name,
+    })
+  }
+
+  const dismissActivation = () => {
+    setActivationDismissed(true)
+    LS.set("tc_activation_dismissed", true)
+  }
+
+  const hasDates = Boolean(trip.startDate)
+  const hasPlanOrPack = itinerary.length > 0 || LS.get("tc_imported_templates", []).length > 0
+  const activationItems = [
+    { key: "dest", label: "Set destination", done: Boolean(trip.destination), tab: 1 },
+    { key: "dates", label: "Add travel dates", done: hasDates, tab: 1 },
+    {
+      key: "plan",
+      label: "Add a day or packing template",
+      done: hasPlanOrPack,
+      tab: itinerary.length ? 2 : 1,
+    },
+    { key: "invite", label: "Invite your crew", done: Boolean(hasInvite), action: "share" },
+  ]
+  const activationDone = activationItems.filter((i) => i.done).length
+  const showActivation = Boolean(trip.destination) && !activationDismissed && activationDone < 3
 
   // ── Ring SVG ───────────────────────────────────────────────────────────────
   const Ring = ({ pct, color, size = 64, stroke = 6 }) => {
@@ -570,6 +622,101 @@ Generate the departure day brief.`,
           </div>
         )}
 
+      {/* ── First-run setup ── */}
+      {!trip.destination && (
+        <div className="setup-card">
+          <div className="setup-eyebrow">Start your trip</div>
+          <div className="setup-title">Where are you going?</div>
+          <div className="setup-sub">
+            Destination and dates unlock your countdown, packing, and crew invite.
+          </div>
+          <input
+            className="input"
+            placeholder="Destination (e.g. Tokyo, Japan)"
+            value={setup.destination}
+            onChange={(e) => setSetup((s) => ({ ...s, destination: e.target.value }))}
+            onKeyDown={(e) => e.key === "Enter" && submitSetup()}
+          />
+          <input
+            className="input"
+            placeholder="Trip name (optional)"
+            value={setup.name}
+            onChange={(e) => setSetup((s) => ({ ...s, name: e.target.value }))}
+          />
+          <div className="grid-2">
+            <div>
+              <div className="card-title-small">Depart</div>
+              <input
+                type="date"
+                className="input"
+                value={setup.startDate}
+                onChange={(e) => setSetup((s) => ({ ...s, startDate: e.target.value }))}
+              />
+            </div>
+            <div>
+              <div className="card-title-small">Return</div>
+              <input
+                type="date"
+                className="input"
+                value={setup.endDate}
+                onChange={(e) => setSetup((s) => ({ ...s, endDate: e.target.value }))}
+              />
+            </div>
+          </div>
+          <button
+            className="btn btn-full"
+            disabled={!setup.destination.trim()}
+            onClick={submitSetup}
+          >
+            Start planning
+          </button>
+          <button className="btn-ghost btn-full" onClick={() => navigateTo("share")}>
+            I have a join code
+          </button>
+        </div>
+      )}
+
+      {/* ── Activation checklist ── */}
+      {showActivation && (
+        <div className="activation-card">
+          <div className="activation-hdr">
+            <div>
+              <div className="activation-title">Finish setting up</div>
+              <div className="activation-sub">
+                {activationDone} of {activationItems.length} done
+              </div>
+            </div>
+            <button
+              className="btn-del"
+              type="button"
+              onClick={dismissActivation}
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+          {activationItems.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              className={`activation-row${item.done ? " done" : ""}`}
+              onClick={() =>
+                item.done
+                  ? null
+                  : item.action === "share"
+                    ? navigateTo("share")
+                    : navigateTo(item.tab)
+              }
+            >
+              <span className={`activation-check${item.done ? " on" : ""}`}>
+                {item.done ? "✓" : ""}
+              </span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* ── Countdown / Status Banner ── */}
       {trip.destination && (
         <div className="countdown-banner">
@@ -652,73 +799,77 @@ Generate the departure day brief.`,
       )}
 
       {/* ── Stats Grid ── */}
-      <div className="dash-grid">
-        <div className="dash-card" onClick={() => navigateTo(3)}>
-          <div className="dash-ring-wrap">
-            <Ring pct={budgetPct} color={budgetPct > 85 ? "#FF5C5C" : "#FFA828"} />
-            <div className="dash-ring-center">
-              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--amber)" }}>
-                {budgetPct}%
+      {trip.destination && (
+        <div className="dash-grid">
+          <div className="dash-card" onClick={() => navigateTo(3)}>
+            <div className="dash-ring-wrap">
+              <Ring pct={budgetPct} color={budgetPct > 85 ? "#FF5C5C" : "#FFA828"} />
+              <div className="dash-ring-center">
+                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--amber)" }}>
+                  {budgetPct}%
+                </div>
               </div>
             </div>
-          </div>
-          <div className="dash-card-label">Budget Used</div>
-          <div className="dash-card-sub">
-            {baseCurrency} {spent.toFixed(0)} of {totalBudget}
-          </div>
-        </div>
-        <div className="dash-card" onClick={() => navigateTo(2)}>
-          <div className="dash-ring-wrap">
-            <Ring pct={packingPct} color="#4DB87A" />
-            <div className="dash-ring-center">
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#4DB87A" }}>{packingPct}%</div>
+            <div className="dash-card-label">Budget Used</div>
+            <div className="dash-card-sub">
+              {baseCurrency} {spent.toFixed(0)} of {totalBudget}
             </div>
           </div>
-          <div className="dash-card-label">Packed</div>
-          <div className="dash-card-sub">
-            {packingDone} of {packingTotal} items
+          <div className="dash-card" onClick={() => navigateTo(2)}>
+            <div className="dash-ring-wrap">
+              <Ring pct={packingPct} color="#4DB87A" />
+              <div className="dash-ring-center">
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#4DB87A" }}>{packingPct}%</div>
+              </div>
+            </div>
+            <div className="dash-card-label">Packed</div>
+            <div className="dash-card-sub">
+              {packingDone} of {packingTotal} items
+            </div>
+          </div>
+          <div className="dash-card" onClick={() => navigateTo(1)}>
+            <div className="dash-card-icon">📅</div>
+            <div className="dash-card-val">
+              {doneActs}/{allActs.length}
+            </div>
+            <div className="dash-card-label">Activities Done</div>
+          </div>
+          <div className="dash-card" onClick={() => navigateTo(5)}>
+            <div className="dash-card-icon">📸</div>
+            <div className="dash-card-val">{memories.length}</div>
+            <div className="dash-card-label">Memories</div>
+            {memories.length > 0 && (
+              <div className="dash-card-sub">{memories[memories.length - 1].title}</div>
+            )}
           </div>
         </div>
-        <div className="dash-card" onClick={() => navigateTo(1)}>
-          <div className="dash-card-icon">📅</div>
-          <div className="dash-card-val">
-            {doneActs}/{allActs.length}
-          </div>
-          <div className="dash-card-label">Activities Done</div>
-        </div>
-        <div className="dash-card" onClick={() => navigateTo(5)}>
-          <div className="dash-card-icon">📸</div>
-          <div className="dash-card-val">{memories.length}</div>
-          <div className="dash-card-label">Memories</div>
-          {memories.length > 0 && (
-            <div className="dash-card-sub">{memories[memories.length - 1].title}</div>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* ── Quick Actions ── */}
-      <div className="quick-actions">
-        {[
-          { icon: "✈️", label: "Trip Details", sub: "Dates & destination", tab: 1 },
-          { icon: "🧳", label: "Smart Pack", sub: "AI packing list", tab: 2 },
-          { icon: "💰", label: "Log Expense", sub: "Track spending", tab: 3 },
-          { icon: "🌍", label: "Explore", sub: "Weather & tips", tab: 4 },
-          { icon: "📸", label: "Add Memory", sub: "Drop a pin", tab: 5 },
-          { icon: "📤", label: "Share Trip", sub: "Invite travellers", action: "share" },
-        ].map((qa, i) => (
-          <div
-            key={i}
-            className="quick-action-btn"
-            onClick={() => (qa.action === "share" ? navigateTo("share") : navigateTo(qa.tab))}
-          >
-            <span className="qa-icon">{qa.icon}</span>
-            <div>
-              <div className="qa-label">{qa.label}</div>
-              <div className="qa-sub">{qa.sub}</div>
+      {trip.destination && (
+        <div className="quick-actions">
+          {[
+            { icon: "✈️", label: "Trip Details", sub: "Dates & destination", tab: 1 },
+            { icon: "🧳", label: "Smart Pack", sub: "AI packing list", tab: 2 },
+            { icon: "💰", label: "Log Expense", sub: "Track spending", tab: 3 },
+            { icon: "🌍", label: "Explore", sub: "Weather & tips", tab: 4 },
+            { icon: "📸", label: "Add Memory", sub: "Drop a pin", tab: 5 },
+            { icon: "📤", label: "Share Trip", sub: "Invite travellers", action: "share" },
+          ].map((qa, i) => (
+            <div
+              key={i}
+              className="quick-action-btn"
+              onClick={() => (qa.action === "share" ? navigateTo("share") : navigateTo(qa.tab))}
+            >
+              <span className="qa-icon">{qa.icon}</span>
+              <div>
+                <div className="qa-label">{qa.label}</div>
+                <div className="qa-sub">{qa.sub}</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* ── Recent Memories Strip ── */}
       {memories.length > 0 && (

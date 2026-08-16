@@ -6,8 +6,8 @@ export const mergePeople = (local, remote) => {
   const names = new Set((local || []).map((p) => p.name))
   return [...(local || []), ...(remote || []).filter((p) => !names.has(p.name))]
 }
-export const mergeItinerary = (local, remote) => {
-  const dayMap = new Map((local || []).map((d) => [d.id, d]))
+export const mergeItinerary = (local: any[] = [], remote: any[] = []): any[] => {
+  const dayMap = new Map<any, any>((local || []).map((d) => [d.id, d]))
   ;(remote || []).forEach((rd) => {
     if (!dayMap.has(rd.id)) {
       dayMap.set(rd.id, rd)
@@ -20,15 +20,19 @@ export const mergeItinerary = (local, remote) => {
   })
   return [...dayMap.values()].sort((a, b) => a.day - b.day)
 }
-export const mergePacking = (local, remote) => {
-  const merged = { ...(local || {}) }
+export const mergePacking = (
+  local: Record<string, any[]> = {},
+  remote: Record<string, any[]> = {},
+) => {
+  const merged: Record<string, any[]> = { ...(local || {}) }
   Object.entries(remote || {}).forEach(([cat, items]) => {
+    const incoming = items || []
     if (!merged[cat]) {
-      merged[cat] = items
+      merged[cat] = incoming
       return
     }
     const ids = new Set(merged[cat].map((i) => i.id))
-    const newItems = (items || []).filter((i) => !ids.has(i.id))
+    const newItems = incoming.filter((i) => !ids.has(i.id))
     if (newItems.length) merged[cat] = [...merged[cat], ...newItems]
   })
   return merged
