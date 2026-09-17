@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { formatBytes, isImage, processFiles } from "../../lib/attachments"
-import { ViewerModal } from "../shared/ViewerModal"
+import { DOC_CATS, ViewerModal } from "../shared/ViewerModal"
 export function DocsTab({
   docs,
   saveDocs,

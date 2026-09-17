@@ -11,6 +11,15 @@ import { PackTab } from "./components/tabs/PackTab"
 import { PlanTab } from "./components/tabs/PlanTab"
 import { callAi } from "./lib/ai"
 import { COUNTRY_CURRENCY, CURRENCIES, EXPENSE_CATS, WC_ICON, countryFlag } from "./lib/constants"
+import {
+  DEMO_LOADED_KEY,
+  DEMO_TRIP_ID,
+  GUIDE_CONTACT,
+  ROUTE_BANNER,
+  isJapanNaviDemoQuery,
+  seedNakasendoDemo,
+  shouldResetDemo,
+} from "./lib/demo/nakasendo"
 import { generateExportHTML } from "./lib/export"
 import { LS } from "./lib/storage"
 import { mergeById, mergeItinerary, mergePacking, mergePeople } from "./lib/sync"
@@ -26,6 +35,33 @@ const JSONBLOB = "https://jsonblob.com/api/jsonBlob"
 
 const HASH_TABS = { home: 0, plan: 1, pack: 2, budget: 3, explore: 4, memories: 5, docs: 6 }
 
+/** Sync LS + document chrome before first React paint when ?demo=nakasendo */
+function bootstrapJapanNaviDemo() {
+  if (typeof window === "undefined" || !isJapanNaviDemoQuery()) return false
+  document.documentElement.classList.add("japan-navi")
+  document.title = "Nakasendo Walking Journey · Japan Navi Journey"
+  const theme = document.querySelector('meta[name="theme-color"]')
+  if (theme) theme.setAttribute("content", "#7B181B")
+
+  const trips = LS.get<Array<{ id: string }>>("tc_trips", [])
+  const hasDemo = trips.some((t) => t.id === DEMO_TRIP_ID)
+  const reset = shouldResetDemo()
+  const needSeed = reset || !LS.get(DEMO_LOADED_KEY, false) || !hasDemo
+
+  const active = LS.get("tc_active_trip", "")
+  if (active && active !== DEMO_TRIP_ID) snapshotTrip(active)
+
+  if (needSeed) {
+    seedNakasendoDemo({ reset })
+  } else {
+    restoreTrip(DEMO_TRIP_ID)
+    LS.set("tc_active_trip", DEMO_TRIP_ID)
+  }
+  return true
+}
+
+const japanNaviDemoActive = bootstrapJapanNaviDemo()
+
 export default function App() {
   const [tab, setTab] = useState(0)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
@@ -34,6 +70,7 @@ export default function App() {
   const [installDismissed, setInstallDismissed] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
+  const demoMode = japanNaviDemoActive
 
   // ── Sync state ────────────────────────────────────────────────────────────
   const [syncEnabled, setSyncEnabled] = useState(() => LS.get("tc_sync_enabled", false))
@@ -1012,10 +1049,11 @@ export default function App() {
   const packingItems = Object.values(packing).flat() as Array<{ checked?: boolean }>
   const packingTotal = packingItems.length
   const packingDone = packingItems.filter((i) => i.checked).length
-  const subtitle =
-    [trip.destination, trip.startDate && trip.endDate && `${trip.startDate} → ${trip.endDate}`]
-      .filter(Boolean)
-      .join("  ·  ") || "Where are you headed?"
+  const subtitle = demoMode
+    ? ROUTE_BANNER
+    : [trip.destination, trip.startDate && trip.endDate && `${trip.startDate} → ${trip.endDate}`]
+        .filter(Boolean)
+        .join("  ·  ") || "Where are you headed?"
 
   const TABS = [
     { label: "Home", icon: "🏠" },
@@ -1043,7 +1081,11 @@ export default function App() {
       {showInstall && (
         <div className="install-banner">
           <span>✈️</span>
-          <div className="ib-text">Install for offline packing and departure briefs</div>
+          <div className="ib-text">
+            {demoMode
+              ? "Install Japan Navi Journey for offline access on the trail"
+              : "Install for offline packing and departure briefs"}
+          </div>
           <button className="ib-btn" onClick={handleInstall}>
             Install
           </button>
@@ -1098,6 +1140,11 @@ export default function App() {
 
       {/* Header */}
       <div className="header">
+        {demoMode && (
+          <div className="japan-navi-badge" aria-label="Japan Navi Journey">
+            Japan Navi Journey
+          </div>
+        )}
         <div className="header-top">
           <button
             className="trip-switcher-btn"
@@ -1110,7 +1157,7 @@ export default function App() {
             className="trip-name-input flex-1"
             value={trip.name}
             onChange={(e) => saveTrip({ ...trip, name: e.target.value })}
-            placeholder="✈️ Name Your Trip"
+            placeholder={demoMode ? "Nakasendo Walking Journey" : "✈️ Name Your Trip"}
           />
           <div style={{ display: "flex", gap: 7, alignItems: "center", flexShrink: 0 }}>
             <div className="progress-pill">
@@ -1170,6 +1217,9 @@ export default function App() {
               onQuickMemory={onQuickMemory}
               saveTrip={saveTrip}
               hasInvite={syncEnabled || Boolean(LS.get("tc_share_blobid", ""))}
+              demoMode={demoMode}
+              guideContact={demoMode ? GUIDE_CONTACT : null}
+              routeBanner={demoMode ? ROUTE_BANNER : ""}
             />
           )}
           {tab === 1 && (
@@ -1582,6 +1632,7 @@ export default function App() {
           onPullNow={pullSync}
           onJoinTrip={importJoinedTrip}
           currentTripEmpty={isTripEmpty(trip, itinerary, expenses)}
+          brandName={demoMode ? "Japan Navi Journey" : "TravelPal"}
         />
       )}
 

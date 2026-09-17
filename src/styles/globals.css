@@ -23,6 +23,93 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Japan Navi Journey demo skin (?demo=nakasendo) */
+html.japan-navi {
+  --bg: #1a3a34;
+  --surface: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --amber: #7b181b;
+  --amber-dim: rgba(123, 24, 27, 0.22);
+  --amber-glow: rgba(123, 24, 27, 0.12);
+  --text: #f2ebe3;
+  --text-dim: rgba(242, 235, 227, 0.45);
+  --text-faint: rgba(242, 235, 227, 0.28);
+}
+
+html.japan-navi body {
+  background: var(--bg);
+}
+
+.japan-navi-badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--amber-dim);
+  border: 1px solid rgba(123, 24, 27, 0.35);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 0 14px 8px;
+  text-align: center;
+}
+
+.japan-navi-contact-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(123, 24, 27, 0.45);
+  background: linear-gradient(135deg, rgba(123, 24, 27, 0.35), rgba(26, 58, 52, 0.9));
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.japan-navi-contact-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.japan-navi-contact-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.japan-navi-contact-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.japan-navi-contact-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.japan-navi-contact-arrow {
+  font-size: 16px;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.japan-navi-route-strip {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-dim);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
 html,
 body {
   height: 100%;

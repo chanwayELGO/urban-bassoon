@@ -28,6 +28,7 @@ export function ShareModal({
   onPullNow,
   onJoinTrip,
   currentTripEmpty = true,
+  brandName = "TravelPal",
 }) {
   const [activeTab, setActiveTab] = useState(initialCode ? "join" : "share")
   const [includes, setIncludes] = useState({
@@ -224,7 +225,7 @@ export function ShareModal({
     navigator
       .share({
         title: `Join ${trip.name || "my trip"}!`,
-        text: `Join my TravelPal trip${trip.destination ? " to " + trip.destination : ""}! Use code: ${shareState.code}`,
+        text: `Join my ${brandName} trip${trip.destination ? " to " + trip.destination : ""}! Use code: ${shareState.code}`,
         url: tripUrl(),
       })
       .catch(() => {})

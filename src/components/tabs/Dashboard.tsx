@@ -19,6 +19,9 @@ export function Dashboard({
   onQuickMemory,
   saveTrip,
   hasInvite,
+  demoMode = false,
+  guideContact = null,
+  routeBanner = "",
 }) {
   const today = new Date()
 
@@ -287,7 +290,8 @@ Generate the departure day brief.`,
     { key: "invite", label: "Invite your crew", done: Boolean(hasInvite), action: "share" },
   ]
   const activationDone = activationItems.filter((i) => i.done).length
-  const showActivation = Boolean(trip.destination) && !activationDismissed && activationDone < 3
+  const showActivation =
+    Boolean(trip.destination) && !demoMode && !activationDismissed && activationDone < 3
 
   // ── Ring SVG ───────────────────────────────────────────────────────────────
   const Ring = ({ pct, color, size = 64, stroke = 6 }) => {
@@ -623,7 +627,7 @@ Generate the departure day brief.`,
         )}
 
       {/* ── First-run setup ── */}
-      {!trip.destination && (
+      {!trip.destination && !demoMode && (
         <div className="setup-card">
           <div className="setup-eyebrow">Start your trip</div>
           <div className="setup-title">Where are you going?</div>
@@ -757,6 +761,27 @@ Generate the departure day brief.`,
             </div>
           )}
         </div>
+      )}
+
+      {demoMode && guideContact && trip.destination && (
+        <button
+          type="button"
+          className="japan-navi-contact-cta"
+          onClick={() => window.open(guideContact, "_blank", "noopener,noreferrer")}
+        >
+          <span className="japan-navi-contact-icon">📞</span>
+          <span className="japan-navi-contact-body">
+            <span className="japan-navi-contact-label">Contact Japan Navi Journey</span>
+            <span className="japan-navi-contact-sub">
+              Pre-trip support · short-notice changes · your pace
+            </span>
+          </span>
+          <span className="japan-navi-contact-arrow">→</span>
+        </button>
+      )}
+
+      {demoMode && routeBanner && trip.destination && (
+        <div className="japan-navi-route-strip">{routeBanner}</div>
       )}
 
       {/* ── Today's Activities ── */}
