@@ -4003,9 +4003,6 @@ textarea.input {
   padding: 16px;
   margin-bottom: 12px;
 }
-.today-activity {
-  /* layout now owned by SwipeableActivity */
-}
 .today-act-text {
   font-size: 13px;
   flex: 1;

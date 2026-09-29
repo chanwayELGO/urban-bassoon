@@ -1,6 +1,7 @@
 /**
  * Japan Navi Journey — Nakasendo Walking Journey demo seed.
- * Source: Japan Navi Journey itinerary sheet (10 days, 25 Oct–3 Nov 2026).
+ * Source: Japan Navi Journey accommodation sheet (10 days, 25 Oct–3 Nov 2026).
+ * Package total is tax-included JPY 401,500 (365,000 + 10% tax).
  * Adjust BASELINE_DAYS / guestCount; budgetFromItinerary keeps tc_budget in sync.
  */
 
@@ -14,12 +15,16 @@ export const GUIDE_CONTACT =
 export const ROUTE_BANNER =
   "Singapore → Narita → Shinjuku → Nagoya → Nakatsugawa → Magome & Tsumago → Kiso Valley → Narai-juku → Matsumoto → Shinjuku → Haneda → Singapore"
 
-/** Illustrative package total (JPY, two guests) — new sheet has no price; keep for Budget demo. */
-const BASE_PACKAGE = 365_000
+/** Tax-included package total (JPY, two guests) from accommodation sheet. */
+const BASE_PACKAGE = 401_500
+const PACKAGE_TAX_EXCL = 365_000
+const PACKAGE_TAX = 36_500
+const PACKAGE_DEPOSIT = 79_146
+const PACKAGE_BALANCE = 322_354
 const BASELINE_NIGHTS = 8
 const BASELINE_WALK_DAYS = 6
-const BASELINE_BREAKFASTS = 0
-const BASELINE_DINNERS = 0
+const BASELINE_BREAKFASTS = 3
+const BASELINE_DINNERS = 2
 const BASELINE_HIGHWAY_BUSES = 2
 const NIGHT_UNIT = BASE_PACKAGE / BASELINE_NIGHTS
 const WALK_SLICE = BASE_PACKAGE * 0.04
@@ -71,14 +76,14 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Arrive Narita Airport 08:40 · train to Shinjuku",
+        text: "Arrive Narita Airport 08:40 · Narita → Shinjuku (own arrangement)",
         done: false,
         time: "08:40",
         kind: "transfer",
       },
       {
         id: nid(),
-        text: "Daytime highway bus Shinjuku → Nagoya",
+        text: "Daytime highway bus Shinjuku → Nagoya (by Japan Navi)",
         done: false,
         kind: "transfer",
         highwayBus: true,
@@ -86,7 +91,7 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Check in and rest · Nagoya (mainly a travel day)",
+        text: "Daiwa Roynet Hotel Nagoya Taiko-dori Side · Moderate Double · room only",
         done: false,
         kind: "stay",
         lodging: true,
@@ -114,7 +119,7 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Stay Nakatsugawa — compact modern hotel",
+        text: "Plaza Hotel Sakae Nakatsugawa · Double · room only",
         done: false,
         kind: "stay",
         lodging: true,
@@ -148,10 +153,11 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Stay Kiso Valley — Japanese-style lodging",
+        text: "Nezame Hotel · Western Twin · breakfast & dinner (1 of 2 nights)",
         done: false,
         kind: "stay",
         lodging: true,
+        meal: "BD",
         included: true,
       },
     ],
@@ -176,10 +182,11 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Public transport back to overnight area · stay Kiso Valley",
+        text: "Nezame Hotel · Western Twin · breakfast & dinner (2 of 2 nights)",
         done: false,
         kind: "stay",
         lodging: true,
+        meal: "BD",
         included: true,
       },
     ],
@@ -204,10 +211,11 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Finish around Narai-juku · traditional guesthouse stay",
+        text: "YAMANIWA INN · Wide Twin · breakfast included",
         done: false,
         kind: "stay",
         lodging: true,
+        meal: "B",
         included: true,
       },
     ],
@@ -232,7 +240,7 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Stay Matsumoto",
+        text: "Richmond Hotel Matsumoto · Double · room only (1 of 2 nights)",
         done: false,
         kind: "stay",
         lodging: true,
@@ -254,7 +262,7 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Stay Matsumoto — no major Nakasendo hike planned",
+        text: "Richmond Hotel Matsumoto · Double · room only (2 of 2 nights)",
         done: false,
         kind: "stay",
         lodging: true,
@@ -270,7 +278,7 @@ export const BASELINE_DAYS: DemoDay[] = [
     activities: [
       {
         id: nid(),
-        text: "Daytime highway bus Matsumoto → Shinjuku",
+        text: "Daytime highway bus Matsumoto → Shinjuku (by Japan Navi)",
         done: false,
         kind: "transfer",
         highwayBus: true,
@@ -278,7 +286,7 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Easy travel day · stay Shinjuku city hotel",
+        text: "Shinjuku Washington Hotel · Casual Double · room only",
         done: false,
         kind: "stay",
         lodging: true,
@@ -300,7 +308,7 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Evening transfer to Haneda Airport for late-night flight",
+        text: "Shinjuku → Haneda Airport (own arrangement) for late-night flight",
         done: false,
         kind: "transfer",
       },
@@ -399,8 +407,8 @@ export function buildPacking() {
       "Travel insurance",
       "E-tickets / boarding passes (NH804 · NH843)",
       "Japan Navi Journey itinerary (offline)",
-      "Ryokan / hotel confirmations",
-      "Highway bus tickets (Shinjuku↔Nagoya / Matsumoto→Shinjuku)",
+      "Hotel confirmations (Daiwa Roynet · Plaza Sakae · Nezame · YAMANIWA · Richmond · Washington)",
+      "Highway bus tickets (Shinjuku→Nagoya · Matsumoto→Shinjuku, by Japan Navi)",
     ],
     "👕 Clothing": [
       "Trail shoes / broken-in walking shoes",
@@ -475,15 +483,15 @@ export function buildDocs(days: DemoDay[], totalBudget: number) {
       "ticket",
       [
         `Japan Navi Journey · Nakasendo Walking Journey`,
-        `Package total: JPY ${totalBudget.toLocaleString()} (for two · illustrative unless Japan Navi supplies a new quote)`,
+        `Package total (tax included): JPY ${totalBudget.toLocaleString()} (for two)`,
+        `Tax excluded: JPY ${PACKAGE_TAX_EXCL.toLocaleString()} · Consumption tax 10%: JPY ${PACKAGE_TAX.toLocaleString()}`,
+        `Deposit received: JPY ${PACKAGE_DEPOSIT.toLocaleString()} · Remaining balance: JPY ${PACKAGE_BALANCE.toLocaleString()}`,
         ``,
         `Included:`,
-        `· ${nights} overnight stay(s) as listed in Plan (Nakatsugawa · Kiso Valley · Narai-juku · Matsumoto · Shinjuku / Nagoya)`,
-        breakfasts || dinners
-          ? `· Meals: ${breakfasts} breakfast(s), ${dinners} dinner(s) marked included`
-          : `· Meals: not pre-marked on this itinerary sheet — confirm with Japan Navi Journey`,
+        `· ${nights} overnight stay(s): Daiwa Roynet Nagoya · Plaza Hotel Sakae Nakatsugawa · Nezame Hotel (2) · YAMANIWA INN · Richmond Hotel Matsumoto (2) · Shinjuku Washington Hotel`,
+        `· Meals: ${breakfasts} breakfast(s), ${dinners} dinner(s) (Nezame B&D ×2 nights; YAMANIWA breakfast)`,
         buses
-          ? `· Daytime highway bus tickets: ${buses}`
+          ? `· Daytime highway buses by Japan Navi: ${buses}`
           : `· Bus tickets: (adjusted — check Plan)`,
         `· Personalized itinerary & self-guided walking info`,
         `· Pre-trip support from Japan Navi Journey`,
@@ -498,6 +506,7 @@ export function buildDocs(days: DemoDay[], totalBudget: number) {
       "other",
       [
         `· International flights (NH804 Singapore→Narita · NH843 Haneda→Singapore) — shown on Plan as guest flights`,
+        `· Narita ↔ Shinjuku and Shinjuku ↔ Haneda (own arrangement)`,
         `· Local trains / buses / taxis not specified in the package`,
         `· Luggage delivery (arrange locally; budget separately)`,
         `· Unlisted meals and drinks`,
@@ -505,7 +514,7 @@ export function buildDocs(days: DemoDay[], totalBudget: number) {
         `· Travel insurance`,
         ``,
         `Estimated separate budget for two: JPY 50,000–80,000`,
-        `(local transport, airport transfers, luggage delivery, extra meals)`,
+        `(own airport transfers, local transport, luggage delivery, extra meals)`,
       ].join("\n"),
     ),
     noteDoc(
@@ -513,9 +522,14 @@ export function buildDocs(days: DemoDay[], totalBudget: number) {
       "Payment notes",
       "other",
       [
+        `Tax excluded: JPY ${PACKAGE_TAX_EXCL.toLocaleString()}`,
+        `Consumption tax 10%: JPY ${PACKAGE_TAX.toLocaleString()}`,
+        `Tax included total: JPY ${BASE_PACKAGE.toLocaleString()}`,
+        `Deposit received: JPY ${PACKAGE_DEPOSIT.toLocaleString()}`,
+        `Remaining balance (to be invoiced): JPY ${PACKAGE_BALANCE.toLocaleString()}`,
+        ``,
         `Bank transfer preferred.`,
         `Card payments: 2% surcharge.`,
-        `Interview discount (full baseline package only): JPY 361,350 — confirm if still offered.`,
       ].join("\n"),
     ),
     noteDoc(
