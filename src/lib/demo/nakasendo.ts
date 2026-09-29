@@ -1,6 +1,6 @@
 /**
  * Japan Navi Journey — Nakasendo Walking Journey demo seed.
- * Source: Japan Navi Journey proposal (9 days / 8 nights, 24 Oct–1 Nov 2026).
+ * Source: Japan Navi Journey itinerary sheet (10 days, 25 Oct–3 Nov 2026).
  * Adjust BASELINE_DAYS / guestCount; budgetFromItinerary keeps tc_budget in sync.
  */
 
@@ -12,13 +12,15 @@ export const DEMO_LOADED_KEY = "tc_demo_nakasendo_loaded"
 export const GUIDE_CONTACT =
   "mailto:hello@japan-navi-journey.com?subject=Nakasendo%20Walking%20Journey"
 export const ROUTE_BANNER =
-  "Narita → Tokyo/Shinjuku → Nagoya → Nakatsugawa → Magome & Tsumago → Kiso Valley → Narai-juku → Suwa & Shimosuwa → Shinjuku (~40–50 km walking)"
+  "Singapore → Narita → Shinjuku → Nagoya → Nakatsugawa → Magome & Tsumago → Kiso Valley → Narai-juku → Matsumoto → Shinjuku → Haneda → Singapore"
 
+/** Illustrative package total (JPY, two guests) — new sheet has no price; keep for Budget demo. */
 const BASE_PACKAGE = 365_000
 const BASELINE_NIGHTS = 8
 const BASELINE_WALK_DAYS = 6
-const BASELINE_BREAKFASTS = 4
-const BASELINE_DINNERS = 4
+const BASELINE_BREAKFASTS = 0
+const BASELINE_DINNERS = 0
+const BASELINE_HIGHWAY_BUSES = 2
 const NIGHT_UNIT = BASE_PACKAGE / BASELINE_NIGHTS
 const WALK_SLICE = BASE_PACKAGE * 0.04
 const DINNER_UNIT = 4_000
@@ -52,34 +54,42 @@ export interface DemoDay {
 let _id = 1
 const nid = () => _id++
 
-/** Editable PDF baseline — change this array to adjust the demo package. */
+/** Editable itinerary baseline — change this array to adjust the demo package. */
 export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 1,
-    label: "Day 1 · Arrival & overnight bus",
-    date: "2026-10-24",
+    label: "Day 1 · Singapore → Nagoya",
+    date: "2026-10-25",
     activities: [
       {
         id: nid(),
-        text: "Arrive Narita (NRT) 14:30",
+        text: "Flight NH804 Singapore → Narita (00:55 – 08:40)",
         done: false,
-        time: "14:30",
+        time: "00:55",
         kind: "transfer",
       },
       {
         id: nid(),
-        text: "Travel to Tokyo / Shinjuku",
+        text: "Arrive Narita Airport 08:40 · train to Shinjuku",
         done: false,
+        time: "08:40",
         kind: "transfer",
       },
       {
         id: nid(),
-        text: "Overnight highway bus Shinjuku → Nagoya",
+        text: "Daytime highway bus Shinjuku → Nagoya",
         done: false,
         kind: "transfer",
+        highwayBus: true,
+        included: true,
+      },
+      {
+        id: nid(),
+        text: "Check in and rest · Nagoya (mainly a travel day)",
+        done: false,
+        kind: "stay",
         lodging: true,
-        overnightBus: true,
         included: true,
       },
     ],
@@ -87,18 +97,18 @@ export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 2,
-    label: "Day 2 · Nakatsugawa walk",
-    date: "2026-10-25",
+    label: "Day 2 · Nakatsugawa-juku",
+    date: "2026-10-26",
     activities: [
       {
         id: nid(),
-        text: "Nagoya → Nakatsugawa",
+        text: "Train Nagoya → Nakatsugawa",
         done: false,
         kind: "transfer",
       },
       {
         id: nid(),
-        text: "Walk Nakatsugawa-juku → Ochiai-juku (~5–7 km)",
+        text: "Explore Nakatsugawa-juku and surrounding area (~2–4 km, 1–2 hours)",
         done: false,
         kind: "walk",
       },
@@ -116,27 +126,32 @@ export const BASELINE_DAYS: DemoDay[] = [
     id: nid(),
     day: 3,
     label: "Day 3 · Magome → Tsumago",
-    date: "2026-10-26",
+    date: "2026-10-27",
     activities: [
       {
         id: nid(),
-        text: "Walk Magome-juku → Magome Pass → Tsumago-juku (~8 km)",
-        done: false,
-        kind: "walk",
-      },
-      {
-        id: nid(),
-        text: "Continue to Kiso Valley",
+        text: "Bus to Magome · begin Nakasendo walk",
         done: false,
         kind: "transfer",
       },
       {
         id: nid(),
-        text: "Dinner included · Kiso Valley Japanese-style stay",
+        text: "Walk Magome → Tsumago (~8 km, about 3 hours)",
+        done: false,
+        kind: "walk",
+      },
+      {
+        id: nid(),
+        text: "Public transport further north in the Kiso Valley",
+        done: false,
+        kind: "transfer",
+      },
+      {
+        id: nid(),
+        text: "Stay Kiso Valley — Japanese-style lodging",
         done: false,
         kind: "stay",
         lodging: true,
-        meal: "D",
         included: true,
       },
     ],
@@ -144,22 +159,27 @@ export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 4,
-    label: "Day 4 · Nojiri → Suhara",
-    date: "2026-10-27",
+    label: "Day 4 · Scenic Kiso Valley",
+    date: "2026-10-28",
     activities: [
       {
         id: nid(),
-        text: "Walk Nojiri-juku → Suhara-juku (~7–8 km)",
+        text: "Train/bus to a suitable Nakasendo starting point",
+        done: false,
+        kind: "transfer",
+      },
+      {
+        id: nid(),
+        text: "Walk selected Nakasendo section (~5–7 km, 2–3 hours; shorten if needed)",
         done: false,
         kind: "walk",
       },
       {
         id: nid(),
-        text: "Breakfast & dinner included · Kiso Valley stay",
+        text: "Public transport back to overnight area · stay Kiso Valley",
         done: false,
         kind: "stay",
         lodging: true,
-        meal: "BD",
         included: true,
       },
     ],
@@ -167,22 +187,27 @@ export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 5,
-    label: "Day 5 · Torii Pass → Narai",
-    date: "2026-10-28",
+    label: "Day 5 · Narai-juku",
+    date: "2026-10-29",
     activities: [
       {
         id: nid(),
-        text: "Walk Yabuhara-juku → Torii Pass → Narai-juku (~6–7 km)",
+        text: "Continue north through the Kiso Valley (train + walk)",
+        done: false,
+        kind: "transfer",
+      },
+      {
+        id: nid(),
+        text: "Selected Nakasendo walking sections (~5–7 km, 2–3 hours)",
         done: false,
         kind: "walk",
       },
       {
         id: nid(),
-        text: "Breakfast included · Narai-juku traditional guesthouse",
+        text: "Finish around Narai-juku · traditional guesthouse stay",
         done: false,
         kind: "stay",
         lodging: true,
-        meal: "B",
         included: true,
       },
     ],
@@ -190,28 +215,27 @@ export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 6,
-    label: "Day 6 · Narai → Suwa",
-    date: "2026-10-29",
+    label: "Day 6 · Torii Pass area → Matsumoto",
+    date: "2026-10-30",
     activities: [
       {
         id: nid(),
-        text: "Explore Narai-juku; walk toward Kiso-Hirasawa / Niekawa",
+        text: "Explore Narai-juku; optional Torii Pass area walk (~4–7 km, can be shortened)",
         done: false,
         kind: "walk",
       },
       {
         id: nid(),
-        text: "JR train to Suwa",
+        text: "Train to Matsumoto",
         done: false,
         kind: "transfer",
       },
       {
         id: nid(),
-        text: "Dinner included · Suwa Japanese-style stay",
+        text: "Stay Matsumoto",
         done: false,
         kind: "stay",
         lodging: true,
-        meal: "D",
         included: true,
       },
     ],
@@ -219,22 +243,21 @@ export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 7,
-    label: "Day 7 · Shiojiri Pass",
-    date: "2026-10-30",
+    label: "Day 7 · Matsumoto Castle",
+    date: "2026-10-31",
     activities: [
       {
         id: nid(),
-        text: "Walk Shiojiri Pass → Shimosuwa-juku (up to 14–15 km)",
+        text: "Explore Matsumoto Castle and old town (~3–5 km; recovery / rest day)",
         done: false,
         kind: "walk",
       },
       {
         id: nid(),
-        text: "Breakfast & dinner included · Suwa stay",
+        text: "Stay Matsumoto — no major Nakasendo hike planned",
         done: false,
         kind: "stay",
         lodging: true,
-        meal: "BD",
         included: true,
       },
     ],
@@ -242,12 +265,12 @@ export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 8,
-    label: "Day 8 · Return to Shinjuku",
-    date: "2026-10-31",
+    label: "Day 8 · Back to Tokyo",
+    date: "2026-11-01",
     activities: [
       {
         id: nid(),
-        text: "Highway bus Kamisuwa → Shinjuku",
+        text: "Daytime highway bus Matsumoto → Shinjuku",
         done: false,
         kind: "transfer",
         highwayBus: true,
@@ -255,15 +278,7 @@ export const BASELINE_DAYS: DemoDay[] = [
       },
       {
         id: nid(),
-        text: "Breakfast included · Final Tokyo evening",
-        done: false,
-        kind: "meal",
-        meal: "B",
-        included: true,
-      },
-      {
-        id: nid(),
-        text: "Stay Shinjuku — standard city hotel",
+        text: "Easy travel day · stay Shinjuku city hotel",
         done: false,
         kind: "stay",
         lodging: true,
@@ -274,21 +289,48 @@ export const BASELINE_DAYS: DemoDay[] = [
   {
     id: nid(),
     day: 9,
-    label: "Day 9 · Departure",
-    date: "2026-11-01",
+    label: "Day 9 · Free Tokyo · Haneda",
+    date: "2026-11-02",
     activities: [
       {
         id: nid(),
-        text: "Free morning in Tokyo",
+        text: "Free time in Tokyo (walk as you like)",
         done: false,
         kind: "note",
       },
       {
         id: nid(),
-        text: "Travel to NRT for 17:00 departure",
+        text: "Evening transfer to Haneda Airport for late-night flight",
         done: false,
-        time: "17:00",
         kind: "transfer",
+      },
+      {
+        id: nid(),
+        text: "Note: walking distances are estimates; sections can be shortened. Best walks combine with trains/buses (not continuous Nakatsugawa→Narai).",
+        done: false,
+        kind: "note",
+      },
+    ],
+  },
+  {
+    id: nid(),
+    day: 10,
+    label: "Day 10 · Haneda → Singapore",
+    date: "2026-11-03",
+    activities: [
+      {
+        id: nid(),
+        text: "Flight NH843 Haneda → Singapore (00:25 – 06:55)",
+        done: false,
+        time: "00:25",
+        kind: "transfer",
+      },
+      {
+        id: nid(),
+        text: "Arrive Singapore 06:55 · have a safe flight",
+        done: false,
+        time: "06:55",
+        kind: "note",
       },
     ],
   },
@@ -322,12 +364,8 @@ function countWalkDays(days: DemoDay[]) {
   return days.filter((d) => d.activities.some((a) => a.kind === "walk")).length
 }
 
-function hasOvernightBus(days: DemoDay[]) {
-  return days.some((d) => d.activities.some((a) => a.overnightBus))
-}
-
-function hasHighwayBus(days: DemoDay[]) {
-  return days.some((d) => d.activities.some((a) => a.highwayBus))
+function countHighwayBuses(days: DemoDay[]) {
+  return days.reduce((n, d) => n + d.activities.filter((a) => a.highwayBus).length, 0)
 }
 
 function isFullBaseline(days: DemoDay[], guestCount: number) {
@@ -336,7 +374,7 @@ function isFullBaseline(days: DemoDay[], guestCount: number) {
   if (countWalkDays(days) !== BASELINE_WALK_DAYS) return false
   if (countMeals(days, "B") !== BASELINE_BREAKFASTS) return false
   if (countMeals(days, "D") !== BASELINE_DINNERS) return false
-  if (!hasOvernightBus(days) || !hasHighwayBus(days)) return false
+  if (countHighwayBuses(days) !== BASELINE_HIGHWAY_BUSES) return false
   return days.every((d, i) => d.date === BASELINE_DAYS[i].date)
 }
 
@@ -349,7 +387,7 @@ export function budgetFromItinerary(days: DemoDay[], guestCount = 2): number {
   total += (countWalkDays(days) - BASELINE_WALK_DAYS) * WALK_SLICE
   total += (countMeals(days, "D") - BASELINE_DINNERS) * DINNER_UNIT
   total += (countMeals(days, "B") - BASELINE_BREAKFASTS) * BREAKFAST_UNIT
-  if (!hasOvernightBus(days) && !hasHighwayBus(days)) total -= BUS_TICKET_SLICE
+  if (countHighwayBuses(days) === 0) total -= BUS_TICKET_SLICE
   total = total * (guestCount / 2)
   return Math.max(0, Math.round(total / 500) * 500)
 }
@@ -359,14 +397,15 @@ export function buildPacking() {
     "📄 Documents": [
       "Passport",
       "Travel insurance",
+      "E-tickets / boarding passes (NH804 · NH843)",
       "Japan Navi Journey itinerary (offline)",
       "Ryokan / hotel confirmations",
-      "Highway & overnight bus tickets",
+      "Highway bus tickets (Shinjuku↔Nagoya / Matsumoto→Shinjuku)",
     ],
     "👕 Clothing": [
       "Trail shoes / broken-in walking shoes",
       "Rain jacket / packable shell",
-      "Warm layer for late October evenings",
+      "Warm layer for late Oct / early Nov evenings",
       "Quick-dry shirts",
       "Socks (extra pairs)",
       "Casual clothes for Tokyo evenings",
@@ -412,16 +451,22 @@ function noteDoc(id: string, name: string, cat: string, body: string) {
   }
 }
 
+function listHighwayBusLabels(days: DemoDay[]) {
+  const labels: string[] = []
+  for (const d of days) {
+    for (const a of d.activities) {
+      if (a.highwayBus) labels.push(a.text.replace(/^Daytime highway bus /, ""))
+    }
+  }
+  return labels
+}
+
 export function buildDocs(days: DemoDay[], totalBudget: number) {
   const nights = countLodgingNights(days)
   const breakfasts = countMeals(days, "B")
   const dinners = countMeals(days, "D")
-  const buses = [
-    hasOvernightBus(days) && "overnight highway bus",
-    hasHighwayBus(days) && "Kamisuwa → Shinjuku highway bus",
-  ]
-    .filter(Boolean)
-    .join("; ")
+  const busLabels = listHighwayBusLabels(days)
+  const buses = busLabels.length ? busLabels.join("; ") : ""
 
   return [
     noteDoc(
@@ -430,14 +475,21 @@ export function buildDocs(days: DemoDay[], totalBudget: number) {
       "ticket",
       [
         `Japan Navi Journey · Nakasendo Walking Journey`,
-        `Package total: JPY ${totalBudget.toLocaleString()} (for two)`,
+        `Package total: JPY ${totalBudget.toLocaleString()} (for two · illustrative unless Japan Navi supplies a new quote)`,
         ``,
         `Included:`,
-        `· ${nights} overnight stay(s) as listed in Plan (hotel / guesthouse / overnight bus)`,
-        `· Meals: ${breakfasts} breakfast(s), ${dinners} dinner(s) marked included`,
-        buses ? `· Bus tickets: ${buses}` : `· Bus tickets: (adjusted — check Plan)`,
+        `· ${nights} overnight stay(s) as listed in Plan (Nakatsugawa · Kiso Valley · Narai-juku · Matsumoto · Shinjuku / Nagoya)`,
+        breakfasts || dinners
+          ? `· Meals: ${breakfasts} breakfast(s), ${dinners} dinner(s) marked included`
+          : `· Meals: not pre-marked on this itinerary sheet — confirm with Japan Navi Journey`,
+        buses
+          ? `· Daytime highway bus tickets: ${buses}`
+          : `· Bus tickets: (adjusted — check Plan)`,
         `· Personalized itinerary & self-guided walking info`,
         `· Pre-trip support from Japan Navi Journey`,
+        ``,
+        `Walking notes: distances are estimates (typically max ~5–8 km walking days).`,
+        `Walks combine with trains/buses — not continuous from Nakatsugawa to Narai.`,
       ].join("\n"),
     ),
     noteDoc(
@@ -445,7 +497,7 @@ export function buildDocs(days: DemoDay[], totalBudget: number) {
       "Not included",
       "other",
       [
-        `· International flights`,
+        `· International flights (NH804 Singapore→Narita · NH843 Haneda→Singapore) — shown on Plan as guest flights`,
         `· Local trains / buses / taxis not specified in the package`,
         `· Luggage delivery (arrange locally; budget separately)`,
         `· Unlisted meals and drinks`,
@@ -463,7 +515,7 @@ export function buildDocs(days: DemoDay[], totalBudget: number) {
       [
         `Bank transfer preferred.`,
         `Card payments: 2% surcharge.`,
-        `Interview discount (full baseline package only): JPY 361,350.`,
+        `Interview discount (full baseline package only): JPY 361,350 — confirm if still offered.`,
       ].join("\n"),
     ),
     noteDoc(
@@ -488,11 +540,11 @@ export function buildPeople() {
 }
 
 export function buildTripMeta(days: DemoDay[]) {
-  const startDate = days[0]?.date || "2026-10-24"
-  const endDate = days[days.length - 1]?.date || "2026-11-01"
+  const startDate = days[0]?.date || "2026-10-25"
+  const endDate = days[days.length - 1]?.date || "2026-11-03"
   return {
     name: "Nakasendo Walking Journey",
-    destination: "Nakasendo / Kiso Valley",
+    destination: "Nakasendo / Kiso Valley / Matsumoto",
     startDate,
     endDate,
   }
